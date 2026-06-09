@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Georgia', serif;
+}
+
+:root {
+  --beige: #C8A97A;
+  --beige-fonce: #B8926A;
+  --beige-clair: #F5ECD8;
+  --bleu: #2B6CB0;
+  --bleu-fonce: #1A365D;
+  --bleu-ciel: #90CDF4;
+  --rouge: #C53030;
+  --texte-fonce: #3D2B0F;
+  --texte-bleu: #1A365D;
+}
+
+body {
+  background: #C8A97A;
+  min-height: 100vh;
+}
+
+input, select, textarea {
+  font-family: 'Georgia', serif;
+}
+
+button {
+  font-family: 'Georgia', serif;
+  cursor: pointer;
+}

@@ -1,0 +1,27 @@
+import axios from 'axios'
+
+const API = axios.create({
+  baseURL: 'http://localhost:5000/api'
+})
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+export const inscription = (data) => API.post('/auth/inscription', data)
+export const connexion = (data) => API.post('/auth/connexion', data)
+export const getServices = (categorie) => API.get('/services', { params: { categorie } })
+export const creerService = (data) => API.post('/services', data)
+export const mesServices = () => API.get('/services/mes-services')
+export const creerReservation = (data) => API.post('/bookings', data)
+export const mesReservationsClient = () => API.get('/bookings/client')
+export const mesReservationsPrestataire = () => API.get('/bookings/prestataire')
+export const modifierStatut = (id, statut) => API.put(`/bookings/${id}/statut`, { statut })
+export const laisserAvis = (data) => API.post('/reviews', data)
+export const getAvisService = (service_id) => API.get(`/reviews/service/${service_id}`)
+export const getMesAvis = () => API.get('/reviews/mes-avis')
+export const creerPaiement = (data) => API.post('/stripe/paiement', data)
