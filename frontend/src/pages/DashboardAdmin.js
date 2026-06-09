@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -27,16 +27,11 @@ const DashboardAdmin = () => {
   const [message, setMessage] = useState('')
 
   const API = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'https://loving-nature-production-145d.up.railway.app/api',
     headers: { Authorization: `Bearer ${token}` }
   })
 
-  useEffect(() => {
-    chargerUsers()
-    chargerReservations()
-  }, [])
-
-  const chargerUsers = async () => {
+  const chargerUsers = useCallback(async () => {
     try {
       const res = await API.get('/admin/users')
       setUsers(res.data.users)
@@ -49,9 +44,10 @@ const DashboardAdmin = () => {
     } catch (err) {
       console.error(err)
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
 
-  const chargerReservations = async () => {
+  const chargerReservations = useCallback(async () => {
     try {
       const res = await API.get('/admin/reservations')
       setReservations(res.data.reservations)
@@ -59,7 +55,13 @@ const DashboardAdmin = () => {
     } catch (err) {
       console.error(err)
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  useEffect(() => {
+    chargerUsers()
+    chargerReservations()
+  }, [chargerUsers, chargerReservations])
 
   const supprimerUser = async (id) => {
     if (!window.confirm('Supprimer cet utilisateur ?')) return
