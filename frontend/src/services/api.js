@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const API = axios.create({
- baseURL: 'https://loving-nature-production-145d.up.railway.app/api'
+  baseURL: 'https://loving-nature-production-145d.up.railway.app/api'
 })
 
 API.interceptors.request.use((config) => {
@@ -25,3 +25,7 @@ export const laisserAvis = (data) => API.post('/reviews', data)
 export const getAvisService = (service_id) => API.get(`/reviews/service/${service_id}`)
 export const getMesAvis = () => API.get('/reviews/mes-avis')
 export const creerPaiement = (data) => API.post('/stripe/paiement', data)
+export const getProfil = () => API.get('/profil')
+export const modifierProfil = (data) => API.put('/profil', data)
+export const changerMotDePasse = (data) => API.put('/profil/mot-de-passe', data)
+export const supprimerCompte = () => API.delete('/profil')

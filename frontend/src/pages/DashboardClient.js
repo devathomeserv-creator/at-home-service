@@ -158,6 +158,7 @@ const DashboardClient = () => {
         <Logo />
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ color: '#BEE3F8', fontSize: '14px' }}>Bonjour {user?.prenom} !</span>
+          <button onClick={() => navigate('/profil')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
           <button onClick={handleLogout} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
         </div>
       </nav>
@@ -175,29 +176,10 @@ const DashboardClient = () => {
             <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '480px', border: '1px solid #A07840' }}>
               <h3 style={{ color: '#1A365D', marginBottom: '0.5rem' }}>Réserver — {serviceSelectionne.titre}</h3>
               <p style={{ color: '#C53030', fontWeight: 'bold', marginBottom: '1.5rem' }}>{serviceSelectionne.prix}€ · {serviceSelectionne.duree} min</p>
-
               <p style={{ color: '#3D2B0F', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>Choisissez une date et heure :</p>
-              <DatePicker
-                selected={dateSelectionnee}
-                onChange={(date) => setDateSelectionnee(date)}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={30}
-                dateFormat="dd/MM/yyyy à HH:mm"
-                minDate={new Date()}
-                locale="fr"
-                placeholderText="Cliquez pour choisir..."
-                inline
-              />
-
+              <DatePicker selected={dateSelectionnee} onChange={(date) => setDateSelectionnee(date)} showTimeSelect timeFormat="HH:mm" timeIntervals={30} dateFormat="dd/MM/yyyy à HH:mm" minDate={new Date()} locale="fr" placeholderText="Cliquez pour choisir..." inline />
               <p style={{ color: '#3D2B0F', margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Votre adresse :</p>
-              <input
-                placeholder="Ex: 12 rue de la Paix, Nice"
-                value={adresse}
-                onChange={(e) => setAdresse(e.target.value)}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1.5rem', boxSizing: 'border-box' }}
-              />
-
+              <input placeholder="Ex: 12 rue de la Paix, Nice" value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1.5rem', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={confirmerReservation} style={{ flex: 1, background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Payer et réserver</button>
                 <button onClick={() => setShowReservationModal(false)} style={{ background: '#F5ECD8', color: '#1A365D', border: '1px solid #A07840', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
@@ -227,7 +209,6 @@ const DashboardClient = () => {
                 <button key={cat} onClick={() => filtrerCategorie(cat)} style={{ padding: '6px 16px', borderRadius: '20px', border: '1.5px solid #90CDF4', cursor: 'pointer', background: categorie === cat ? '#2B6CB0' : '#F5ECD8', color: categorie === cat ? 'white' : '#1A365D', textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat}</button>
               ))}
             </div>
-
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
               {services.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun service disponible pour le moment.</p>}
               {services.map(service => (

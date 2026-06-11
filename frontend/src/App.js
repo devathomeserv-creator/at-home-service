@@ -7,6 +7,7 @@ import DashboardClient from './pages/DashboardClient'
 import DashboardPrestataire from './pages/DashboardPrestataire'
 import DashboardAdmin from './pages/DashboardAdmin'
 import MentionsLegales from './pages/MentionsLegales'
+import Profil from './pages/Profil'
 
 const RoutePrategee = ({ children, role }) => {
   const { user, loading } = useAuth()
@@ -34,21 +35,10 @@ const App = () => {
         <Route path="/" element={<Accueil />} />
         <Route path="/auth" element={<RouteAuth><Auth /></RouteAuth>} />
         <Route path="/mentions-legales" element={<MentionsLegales />} />
-        <Route path="/client" element={
-          <RoutePrategee role="client">
-            <DashboardClient />
-          </RoutePrategee>
-        } />
-        <Route path="/prestataire" element={
-          <RoutePrategee role="prestataire">
-            <DashboardPrestataire />
-          </RoutePrategee>
-        } />
-        <Route path="/admin" element={
-          <RoutePrategee role="admin">
-            <DashboardAdmin />
-          </RoutePrategee>
-        } />
+        <Route path="/profil" element={<RoutePrategee><Profil /></RoutePrategee>} />
+        <Route path="/client" element={<RoutePrategee role="client"><DashboardClient /></RoutePrategee>} />
+        <Route path="/prestataire" element={<RoutePrategee role="prestataire"><DashboardPrestataire /></RoutePrategee>} />
+        <Route path="/admin" element={<RoutePrategee role="admin"><DashboardAdmin /></RoutePrategee>} />
       </Routes>
     </BrowserRouter>
   )
