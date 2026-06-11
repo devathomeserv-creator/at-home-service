@@ -10,14 +10,14 @@ const Accueil = () => {
   const [servicesFiltres, setServicesFiltres] = useState([])
 
   const categories = [
-    { nom: 'coiffure', emoji: '💇' },
-    { nom: 'barber', emoji: '💈' },
-    { nom: 'esthetique', emoji: '💅' },
-    { nom: 'massage', emoji: '💆' },
-    { nom: 'plomberie', emoji: '🔧' },
-    { nom: 'electricite', emoji: '⚡' },
-    { nom: 'maconnerie', emoji: '🧱' },
-    { nom: 'renovation', emoji: '🏠' }
+    { nom: 'coiffure', image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop' },
+    { nom: 'barber', image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop' },
+    { nom: 'esthetique', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop' },
+    { nom: 'massage', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&h=200&fit=crop' },
+    { nom: 'plomberie', image: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=300&h=200&fit=crop' },
+    { nom: 'electricite', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=200&fit=crop' },
+    { nom: 'maconnerie', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop' },
+    { nom: 'renovation', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop' }
   ]
 
   useEffect(() => {
@@ -95,14 +95,24 @@ const Accueil = () => {
         </div>
       </div>
 
-      {/* CATEGORIES */}
-      <div style={{ background: '#C8A97A', padding: '24px', display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {categories.map(cat => (
-          <div key={cat.nom} onClick={() => filtrerCategorie(cat.nom)} style={{ background: categorie === cat.nom ? '#2B6CB0' : '#F5ECD8', border: '1px solid #A07840', borderRadius: '12px', padding: '16px 20px', textAlign: 'center', cursor: 'pointer', minWidth: '90px' }}>
-            <div style={{ fontSize: '28px', marginBottom: '6px' }}>{cat.emoji}</div>
-            <div style={{ fontSize: '12px', color: categorie === cat.nom ? 'white' : '#1A365D', textTransform: 'capitalize' }}>{cat.nom}</div>
-          </div>
-        ))}
+      {/* CATEGORIES AVEC PHOTOS */}
+      <div style={{ background: '#C8A97A', padding: '32px 24px' }}>
+        <h2 style={{ color: '#1A365D', textAlign: 'center', marginBottom: '24px', fontFamily: 'Georgia, serif', fontSize: '20px' }}>Nos services à domicile</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '16px', maxWidth: '1100px', margin: '0 auto' }}>
+          {categories.map(cat => (
+            <div key={cat.nom} onClick={() => filtrerCategorie(cat.nom)} style={{ borderRadius: '12px', overflow: 'hidden', border: categorie === cat.nom ? '3px solid #2B6CB0' : '1px solid #A07840', cursor: 'pointer', background: '#F5ECD8', transition: 'transform 0.2s' }}>
+              <div style={{ position: 'relative', height: '120px', overflow: 'hidden' }}>
+                <img src={cat.image} alt={cat.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {categorie === cat.nom && (
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(43, 108, 176, 0.4)' }} />
+                )}
+              </div>
+              <div style={{ padding: '10px', textAlign: 'center' }}>
+                <div style={{ fontSize: '13px', color: categorie === cat.nom ? '#2B6CB0' : '#1A365D', fontWeight: '500', textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat.nom}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* SERVICES */}
