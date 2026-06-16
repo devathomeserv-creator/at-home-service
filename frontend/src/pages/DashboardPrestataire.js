@@ -108,7 +108,7 @@ const DashboardPrestataire = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#C8A97A' }}>
+    <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
       <style>{`
         @media (max-width: 600px) {
           .nav-desktop { display: none !important; }
@@ -147,7 +147,7 @@ const DashboardPrestataire = () => {
         ))}
       </div>
 
-      <div style={{ maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem' }}>
+      <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
         {vue === 'reservations' && (
@@ -233,7 +233,7 @@ const DashboardPrestataire = () => {
         )}
       </div>
 
-      <footer style={{ background: '#1A365D', color: '#BEE3F8', textAlign: 'center', padding: '1rem', marginTop: '2rem', fontSize: '13px' }}>
+      <footer style={{ background: '#1A365D', color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
         © 2026 At Home Service — Tous droits réservés
       </footer>
     </div>
