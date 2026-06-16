@@ -8,6 +8,7 @@ import DashboardPrestataire from './pages/DashboardPrestataire'
 import DashboardAdmin from './pages/DashboardAdmin'
 import MentionsLegales from './pages/MentionsLegales'
 import Profil from './pages/Profil'
+import ProfilPrestataire from './pages/ProfilPrestataire'
 
 const RoutePrategee = ({ children, role }) => {
   const { user, loading } = useAuth()
@@ -36,6 +37,7 @@ const App = () => {
         <Route path="/auth" element={<RouteAuth><Auth /></RouteAuth>} />
         <Route path="/mentions-legales" element={<MentionsLegales />} />
         <Route path="/profil" element={<RoutePrategee><Profil /></RoutePrategee>} />
+        <Route path="/prestataire/:id" element={<ProfilPrestataire />} />
         <Route path="/client" element={<RoutePrategee role="client"><DashboardClient /></RoutePrategee>} />
         <Route path="/prestataire" element={<RoutePrategee role="prestataire"><DashboardPrestataire /></RoutePrategee>} />
         <Route path="/admin" element={<RoutePrategee role="admin"><DashboardAdmin /></RoutePrategee>} />
