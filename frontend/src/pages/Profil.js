@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte } from '../services/api'
+import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto } from '../services/api'
 
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -23,6 +23,7 @@ const Profil = () => {
   const [vue, setVue] = useState('infos')
   const [message, setMessage] = useState('')
   const [erreur, setErreur] = useState('')
+  const [confirmationAuto, setConfirmationAuto] = useState(false)
   const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
@@ -35,6 +36,7 @@ const Profil = () => {
       const res = await getProfil()
       const u = res.data.user
       setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '' })
+      setConfirmationAuto(u.confirmation_auto || false)
     } catch (err) {
       console.error(err)
     }
@@ -78,6 +80,16 @@ const Profil = () => {
     }
   }
 
+  const handleConfirmationAuto = async (valeur) => {
+    try {
+      await modifierConfirmationAuto(valeur)
+      setConfirmationAuto(valeur)
+      setMessage(valeur ? 'Confirmation automatique activée !' : 'Confirmation automatique désactivée !')
+    } catch (err) {
+      setErreur('Erreur lors de la mise à jour')
+    }
+  }
+
   const handleSupprimer = async () => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) return
     try {
@@ -97,8 +109,12 @@ const Profil = () => {
 
   const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }
 
+  const tabs = user?.role === 'prestataire'
+    ? ['infos', 'parametres', 'mot-de-passe', 'supprimer']
+    : ['infos', 'mot-de-passe', 'supprimer']
+
   return (
-    <div style={{ minHeight: '100vh', background: '#C8A97A' }}>
+    <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
       <nav style={{ background: '#2B6CB0', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Logo />
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -107,10 +123,10 @@ const Profil = () => {
         </div>
       </nav>
 
-      <div style={{ maxWidth: '600px', margin: '2rem auto', padding: '0 1rem' }}>
+      <div style={{ flex: 1, maxWidth: '600px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
 
         <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '60px', height: '60px', background: '#2B6CB0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '22px', fontWeight: 'bold' }}>
+          <div style={{ width: '60px', height: '60px', background: '#2B6CB0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '22px', fontWeight: 'bold', flexShrink: 0 }}>
             {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
           </div>
           <div>
@@ -120,10 +136,10 @@ const Profil = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
-          {['infos', 'mot-de-passe', 'supprimer'].map(v => (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          {tabs.map(v => (
             <button key={v} onClick={() => setVue(v)} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', fontSize: '13px' }}>
-              {v === 'infos' ? 'Mes infos' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
+              {v === 'infos' ? 'Mes infos' : v === 'parametres' ? 'Paramètres' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
             </button>
           ))}
         </div>
@@ -144,6 +160,39 @@ const Profil = () => {
           </div>
         )}
 
+        {vue === 'parametres' && user?.role === 'prestataire' && (
+          <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+            <h3 style={{ color: '#1A365D', marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>Paramètres prestataire</h3>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'white', borderRadius: '8px', border: '1px solid #A07840', marginBottom: '1rem' }}>
+              <div>
+                <p style={{ color: '#1A365D', fontWeight: 'bold', margin: '0 0 4px', fontSize: '14px' }}>Confirmation automatique</p>
+                <p style={{ color: '#3D2B0F', fontSize: '12px', margin: 0 }}>Les réservations sont confirmées automatiquement sans validation manuelle</p>
+              </div>
+              <div
+                onClick={() => handleConfirmationAuto(!confirmationAuto)}
+                style={{
+                  width: '48px', height: '26px', borderRadius: '13px', cursor: 'pointer', flexShrink: 0, marginLeft: '1rem',
+                  background: confirmationAuto ? '#2B6CB0' : '#CBD5E0',
+                  position: 'relative', transition: 'background 0.3s'
+                }}
+              >
+                <div style={{
+                  width: '20px', height: '20px', borderRadius: '50%', background: 'white',
+                  position: 'absolute', top: '3px', transition: 'left 0.3s',
+                  left: confirmationAuto ? '25px' : '3px'
+                }} />
+              </div>
+            </div>
+
+            <p style={{ color: '#3D2B0F', fontSize: '12px', fontStyle: 'italic' }}>
+              {confirmationAuto
+                ? '✅ Activé — Les clients reçoivent une confirmation immédiate'
+                : '⏳ Désactivé — Vous devez confirmer manuellement chaque réservation'}
+            </p>
+          </div>
+        )}
+
         {vue === 'mot-de-passe' && (
           <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
             <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Changer mon mot de passe</h3>
@@ -160,14 +209,14 @@ const Profil = () => {
           <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #C53030' }}>
             <h3 style={{ color: '#C53030', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Supprimer mon compte</h3>
             <p style={{ color: '#3D2B0F', fontSize: '14px', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-              ⚠️ Cette action est <strong>irréversible</strong>. Toutes vos données seront supprimées définitivement : réservations, avis, informations personnelles.
+              ⚠️ Cette action est <strong>irréversible</strong>. Toutes vos données seront supprimées définitivement.
             </p>
             <button onClick={handleSupprimer} style={{ width: '100%', padding: '12px', background: '#C53030', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Supprimer définitivement mon compte</button>
           </div>
         )}
       </div>
 
-      <footer style={{ background: '#1A365D', color: '#BEE3F8', textAlign: 'center', padding: '1rem', marginTop: '2rem', fontSize: '13px' }}>
+      <footer style={{ background: '#1A365D', color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
         © 2026 At Home Service — Tous droits réservés
       </footer>
     </div>

@@ -26,9 +26,11 @@ const creerReservation = async (req, res) => {
       .eq('id', client_id)
       .single()
 
+    const statut = service.users.confirmation_auto ? 'confirme' : 'en_attente'
+
     const { data, error } = await supabase
       .from('bookings')
-      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note }])
+      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut }])
       .select()
 
     if (error) throw error
@@ -44,7 +46,18 @@ const creerReservation = async (req, res) => {
       }
     )
 
-    res.status(201).json({ message: 'Réservation créée avec succès', reservation: data[0] })
+    if (statut === 'confirme') {
+      await envoyerEmailConfirmation(
+        client.email,
+        {
+          service: service.titre,
+          date: new Date(date_rdv).toLocaleString('fr-FR'),
+          adresse: adresse_intervention
+        }
+      )
+    }
+
+    res.status(201).json({ message: 'Réservation créée avec succès', reservation: data[0], statut })
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message })
   }

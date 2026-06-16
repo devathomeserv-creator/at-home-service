@@ -5,7 +5,7 @@ const getProfil = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, created_at')
+      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, created_at')
       .eq('id', req.user.id)
       .single()
 
@@ -28,6 +28,23 @@ const modifierProfil = async (req, res) => {
 
     if (error) throw error
     res.json({ message: 'Profil mis à jour avec succès', user: data[0] })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+const modifierConfirmationAuto = async (req, res) => {
+  try {
+    const { confirmation_auto } = req.body
+
+    const { data, error } = await supabase
+      .from('users')
+      .update({ confirmation_auto })
+      .eq('id', req.user.id)
+      .select()
+
+    if (error) throw error
+    res.json({ message: 'Paramètre mis à jour', user: data[0] })
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message })
   }
@@ -76,4 +93,4 @@ const supprimerCompte = async (req, res) => {
   }
 }
 
-module.exports = { getProfil, modifierProfil, changerMotDePasse, supprimerCompte }
+module.exports = { getProfil, modifierProfil, modifierConfirmationAuto, changerMotDePasse, supprimerCompte }
