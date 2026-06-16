@@ -46,7 +46,7 @@ const DashboardClient = () => {
   const [adresse, setAdresse] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
 
-  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation']
+  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
 
   useEffect(() => {
     chargerServices()

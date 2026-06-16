@@ -39,7 +39,7 @@ const DashboardPrestataire = () => {
     categorie: 'coiffure', titre: '', description: '', prix: '', duree: ''
   })
 
-  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation']
+  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
 
   useEffect(() => {
     chargerServices()

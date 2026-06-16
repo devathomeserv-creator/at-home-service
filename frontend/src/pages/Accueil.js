@@ -18,7 +18,9 @@ const Accueil = () => {
     { nom: 'plomberie', image: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=300&h=200&fit=crop' },
     { nom: 'electricite', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=200&fit=crop' },
     { nom: 'maconnerie', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop' },
-    { nom: 'renovation', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop' }
+    { nom: 'renovation', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop' },
+    { nom: 'coach sportif', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop' },
+    { nom: 'photographe', image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=300&h=200&fit=crop' }
   ]
 
   useEffect(() => {
@@ -62,7 +64,6 @@ const Accueil = () => {
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
 
-      {/* NAVBAR */}
       <nav style={{ background: '#2B6CB0', padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '36px', height: '36px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -75,21 +76,15 @@ const Accueil = () => {
             <div style={{ color: '#FEB2B2', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
           </div>
         </div>
-
-        {/* BOUTONS DESKTOP */}
         <div className="nav-desktop" style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => navigate('/auth')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Connexion</button>
           <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>S'inscrire</button>
         </div>
-
-        {/* HAMBURGER MOBILE */}
         <button onClick={() => setMenuOuvert(!menuOuvert)} className="nav-mobile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'none' }}>
           <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
           <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
           <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
         </button>
-
-        {/* MENU MOBILE OUVERT */}
         {menuOuvert && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#2B6CB0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
             <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Connexion</button>
@@ -108,22 +103,15 @@ const Accueil = () => {
         }
       `}</style>
 
-      {/* HERO */}
       <div style={{ background: '#B8926A', padding: '40px 16px', textAlign: 'center' }}>
         <h1 className="hero-title" style={{ fontSize: '32px', color: '#1A365D', marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>Des pros à domicile,<br />quand vous en avez besoin</h1>
         <p style={{ color: '#3D2B0F', fontSize: '15px', fontStyle: 'italic', marginBottom: '32px', padding: '0 8px' }}>Plus besoin de chercher, un clic et trouvez votre artisan à domicile</p>
         <div className="search-box" style={{ background: '#F5ECD8', borderRadius: '12px', padding: '16px', maxWidth: '600px', margin: '0 auto', display: 'flex', gap: '8px', border: '1px solid #A07840' }}>
-          <input
-            placeholder="Quel service cherchez-vous ?"
-            value={recherche}
-            onChange={(e) => setRecherche(e.target.value)}
-            style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }}
-          />
+          <input placeholder="Quel service cherchez-vous ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
           <button style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>Rechercher</button>
         </div>
       </div>
 
-      {/* CATEGORIES AVEC PHOTOS */}
       <div style={{ background: '#C8A97A', padding: '32px 16px' }}>
         <h2 style={{ color: '#1A365D', textAlign: 'center', marginBottom: '24px', fontFamily: 'Georgia, serif', fontSize: '20px' }}>Nos services à domicile</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', maxWidth: '1100px', margin: '0 auto' }}>
@@ -140,8 +128,7 @@ const Accueil = () => {
         </div>
       </div>
 
-      {/* SERVICES */}
-      <div style={{ maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
+      <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         <h2 style={{ color: '#1A365D', marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>
           {servicesFiltres.length} service{servicesFiltres.length > 1 ? 's' : ''} disponible{servicesFiltres.length > 1 ? 's' : ''}
         </h2>
@@ -168,7 +155,6 @@ const Accueil = () => {
         </div>
       </div>
 
-      {/* COMMENT CA MARCHE */}
       <div style={{ background: '#F5ECD8', padding: '40px 16px', textAlign: 'center' }}>
         <h2 style={{ color: '#1A365D', fontSize: '22px', marginBottom: '32px', fontFamily: 'Georgia, serif' }}>Comment ça marche ?</h2>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto' }}>
@@ -186,12 +172,11 @@ const Accueil = () => {
         </div>
       </div>
 
-      {/* STATS */}
       <div style={{ background: '#2B6CB0', padding: '40px 16px', textAlign: 'center' }}>
         <h2 style={{ color: 'white', fontSize: '20px', marginBottom: '28px', fontFamily: 'Georgia, serif' }}>At Home Service en chiffres</h2>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto' }}>
           {[
-            { num: '8', label: 'Corps de métiers' },
+            { num: '10', label: 'Corps de métiers' },
             { num: '100%', label: 'Pros vérifiés' },
             { num: '24/7', label: 'Réservation en ligne' },
             { num: '🔒', label: 'Paiement sécurisé' }
@@ -204,7 +189,6 @@ const Accueil = () => {
         </div>
       </div>
 
-      {/* SECTION PRESTATAIRE */}
       <div style={{ background: '#C8A97A', padding: '40px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', flexWrap: 'wrap', textAlign: 'center' }}>
         <div>
           <h2 style={{ color: '#1A365D', fontSize: '20px', marginBottom: '8px', fontFamily: 'Georgia, serif' }}>Vous êtes un professionnel ?</h2>
@@ -213,8 +197,7 @@ const Accueil = () => {
         <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '14px 28px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Rejoindre la plateforme</button>
       </div>
 
-      {/* FOOTER */}
-      <footer style={{ background: '#1A365D', padding: '28px 16px', marginTop: 'auto' }}>
+      <footer style={{ background: '#1A365D', padding: '28px 16px' }}>
         <div className="footer-grid" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', gap: '24px', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: '20px' }}>
           <div>
             <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>At Home Service</div>
@@ -222,7 +205,7 @@ const Accueil = () => {
           </div>
           <div>
             <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>Services</div>
-            <div style={{ color: '#90CDF4', fontSize: '12px', lineHeight: 1.8 }}>Coiffure · Barber<br />Massage · Esthétique<br />Plomberie · Électricité<br />Maçonnerie · Rénovation</div>
+            <div style={{ color: '#90CDF4', fontSize: '12px', lineHeight: 1.8 }}>Coiffure · Barber<br />Massage · Esthétique<br />Plomberie · Électricité<br />Maçonnerie · Rénovation<br />Coach sportif · Photographe</div>
           </div>
           <div>
             <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>Liens utiles</div>
