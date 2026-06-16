@@ -8,6 +8,7 @@ const Accueil = () => {
   const [recherche, setRecherche] = useState('')
   const [categorie, setCategorie] = useState('')
   const [servicesFiltres, setServicesFiltres] = useState([])
+  const [menuOuvert, setMenuOuvert] = useState(false)
 
   const categories = [
     { nom: 'coiffure', image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop' },
@@ -62,7 +63,7 @@ const Accueil = () => {
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
 
       {/* NAVBAR */}
-      <nav style={{ background: '#2B6CB0', padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <nav style={{ background: '#2B6CB0', padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '36px', height: '36px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
@@ -74,41 +75,65 @@ const Accueil = () => {
             <div style={{ color: '#FEB2B2', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+
+        {/* BOUTONS DESKTOP */}
+        <div className="nav-desktop" style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => navigate('/auth')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Connexion</button>
           <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>S'inscrire</button>
         </div>
+
+        {/* HAMBURGER MOBILE */}
+        <button onClick={() => setMenuOuvert(!menuOuvert)} className="nav-mobile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'none' }}>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+        </button>
+
+        {/* MENU MOBILE OUVERT */}
+        {menuOuvert && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#2B6CB0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Connexion</button>
+            <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>S'inscrire</button>
+          </div>
+        )}
       </nav>
 
+      <style>{`
+        @media (max-width: 600px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile { display: block !important; }
+          .hero-title { font-size: 22px !important; }
+          .search-box { flex-direction: column !important; }
+          .footer-grid { flex-direction: column !important; }
+        }
+      `}</style>
+
       {/* HERO */}
-      <div style={{ background: '#B8926A', padding: '60px 24px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '32px', color: '#1A365D', marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>Des pros à domicile,<br />quand vous en avez besoin</h1>
-        <p style={{ color: '#3D2B0F', fontSize: '15px', fontStyle: 'italic', marginBottom: '32px' }}>Plus besoin de chercher, un clic et trouvez votre artisan à domicile</p>
-        <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '20px', maxWidth: '600px', margin: '0 auto', display: 'flex', gap: '8px', border: '1px solid #A07840' }}>
+      <div style={{ background: '#B8926A', padding: '40px 16px', textAlign: 'center' }}>
+        <h1 className="hero-title" style={{ fontSize: '32px', color: '#1A365D', marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>Des pros à domicile,<br />quand vous en avez besoin</h1>
+        <p style={{ color: '#3D2B0F', fontSize: '15px', fontStyle: 'italic', marginBottom: '32px', padding: '0 8px' }}>Plus besoin de chercher, un clic et trouvez votre artisan à domicile</p>
+        <div className="search-box" style={{ background: '#F5ECD8', borderRadius: '12px', padding: '16px', maxWidth: '600px', margin: '0 auto', display: 'flex', gap: '8px', border: '1px solid #A07840' }}>
           <input
             placeholder="Quel service cherchez-vous ?"
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
-            style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif' }}
+            style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }}
           />
           <button style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>Rechercher</button>
         </div>
       </div>
 
       {/* CATEGORIES AVEC PHOTOS */}
-      <div style={{ background: '#C8A97A', padding: '32px 24px' }}>
+      <div style={{ background: '#C8A97A', padding: '32px 16px' }}>
         <h2 style={{ color: '#1A365D', textAlign: 'center', marginBottom: '24px', fontFamily: 'Georgia, serif', fontSize: '20px' }}>Nos services à domicile</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '16px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', maxWidth: '1100px', margin: '0 auto' }}>
           {categories.map(cat => (
-            <div key={cat.nom} onClick={() => filtrerCategorie(cat.nom)} style={{ borderRadius: '12px', overflow: 'hidden', border: categorie === cat.nom ? '3px solid #2B6CB0' : '1px solid #A07840', cursor: 'pointer', background: '#F5ECD8', transition: 'transform 0.2s' }}>
-              <div style={{ position: 'relative', height: '120px', overflow: 'hidden' }}>
+            <div key={cat.nom} onClick={() => filtrerCategorie(cat.nom)} style={{ borderRadius: '12px', overflow: 'hidden', border: categorie === cat.nom ? '3px solid #2B6CB0' : '1px solid #A07840', cursor: 'pointer', background: '#F5ECD8' }}>
+              <div style={{ height: '100px', overflow: 'hidden' }}>
                 <img src={cat.image} alt={cat.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                {categorie === cat.nom && (
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(43, 108, 176, 0.4)' }} />
-                )}
               </div>
-              <div style={{ padding: '10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '13px', color: categorie === cat.nom ? '#2B6CB0' : '#1A365D', fontWeight: '500', textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat.nom}</div>
+              <div style={{ padding: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '12px', color: categorie === cat.nom ? '#2B6CB0' : '#1A365D', fontWeight: '500', textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat.nom}</div>
               </div>
             </div>
           ))}
@@ -125,7 +150,7 @@ const Accueil = () => {
             <p style={{ fontSize: '18px' }}>Aucun service trouvé</p>
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
           {servicesFiltres.map(service => (
             <div key={service.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
               <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
@@ -144,7 +169,7 @@ const Accueil = () => {
       </div>
 
       {/* COMMENT CA MARCHE */}
-      <div style={{ background: '#F5ECD8', padding: '40px 24px', textAlign: 'center' }}>
+      <div style={{ background: '#F5ECD8', padding: '40px 16px', textAlign: 'center' }}>
         <h2 style={{ color: '#1A365D', fontSize: '22px', marginBottom: '32px', fontFamily: 'Georgia, serif' }}>Comment ça marche ?</h2>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto' }}>
           {[
@@ -152,7 +177,7 @@ const Accueil = () => {
             { num: '2', titre: 'Choisissez et réservez', desc: 'Consultez les avis, les tarifs et réservez en quelques clics avec notre calendrier' },
             { num: '3', titre: 'Le pro vient chez vous', desc: "Votre artisan se déplace à domicile à l'heure convenue. Profitez !" }
           ].map(step => (
-            <div key={step.num} style={{ flex: 1, minWidth: '160px', background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #A07840' }}>
+            <div key={step.num} style={{ flex: 1, minWidth: '200px', background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #A07840' }}>
               <div style={{ width: '36px', height: '36px', background: '#2B6CB0', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', margin: '0 auto 12px' }}>{step.num}</div>
               <div style={{ color: '#1A365D', fontSize: '14px', fontWeight: '500', marginBottom: '6px' }}>{step.titre}</div>
               <div style={{ color: '#3D2B0F', fontSize: '12px', lineHeight: 1.6 }}>{step.desc}</div>
@@ -162,7 +187,7 @@ const Accueil = () => {
       </div>
 
       {/* STATS */}
-      <div style={{ background: '#2B6CB0', padding: '40px 24px', textAlign: 'center' }}>
+      <div style={{ background: '#2B6CB0', padding: '40px 16px', textAlign: 'center' }}>
         <h2 style={{ color: 'white', fontSize: '20px', marginBottom: '28px', fontFamily: 'Georgia, serif' }}>At Home Service en chiffres</h2>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto' }}>
           {[
@@ -171,7 +196,7 @@ const Accueil = () => {
             { num: '24/7', label: 'Réservation en ligne' },
             { num: '🔒', label: 'Paiement sécurisé' }
           ].map(stat => (
-            <div key={stat.label} style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px 28px', border: '1px solid rgba(255,255,255,0.2)' }}>
+            <div key={stat.label} style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(255,255,255,0.2)' }}>
               <div style={{ color: 'white', fontSize: '28px', fontWeight: '500' }}>{stat.num}</div>
               <div style={{ color: '#BEE3F8', fontSize: '12px', marginTop: '4px' }}>{stat.label}</div>
             </div>
@@ -180,17 +205,17 @@ const Accueil = () => {
       </div>
 
       {/* SECTION PRESTATAIRE */}
-      <div style={{ background: '#C8A97A', padding: '40px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', flexWrap: 'wrap', textAlign: 'center' }}>
+      <div style={{ background: '#C8A97A', padding: '40px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', flexWrap: 'wrap', textAlign: 'center' }}>
         <div>
           <h2 style={{ color: '#1A365D', fontSize: '20px', marginBottom: '8px', fontFamily: 'Georgia, serif' }}>Vous êtes un professionnel ?</h2>
-          <p style={{ color: '#3D2B0F', fontSize: '13px', maxWidth: '300px', lineHeight: 1.6 }}>Rejoignez At Home Service et développez votre clientèle. Créez votre profil gratuitement et commencez à recevoir des réservations dès aujourd'hui.</p>
+          <p style={{ color: '#3D2B0F', fontSize: '13px', maxWidth: '300px', lineHeight: 1.6, margin: '0 auto' }}>Rejoignez At Home Service et développez votre clientèle. Créez votre profil gratuitement et commencez à recevoir des réservations dès aujourd'hui.</p>
         </div>
         <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '14px 28px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Rejoindre la plateforme</button>
       </div>
 
       {/* FOOTER */}
-      <footer style={{ background: '#1A365D', padding: '28px 24px', marginTop: 'auto' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', gap: '24px', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: '20px' }}>
+      <footer style={{ background: '#1A365D', padding: '28px 16px', marginTop: 'auto' }}>
+        <div className="footer-grid" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', gap: '24px', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: '20px' }}>
           <div>
             <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>At Home Service</div>
             <p style={{ color: '#90CDF4', fontSize: '12px', fontStyle: 'italic', lineHeight: 1.6 }}>Plus besoin de chercher,<br />un clic et trouvez votre<br />artisan à domicile</p>
