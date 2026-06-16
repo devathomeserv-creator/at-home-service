@@ -129,4 +129,72 @@ const modifierStatut = async (req, res) => {
   }
 }
 
-module.exports = { creerReservation, mesReservationsClient, mesReservationsPrestataire, modifierStatut }
+const annulerReservation = async (req, res) => {
+  try {
+    const { id } = req.params
+    const client_id = req.user.id
+
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('*, services(*), users(*)')
+      .eq('id', id)
+      .eq('client_id', client_id)
+      .single()
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Réservation introuvable' })
+    }
+
+    if (booking.statut === 'termine' || booking.statut === 'annule') {
+      return res.status(400).json({ message: 'Cette réservation ne peut pas être annulée' })
+    }
+
+    const { error } = await supabase
+      .from('bookings')
+      .update({ statut: 'annule' })
+      .eq('id', id)
+
+    if (error) throw error
+
+    res.json({ message: 'Réservation annulée avec succès' })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+const modifierReservation = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { date_rdv, adresse_intervention } = req.body
+    const client_id = req.user.id
+
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('id', id)
+      .eq('client_id', client_id)
+      .single()
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Réservation introuvable' })
+    }
+
+    if (booking.statut === 'termine' || booking.statut === 'annule') {
+      return res.status(400).json({ message: 'Cette réservation ne peut pas être modifiée' })
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .update({ date_rdv, adresse_intervention, statut: 'en_attente' })
+      .eq('id', id)
+      .select()
+
+    if (error) throw error
+
+    res.json({ message: 'Réservation modifiée avec succès', reservation: data[0] })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+module.exports = { creerReservation, mesReservationsClient, mesReservationsPrestataire, modifierStatut, annulerReservation, modifierReservation }

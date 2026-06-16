@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement } from '../services/api'
+import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -41,9 +41,13 @@ const DashboardClient = () => {
   const [avisForm, setAvisForm] = useState({ booking_id: null, service_id: null, note: 5, commentaire: '' })
   const [showAvisForm, setShowAvisForm] = useState(false)
   const [showReservationModal, setShowReservationModal] = useState(false)
+  const [showModifierModal, setShowModifierModal] = useState(false)
   const [serviceSelectionne, setServiceSelectionne] = useState(null)
+  const [reservationSelectionnee, setReservationSelectionnee] = useState(null)
   const [dateSelectionnee, setDateSelectionnee] = useState(null)
+  const [dateModifiee, setDateModifiee] = useState(null)
   const [adresse, setAdresse] = useState('')
+  const [adresseModifiee, setAdresseModifiee] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
@@ -127,6 +131,42 @@ const DashboardClient = () => {
     }
   }
 
+  const handleAnnuler = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return
+    try {
+      await annulerReservation(id)
+      setMessage('Réservation annulée avec succès')
+      chargerReservations()
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Erreur lors de l\'annulation')
+    }
+  }
+
+  const ouvrirModifier = (reservation) => {
+    setReservationSelectionnee(reservation)
+    setDateModifiee(new Date(reservation.date_rdv))
+    setAdresseModifiee(reservation.adresse_intervention)
+    setShowModifierModal(true)
+  }
+
+  const handleModifier = async () => {
+    if (!dateModifiee) {
+      setMessage('Veuillez choisir une date')
+      return
+    }
+    try {
+      await modifierReservation(reservationSelectionnee.id, {
+        date_rdv: dateModifiee.toISOString(),
+        adresse_intervention: adresseModifiee
+      })
+      setMessage('Réservation modifiée avec succès !')
+      setShowModifierModal(false)
+      chargerReservations()
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Erreur lors de la modification')
+    }
+  }
+
   const ouvrirAvis = (reservation) => {
     setAvisForm({ booking_id: reservation.id, service_id: reservation.service_id, note: 5, commentaire: '' })
     setShowAvisForm(true)
@@ -151,6 +191,13 @@ const DashboardClient = () => {
   const filtrerCategorie = (cat) => {
     setCategorie(cat)
     chargerServices(cat)
+  }
+
+  const statutColor = (statut) => {
+    if (statut === 'confirme') return { bg: '#d1fae5', color: '#065f46' }
+    if (statut === 'annule') return { bg: '#fee2e2', color: '#991b1b' }
+    if (statut === 'termine') return { bg: '#EBF8FF', color: '#2B6CB0' }
+    return { bg: '#fef3c7', color: '#92400e' }
   }
 
   return (
@@ -212,6 +259,22 @@ const DashboardClient = () => {
           </div>
         )}
 
+        {showModifierModal && reservationSelectionnee && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: '1px solid #A07840', maxHeight: '90vh', overflowY: 'auto' }}>
+              <h3 style={{ color: '#1A365D', marginBottom: '1.5rem' }}>Modifier la réservation</h3>
+              <p style={{ color: '#3D2B0F', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>Nouvelle date et heure :</p>
+              <DatePicker selected={dateModifiee} onChange={(date) => setDateModifiee(date)} showTimeSelect timeFormat="HH:mm" timeIntervals={30} dateFormat="dd/MM/yyyy à HH:mm" minDate={new Date()} locale="fr" inline />
+              <p style={{ color: '#3D2B0F', margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Adresse :</p>
+              <input value={adresseModifiee} onChange={(e) => setAdresseModifiee(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1.5rem', boxSizing: 'border-box' }} />
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button onClick={handleModifier} style={{ flex: 1, background: '#2B6CB0', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Confirmer la modification</button>
+                <button onClick={() => setShowModifierModal(false)} style={{ background: '#F5ECD8', color: '#1A365D', border: '1px solid #A07840', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showAvisForm && (
           <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #A07840' }}>
             <h3 style={{ color: '#1A365D', marginBottom: '1rem' }}>Laisser un avis</h3>
@@ -256,19 +319,30 @@ const DashboardClient = () => {
         {vue === 'reservations' && (
           <div>
             {reservations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune réservation pour le moment.</p>}
-            {reservations.map(res => (
-              <div key={res.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <h3 style={{ margin: 0, color: '#1A365D' }}>{res.services?.titre}</h3>
-                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: res.statut === 'confirme' ? '#d1fae5' : res.statut === 'annule' ? '#fee2e2' : res.statut === 'termine' ? '#EBF8FF' : '#fef3c7', color: res.statut === 'confirme' ? '#065f46' : res.statut === 'annule' ? '#991b1b' : res.statut === 'termine' ? '#2B6CB0' : '#92400e' }}>{res.statut}</span>
+            {reservations.map(res => {
+              const sc = statutColor(res.statut)
+              return (
+                <div key={res.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <h3 style={{ margin: 0, color: '#1A365D' }}>{res.services?.titre}</h3>
+                    <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: sc.bg, color: sc.color }}>{res.statut}</span>
+                  </div>
+                  <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
+                  <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
+
+                  {(res.statut === 'en_attente' || res.statut === 'confirme') && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
+                      <button onClick={() => ouvrirModifier(res)} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✏️ Modifier</button>
+                      <button onClick={() => handleAnnuler(res.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ Annuler</button>
+                    </div>
+                  )}
+
+                  {res.statut === 'termine' && (
+                    <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '1rem', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
+                  )}
                 </div>
-                <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
-                <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
-                {res.statut === 'termine' && (
-                  <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '1rem', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
