@@ -22,7 +22,10 @@ const obtenirServices = async (req, res) => {
   try {
     const { categorie } = req.query
 
-    let query = supabase.from('services').select('*').eq('disponible', true)
+    let query = supabase
+      .from('services')
+      .select('*, users(id, nom, prenom)')
+      .eq('disponible', true)
 
     if (categorie) {
       query = query.eq('categorie', categorie)

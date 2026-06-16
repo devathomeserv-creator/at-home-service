@@ -32,9 +32,9 @@ const Accueil = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recherche, categorie, services])
 
-  const chargerServices = async (cat) => {
+  const chargerServices = async () => {
     try {
-      const res = await getServices(cat)
+      const res = await getServices()
       setServices(res.data.services)
       setServicesFiltres(res.data.services)
     } catch (err) {
@@ -51,7 +51,8 @@ const Accueil = () => {
       resultats = resultats.filter(s =>
         s.titre.toLowerCase().includes(recherche.toLowerCase()) ||
         s.categorie.toLowerCase().includes(recherche.toLowerCase()) ||
-        s.description?.toLowerCase().includes(recherche.toLowerCase())
+        s.description?.toLowerCase().includes(recherche.toLowerCase()) ||
+        `${s.users?.prenom} ${s.users?.nom}`.toLowerCase().includes(recherche.toLowerCase())
       )
     }
     setServicesFiltres(resultats)
@@ -107,7 +108,7 @@ const Accueil = () => {
         <h1 className="hero-title" style={{ fontSize: '32px', color: '#1A365D', marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>Des pros à domicile,<br />quand vous en avez besoin</h1>
         <p style={{ color: '#3D2B0F', fontSize: '15px', fontStyle: 'italic', marginBottom: '32px', padding: '0 8px' }}>Plus besoin de chercher, un clic et trouvez votre artisan à domicile</p>
         <div className="search-box" style={{ background: '#F5ECD8', borderRadius: '12px', padding: '16px', maxWidth: '600px', margin: '0 auto', display: 'flex', gap: '8px', border: '1px solid #A07840' }}>
-          <input placeholder="Quel service cherchez-vous ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
+          <input placeholder="Quel service ou prestataire cherchez-vous ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
           <button style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>Rechercher</button>
         </div>
       </div>
@@ -140,8 +141,18 @@ const Accueil = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
           {servicesFiltres.map(service => (
             <div key={service.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
-              <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
-              <h3 style={{ margin: '0.8rem 0 0.5rem', color: '#1A365D', fontFamily: 'Georgia, serif' }}>{service.titre}</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
+                {service.users && (
+                  <span
+                    onClick={() => navigate(`/prestataire/${service.users.id}`)}
+                    style={{ fontSize: '12px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    {service.users.prenom} {service.users.nom}
+                  </span>
+                )}
+              </div>
+              <h3 style={{ margin: '0.5rem 0', color: '#1A365D', fontFamily: 'Georgia, serif' }}>{service.titre}</h3>
               <p style={{ color: '#3D2B0F', fontSize: '14px', marginBottom: '1rem' }}>{service.description}</p>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
