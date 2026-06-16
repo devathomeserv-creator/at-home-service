@@ -34,6 +34,7 @@ const DashboardPrestataire = () => {
   const [moyenneAvis, setMoyenneAvis] = useState(0)
   const [vue, setVue] = useState('reservations')
   const [message, setMessage] = useState('')
+  const [menuOuvert, setMenuOuvert] = useState(false)
   const [form, setForm] = useState({
     categorie: 'coiffure', titre: '', description: '', prix: '', duree: ''
   })
@@ -108,19 +109,40 @@ const DashboardPrestataire = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A' }}>
-      <nav style={{ background: '#2B6CB0', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <style>{`
+        @media (max-width: 600px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile { display: block !important; }
+          .tabs { flex-wrap: wrap !important; }
+          .tabs button { flex: 1 !important; font-size: 11px !important; padding: 8px 6px !important; }
+        }
+      `}</style>
+
+      <nav style={{ background: '#2B6CB0', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
         <Logo />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ color: '#BEE3F8', fontSize: '14px' }}>Bonjour {user?.prenom} !</span>
           <button onClick={() => navigate('/profil')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
           <button onClick={handleLogout} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
         </div>
+        <button onClick={() => setMenuOuvert(!menuOuvert)} className="nav-mobile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'none' }}>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+        </button>
+        {menuOuvert && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#2B6CB0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <p style={{ color: '#BEE3F8', fontSize: '14px', margin: 0 }}>Bonjour {user?.prenom} !</p>
+            <button onClick={() => { navigate('/profil'); setMenuOuvert(false) }} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
+            <button onClick={handleLogout} style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
+          </div>
+        )}
       </nav>
 
-      <div style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {['reservations', 'services', 'avis', 'ajouter'].map(v => (
           <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>
-            {v === 'reservations' ? 'Mes réservations' : v === 'services' ? 'Mes services' : v === 'avis' ? `Mes avis (${moyenneAvis}★)` : 'Ajouter un service'}
+            {v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
           </button>
         ))}
       </div>
@@ -133,7 +155,7 @@ const DashboardPrestataire = () => {
             {reservations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune réservation pour le moment.</p>}
             {reservations.map(res => (
               <div key={res.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <h3 style={{ margin: 0, color: '#1A365D' }}>{res.services?.titre}</h3>
                   <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: res.statut === 'confirme' ? '#d1fae5' : res.statut === 'annule' ? '#fee2e2' : '#fef3c7', color: res.statut === 'confirme' ? '#065f46' : res.statut === 'annule' ? '#991b1b' : '#92400e' }}>{res.statut}</span>
                 </div>
@@ -141,7 +163,7 @@ const DashboardPrestataire = () => {
                 <p style={{ color: '#3D2B0F' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                 <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
                 {res.statut === 'en_attente' && (
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
                     <button onClick={() => changerStatut(res.id, 'confirme')} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Confirmer</button>
                     <button onClick={() => changerStatut(res.id, 'annule')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
                   </div>
@@ -155,7 +177,7 @@ const DashboardPrestataire = () => {
         )}
 
         {vue === 'services' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
             {services.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun service créé pour le moment.</p>}
             {services.map(service => (
               <div key={service.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
@@ -170,7 +192,7 @@ const DashboardPrestataire = () => {
 
         {vue === 'avis' && (
           <div>
-            <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #A07840', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #A07840', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#2B6CB0' }}>{moyenneAvis}</div>
               <div>
                 <Etoiles note={Math.round(moyenneAvis)} />
@@ -180,7 +202,7 @@ const DashboardPrestataire = () => {
             {avis.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun avis pour le moment.</p>}
             {avis.map(a => (
               <div key={a.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                   <div>
                     <span style={{ fontWeight: 'bold', color: '#1A365D' }}>{a.users?.prenom} {a.users?.nom}</span>
                     <span style={{ color: '#3D2B0F', fontSize: '13px', marginLeft: '8px' }}>— {a.services?.titre}</span>

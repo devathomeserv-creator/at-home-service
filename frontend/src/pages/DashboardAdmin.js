@@ -25,6 +25,7 @@ const DashboardAdmin = () => {
   const [reservations, setReservations] = useState([])
   const [stats, setStats] = useState({ totalUsers: 0, totalClients: 0, totalPrestataires: 0, totalReservations: 0 })
   const [message, setMessage] = useState('')
+  const [menuOuvert, setMenuOuvert] = useState(false)
 
   const API = axios.create({
     baseURL: 'https://loving-nature-production-145d.up.railway.app/api',
@@ -88,16 +89,38 @@ const DashboardAdmin = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A' }}>
-      <nav style={{ background: '#2B6CB0', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <style>{`
+        @media (max-width: 600px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile { display: block !important; }
+          .tabs { flex-wrap: wrap !important; }
+          .tabs button { flex: 1 !important; font-size: 12px !important; padding: 8px !important; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+      `}</style>
+
+      <nav style={{ background: '#2B6CB0', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
         <Logo />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ color: '#BEE3F8', fontSize: '14px' }}>Bonjour {user?.prenom} !</span>
           <button onClick={() => navigate('/profil')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
           <button onClick={handleLogout} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
         </div>
+        <button onClick={() => setMenuOuvert(!menuOuvert)} className="nav-mobile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'none' }}>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+          <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
+        </button>
+        {menuOuvert && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#2B6CB0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <p style={{ color: '#BEE3F8', fontSize: '14px', margin: 0 }}>Bonjour {user?.prenom} !</p>
+            <button onClick={() => { navigate('/profil'); setMenuOuvert(false) }} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
+            <button onClick={handleLogout} style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
+          </div>
+        )}
       </nav>
 
-      <div style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {['stats', 'users', 'reservations'].map(v => (
           <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>
             {v === 'stats' ? 'Statistiques' : v === 'users' ? 'Utilisateurs' : 'Réservations'}
@@ -109,7 +132,7 @@ const DashboardAdmin = () => {
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
         {vue === 'stats' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
             {statCards.map(stat => (
               <div key={stat.label} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
                 <p style={{ color: '#3D2B0F', fontSize: '14px', margin: '0 0 0.5rem' }}>{stat.label}</p>
@@ -122,7 +145,7 @@ const DashboardAdmin = () => {
         {vue === 'users' && (
           <div>
             {users.map(u => (
-              <div key={u.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={u.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
                   <h3 style={{ margin: '0 0 0.3rem', color: '#1A365D' }}>{u.prenom} {u.nom}</h3>
                   <p style={{ color: '#3D2B0F', margin: '0 0 0.5rem', fontSize: '14px' }}>{u.email}</p>
@@ -141,7 +164,7 @@ const DashboardAdmin = () => {
             {reservations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune réservation pour le moment.</p>}
             {reservations.map(res => (
               <div key={res.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <h3 style={{ margin: 0, color: '#1A365D' }}>{res.services?.titre}</h3>
                   <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: res.statut === 'confirme' ? '#d1fae5' : res.statut === 'annule' ? '#fee2e2' : '#fef3c7', color: res.statut === 'confirme' ? '#065f46' : res.statut === 'annule' ? '#991b1b' : '#92400e' }}>{res.statut}</span>
                 </div>
