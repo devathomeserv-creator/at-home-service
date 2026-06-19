@@ -6,7 +6,7 @@ const getProfilPublic = async (req, res) => {
 
     const { data: prestataire, error } = await supabase
       .from('users')
-      .select('id, nom, prenom, photo_url, description, telephone, role')
+      .select('id, nom, prenom, photo_url, description, telephone, role, jours_travail, heure_debut, heure_fin')
       .eq('id', id)
       .eq('role', 'prestataire')
       .single()
@@ -37,4 +37,29 @@ const getProfilPublic = async (req, res) => {
   }
 }
 
-module.exports = { getProfilPublic }
+const getCreneauxOccupes = async (req, res) => {
+  try {
+    const { prestataire_id } = req.params
+
+    const { data: services } = await supabase
+      .from('services')
+      .select('id')
+      .eq('prestataire_id', prestataire_id)
+
+    const serviceIds = services.map(s => s.id)
+
+    const { data: bookings, error } = await supabase
+      .from('bookings')
+      .select('date_rdv, statut')
+      .in('service_id', serviceIds)
+      .in('statut', ['en_attente', 'confirme'])
+
+    if (error) throw error
+
+    res.json({ creneauxOccupes: bookings.map(b => b.date_rdv) })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+module.exports = { getProfilPublic, getCreneauxOccupes }

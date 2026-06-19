@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation } from '../services/api'
+import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -30,6 +30,8 @@ const Etoiles = ({ note, onSelect }) => (
   </div>
 )
 
+const joursMap = { 0: 'dimanche', 1: 'lundi', 2: 'mardi', 3: 'mercredi', 4: 'jeudi', 5: 'vendredi', 6: 'samedi' }
+
 const DashboardClient = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -49,6 +51,10 @@ const DashboardClient = () => {
   const [adresse, setAdresse] = useState('')
   const [adresseModifiee, setAdresseModifiee] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
+  const [joursTravail, setJoursTravail] = useState([])
+  const [heureDebut, setHeureDebut] = useState('09:00')
+  const [heureFin, setHeureFin] = useState('18:00')
+  const [creneauxOccupes, setCreneauxOccupes] = useState([])
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
 
@@ -103,11 +109,44 @@ const DashboardClient = () => {
     }
   }
 
-  const ouvrirReservation = (service) => {
+  const ouvrirReservation = async (service) => {
     setServiceSelectionne(service)
     setDateSelectionnee(null)
     setAdresse('')
     setShowReservationModal(true)
+
+    try {
+      const prestataireId = service.users?.id || service.prestataire_id
+      const resProfil = await getProfilPublicPrestataire(prestataireId)
+      setJoursTravail(resProfil.data.prestataire.jours_travail || [])
+      setHeureDebut(resProfil.data.prestataire.heure_debut || '09:00')
+      setHeureFin(resProfil.data.prestataire.heure_fin || '18:00')
+
+      const resCreneaux = await getCreneauxOccupes(prestataireId)
+      setCreneauxOccupes(resCreneaux.data.creneauxOccupes || [])
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const filtrerJourValide = (date) => {
+    const jour = joursMap[date.getDay()]
+    return joursTravail.includes(jour)
+  }
+
+  const filtrerHeureValide = (time) => {
+    const heures = time.getHours()
+    const minutes = time.getMinutes()
+    const heureActuelle = `${String(heures).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+
+    if (heureActuelle < heureDebut || heureActuelle >= heureFin) return false
+
+    const estOccupe = creneauxOccupes.some(creneau => {
+      const dateCreneau = new Date(creneau)
+      return dateCreneau.getTime() === time.getTime()
+    })
+
+    return !estOccupe
   }
 
   const confirmerReservation = async () => {
@@ -246,9 +285,25 @@ const DashboardClient = () => {
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
             <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: '1px solid #A07840', maxHeight: '90vh', overflowY: 'auto' }}>
               <h3 style={{ color: '#1A365D', marginBottom: '0.5rem' }}>Réserver — {serviceSelectionne.titre}</h3>
-              <p style={{ color: '#C53030', fontWeight: 'bold', marginBottom: '1.5rem' }}>{serviceSelectionne.prix}€ · {serviceSelectionne.duree} min</p>
+              <p style={{ color: '#C53030', fontWeight: 'bold', marginBottom: '1rem' }}>{serviceSelectionne.prix}€ · {serviceSelectionne.duree} min</p>
+              <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '1rem', fontStyle: 'italic' }}>
+                Disponible : {joursTravail.join(', ')} de {heureDebut} à {heureFin}
+              </p>
               <p style={{ color: '#3D2B0F', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>Choisissez une date et heure :</p>
-              <DatePicker selected={dateSelectionnee} onChange={(date) => setDateSelectionnee(date)} showTimeSelect timeFormat="HH:mm" timeIntervals={30} dateFormat="dd/MM/yyyy à HH:mm" minDate={new Date()} locale="fr" placeholderText="Cliquez pour choisir..." inline />
+              <DatePicker
+                selected={dateSelectionnee}
+                onChange={(date) => setDateSelectionnee(date)}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={30}
+                dateFormat="dd/MM/yyyy à HH:mm"
+                minDate={new Date()}
+                locale="fr"
+                placeholderText="Cliquez pour choisir..."
+                inline
+                filterDate={filtrerJourValide}
+                filterTime={filtrerHeureValide}
+              />
               <p style={{ color: '#3D2B0F', margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Votre adresse :</p>
               <input placeholder="Ex: 12 rue de la Paix, Nice" value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1.5rem', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
