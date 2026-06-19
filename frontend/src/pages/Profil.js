@@ -27,7 +27,7 @@ const Profil = () => {
   const [joursTravail, setJoursTravail] = useState([])
   const [heureDebut, setHeureDebut] = useState('09:00')
   const [heureFin, setHeureFin] = useState('18:00')
-  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '' })
+  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
   const joursDisponibles = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
@@ -40,7 +40,7 @@ const Profil = () => {
     try {
       const res = await getProfil()
       const u = res.data.user
-      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '', description: u.description || '' })
+      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '', description: u.description || '', ville: u.ville || '' })
       setConfirmationAuto(u.confirmation_auto || false)
       setJoursTravail(u.jours_travail || [])
       setHeureDebut(u.heure_debut || '09:00')
@@ -183,7 +183,10 @@ const Profil = () => {
               <input name="telephone" placeholder="Téléphone" value={form.telephone} onChange={handleChange} style={inputStyle} />
               <input name="adresse" placeholder="Adresse" value={form.adresse} onChange={handleChange} style={inputStyle} />
               {user?.role === 'prestataire' && (
-                <textarea name="description" placeholder="Description de votre activité..." value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
+                <>
+                  <input name="ville" placeholder="Ville (ex: Nice)" value={form.ville} onChange={handleChange} style={inputStyle} />
+                  <textarea name="description" placeholder="Description de votre activité..." value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
+                </>
               )}
               <button type="submit" style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Sauvegarder</button>
             </form>

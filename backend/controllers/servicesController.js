@@ -20,11 +20,11 @@ const creerService = async (req, res) => {
 
 const obtenirServices = async (req, res) => {
   try {
-    const { categorie } = req.query
+    const { categorie, ville } = req.query
 
     let query = supabase
       .from('services')
-      .select('*, users(id, nom, prenom)')
+      .select('*, users(id, nom, prenom, ville)')
       .eq('disponible', true)
 
     if (categorie) {
@@ -35,7 +35,15 @@ const obtenirServices = async (req, res) => {
 
     if (error) throw error
 
-    res.json({ services: data })
+    let resultats = data
+
+    if (ville) {
+      resultats = resultats.filter(s =>
+        s.users?.ville?.toLowerCase().includes(ville.toLowerCase())
+      )
+    }
+
+    res.json({ services: resultats })
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message })
   }

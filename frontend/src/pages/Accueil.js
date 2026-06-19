@@ -6,6 +6,7 @@ const Accueil = () => {
   const navigate = useNavigate()
   const [services, setServices] = useState([])
   const [recherche, setRecherche] = useState('')
+  const [ville, setVille] = useState('')
   const [categorie, setCategorie] = useState('')
   const [servicesFiltres, setServicesFiltres] = useState([])
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -25,7 +26,8 @@ const Accueil = () => {
 
   useEffect(() => {
     chargerServices()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ville])
 
   useEffect(() => {
     filtrer()
@@ -34,7 +36,7 @@ const Accueil = () => {
 
   const chargerServices = async () => {
     try {
-      const res = await getServices()
+      const res = await getServices(null, ville)
       setServices(res.data.services)
       setServicesFiltres(res.data.services)
     } catch (err) {
@@ -107,10 +109,16 @@ const Accueil = () => {
       <div style={{ background: '#B8926A', padding: '40px 16px', textAlign: 'center' }}>
         <h1 className="hero-title" style={{ fontSize: '32px', color: '#1A365D', marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>Des pros à domicile,<br />quand vous en avez besoin</h1>
         <p style={{ color: '#3D2B0F', fontSize: '15px', fontStyle: 'italic', marginBottom: '32px', padding: '0 8px' }}>Plus besoin de chercher, un clic et trouvez votre artisan à domicile</p>
-        <div className="search-box" style={{ background: '#F5ECD8', borderRadius: '12px', padding: '16px', maxWidth: '600px', margin: '0 auto', display: 'flex', gap: '8px', border: '1px solid #A07840' }}>
-          <input placeholder="Quel service ou prestataire cherchez-vous ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
+        <div className="search-box" style={{ background: '#F5ECD8', borderRadius: '12px', padding: '16px', maxWidth: '700px', margin: '0 auto', display: 'flex', gap: '8px', border: '1px solid #A07840' }}>
+          <input placeholder="Quel service ou prestataire ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ flex: 2, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
+          <input placeholder="📍 Ville (ex: Nice)" value={ville} onChange={(e) => setVille(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
           <button style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>Rechercher</button>
         </div>
+        {ville && (
+          <p style={{ color: '#1A365D', fontSize: '13px', marginTop: '12px' }}>
+            Résultats pour : <strong>{ville}</strong> <span onClick={() => setVille('')} style={{ cursor: 'pointer', textDecoration: 'underline', marginLeft: '8px' }}>✕ effacer</span>
+          </p>
+        )}
       </div>
 
       <div style={{ background: '#C8A97A', padding: '32px 16px' }}>
@@ -141,14 +149,11 @@ const Accueil = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
           {servicesFiltres.map(service => (
             <div key={service.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
                 <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
                 {service.users && (
-                  <span
-                    onClick={() => navigate(`/prestataire/${service.users.id}`)}
-                    style={{ fontSize: '12px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline' }}
-                  >
-                    {service.users.prenom} {service.users.nom}
+                  <span onClick={() => navigate(`/prestataire/${service.users.id}`)} style={{ fontSize: '12px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline' }}>
+                    {service.users.prenom} {service.users.nom} {service.users.ville && `· ${service.users.ville}`}
                   </span>
                 )}
               </div>
@@ -170,7 +175,7 @@ const Accueil = () => {
         <h2 style={{ color: '#1A365D', fontSize: '22px', marginBottom: '32px', fontFamily: 'Georgia, serif' }}>Comment ça marche ?</h2>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto' }}>
           {[
-            { num: '1', titre: 'Cherchez un service', desc: 'Tapez le service dont vous avez besoin et trouvez les pros disponibles près de chez vous' },
+            { num: '1', titre: 'Cherchez un service', desc: 'Tapez le service et la ville dont vous avez besoin et trouvez les pros disponibles près de chez vous' },
             { num: '2', titre: 'Choisissez et réservez', desc: 'Consultez les avis, les tarifs et réservez en quelques clics avec notre calendrier' },
             { num: '3', titre: 'Le pro vient chez vous', desc: "Votre artisan se déplace à domicile à l'heure convenue. Profitez !" }
           ].map(step => (

@@ -14,7 +14,7 @@ API.interceptors.request.use((config) => {
 
 export const inscription = (data) => API.post('/auth/inscription', data)
 export const connexion = (data) => API.post('/auth/connexion', data)
-export const getServices = (categorie) => API.get('/services', { params: { categorie } })
+export const getServices = (categorie, ville) => API.get('/services', { params: { categorie, ville } })
 export const creerService = (data) => API.post('/services', data)
 export const mesServices = () => API.get('/services/mes-services')
 export const creerReservation = (data) => API.post('/bookings', data)
