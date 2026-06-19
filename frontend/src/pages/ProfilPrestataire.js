@@ -83,7 +83,6 @@ const ProfilPrestataire = () => {
 
       <div style={{ flex: 1, maxWidth: '800px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
 
-        {/* CARTE PROFIL */}
         <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', border: '1px solid #A07840', marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
             <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#2B6CB0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '28px', fontWeight: 'bold', flexShrink: 0 }}>
@@ -93,7 +92,13 @@ const ProfilPrestataire = () => {
               }
             </div>
             <div style={{ flex: 1 }}>
-              <h1 style={{ color: '#1A365D', margin: '0 0 4px', fontFamily: 'Georgia, serif', fontSize: '24px' }}>{prestataire.prenom} {prestataire.nom}</h1>
+              <h1 style={{ color: '#1A365D', margin: '0 0 4px', fontFamily: 'Georgia, serif', fontSize: '24px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {prestataire.prenom} {prestataire.nom}
+                {prestataire.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '12px', padding: '3px 10px', borderRadius: '20px' }}>✅ Vérifié</span>}
+              </h1>
+              {(prestataire.ville || prestataire.code_postal) && (
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 8px' }}>📍 {prestataire.ville} {prestataire.code_postal}</p>
+              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Etoiles note={moyenne} />
                 <span style={{ color: '#3D2B0F', fontSize: '14px' }}>{moyenne} ({totalAvis} avis)</span>
@@ -105,7 +110,6 @@ const ProfilPrestataire = () => {
           </div>
         </div>
 
-        {/* SERVICES */}
         <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>Services proposés</h2>
         {services.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun service disponible pour le moment.</p>}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
@@ -125,7 +129,6 @@ const ProfilPrestataire = () => {
           ))}
         </div>
 
-        {/* AVIS */}
         <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>Avis clients ({totalAvis})</h2>
         {avis.length === 0 && <p style={{ color: '#3D2B0F', marginBottom: '2rem' }}>Aucun avis pour le moment.</p>}
         {avis.map(a => (
