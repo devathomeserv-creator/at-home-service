@@ -48,3 +48,4 @@ export const ajouterFavori = (prestataire_id) => API.post('/favoris', { prestata
 export const retirerFavori = (prestataire_id) => API.delete(`/favoris/${prestataire_id}`)
 export const getMesFavoris = () => API.get('/favoris')
 export const verifierFavori = (prestataire_id) => API.get(`/favoris/verifier/${prestataire_id}`)
+export const getPrestatairesListe = (categorie, ville) => API.get('/prestataires', { params: { categorie, ville } })
