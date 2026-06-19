@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto } from '../services/api'
+import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto, modifierDisponibilites } from '../services/api'
 
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -24,8 +24,13 @@ const Profil = () => {
   const [message, setMessage] = useState('')
   const [erreur, setErreur] = useState('')
   const [confirmationAuto, setConfirmationAuto] = useState(false)
-  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '' })
+  const [joursTravail, setJoursTravail] = useState([])
+  const [heureDebut, setHeureDebut] = useState('09:00')
+  const [heureFin, setHeureFin] = useState('18:00')
+  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
+
+  const joursDisponibles = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
 
   useEffect(() => {
     chargerProfil()
@@ -35,8 +40,11 @@ const Profil = () => {
     try {
       const res = await getProfil()
       const u = res.data.user
-      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '' })
+      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '', description: u.description || '' })
       setConfirmationAuto(u.confirmation_auto || false)
+      setJoursTravail(u.jours_travail || [])
+      setHeureDebut(u.heure_debut || '09:00')
+      setHeureFin(u.heure_fin || '18:00')
     } catch (err) {
       console.error(err)
     }
@@ -90,6 +98,25 @@ const Profil = () => {
     }
   }
 
+  const toggleJour = (jour) => {
+    if (joursTravail.includes(jour)) {
+      setJoursTravail(joursTravail.filter(j => j !== jour))
+    } else {
+      setJoursTravail([...joursTravail, jour])
+    }
+  }
+
+  const handleDisponibilites = async () => {
+    setMessage('')
+    setErreur('')
+    try {
+      await modifierDisponibilites({ jours_travail: joursTravail, heure_debut: heureDebut, heure_fin: heureFin })
+      setMessage('Disponibilités mises à jour avec succès !')
+    } catch (err) {
+      setErreur('Erreur lors de la mise à jour des disponibilités')
+    }
+  }
+
   const handleSupprimer = async () => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) return
     try {
@@ -110,7 +137,7 @@ const Profil = () => {
   const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }
 
   const tabs = user?.role === 'prestataire'
-    ? ['infos', 'parametres', 'mot-de-passe', 'supprimer']
+    ? ['infos', 'parametres', 'disponibilites', 'mot-de-passe', 'supprimer']
     : ['infos', 'mot-de-passe', 'supprimer']
 
   return (
@@ -138,8 +165,8 @@ const Profil = () => {
 
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           {tabs.map(v => (
-            <button key={v} onClick={() => setVue(v)} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', fontSize: '13px' }}>
-              {v === 'infos' ? 'Mes infos' : v === 'parametres' ? 'Paramètres' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
+            <button key={v} onClick={() => setVue(v)} style={{ flex: '1 1 auto', padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', fontSize: '12px' }}>
+              {v === 'infos' ? 'Mes infos' : v === 'parametres' ? 'Paramètres' : v === 'disponibilites' ? 'Disponibilités' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
             </button>
           ))}
         </div>
@@ -155,6 +182,9 @@ const Profil = () => {
               <input name="nom" placeholder="Nom" value={form.nom} onChange={handleChange} style={inputStyle} />
               <input name="telephone" placeholder="Téléphone" value={form.telephone} onChange={handleChange} style={inputStyle} />
               <input name="adresse" placeholder="Adresse" value={form.adresse} onChange={handleChange} style={inputStyle} />
+              {user?.role === 'prestataire' && (
+                <textarea name="description" placeholder="Description de votre activité..." value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
+              )}
               <button type="submit" style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Sauvegarder</button>
             </form>
           </div>
@@ -163,33 +193,32 @@ const Profil = () => {
         {vue === 'parametres' && user?.role === 'prestataire' && (
           <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
             <h3 style={{ color: '#1A365D', marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>Paramètres prestataire</h3>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'white', borderRadius: '8px', border: '1px solid #A07840', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'white', borderRadius: '8px', border: '1px solid #A07840' }}>
               <div>
                 <p style={{ color: '#1A365D', fontWeight: 'bold', margin: '0 0 4px', fontSize: '14px' }}>Confirmation automatique</p>
-                <p style={{ color: '#3D2B0F', fontSize: '12px', margin: 0 }}>Les réservations sont confirmées automatiquement sans validation manuelle</p>
+                <p style={{ color: '#3D2B0F', fontSize: '12px', margin: 0 }}>Les réservations sont confirmées automatiquement</p>
               </div>
-              <div
-                onClick={() => handleConfirmationAuto(!confirmationAuto)}
-                style={{
-                  width: '48px', height: '26px', borderRadius: '13px', cursor: 'pointer', flexShrink: 0, marginLeft: '1rem',
-                  background: confirmationAuto ? '#2B6CB0' : '#CBD5E0',
-                  position: 'relative', transition: 'background 0.3s'
-                }}
-              >
-                <div style={{
-                  width: '20px', height: '20px', borderRadius: '50%', background: 'white',
-                  position: 'absolute', top: '3px', transition: 'left 0.3s',
-                  left: confirmationAuto ? '25px' : '3px'
-                }} />
+              <div onClick={() => handleConfirmationAuto(!confirmationAuto)} style={{ width: '48px', height: '26px', borderRadius: '13px', cursor: 'pointer', flexShrink: 0, marginLeft: '1rem', background: confirmationAuto ? '#2B6CB0' : '#CBD5E0', position: 'relative', transition: 'background 0.3s' }}>
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.3s', left: confirmationAuto ? '25px' : '3px' }} />
               </div>
             </div>
+          </div>
+        )}
 
-            <p style={{ color: '#3D2B0F', fontSize: '12px', fontStyle: 'italic' }}>
-              {confirmationAuto
-                ? '✅ Activé — Les clients reçoivent une confirmation immédiate'
-                : '⏳ Désactivé — Vous devez confirmer manuellement chaque réservation'}
-            </p>
+        {vue === 'disponibilites' && user?.role === 'prestataire' && (
+          <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+            <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Mes disponibilités</h3>
+            <p style={{ color: '#3D2B0F', fontSize: '13px', marginBottom: '1rem' }}>Sélectionnez vos jours de travail :</p>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+              {joursDisponibles.map(jour => (
+                <button key={jour} onClick={() => toggleJour(jour)} style={{ padding: '8px 14px', borderRadius: '20px', border: '1.5px solid #90CDF4', cursor: 'pointer', background: joursTravail.includes(jour) ? '#2B6CB0' : 'white', color: joursTravail.includes(jour) ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', fontSize: '13px', textTransform: 'capitalize' }}>{jour}</button>
+              ))}
+            </div>
+            <p style={{ color: '#3D2B0F', fontSize: '13px', marginBottom: '8px' }}>Heure de début :</p>
+            <input type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} style={inputStyle} />
+            <p style={{ color: '#3D2B0F', fontSize: '13px', marginBottom: '8px' }}>Heure de fin :</p>
+            <input type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} style={inputStyle} />
+            <button onClick={handleDisponibilites} style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', marginTop: '8px' }}>Sauvegarder mes disponibilités</button>
           </div>
         )}
 

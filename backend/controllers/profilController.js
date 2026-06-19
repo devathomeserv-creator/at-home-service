@@ -5,7 +5,7 @@ const getProfil = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, created_at')
+      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, description, jours_travail, heure_debut, heure_fin, created_at')
       .eq('id', req.user.id)
       .single()
 
@@ -18,11 +18,11 @@ const getProfil = async (req, res) => {
 
 const modifierProfil = async (req, res) => {
   try {
-    const { nom, prenom, telephone, adresse } = req.body
+    const { nom, prenom, telephone, adresse, description } = req.body
 
     const { data, error } = await supabase
       .from('users')
-      .update({ nom, prenom, telephone, adresse })
+      .update({ nom, prenom, telephone, adresse, description })
       .eq('id', req.user.id)
       .select()
 
@@ -45,6 +45,23 @@ const modifierConfirmationAuto = async (req, res) => {
 
     if (error) throw error
     res.json({ message: 'Paramètre mis à jour', user: data[0] })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+const modifierDisponibilites = async (req, res) => {
+  try {
+    const { jours_travail, heure_debut, heure_fin } = req.body
+
+    const { data, error } = await supabase
+      .from('users')
+      .update({ jours_travail, heure_debut, heure_fin })
+      .eq('id', req.user.id)
+      .select()
+
+    if (error) throw error
+    res.json({ message: 'Disponibilités mises à jour', user: data[0] })
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message })
   }
@@ -93,4 +110,4 @@ const supprimerCompte = async (req, res) => {
   }
 }
 
-module.exports = { getProfil, modifierProfil, modifierConfirmationAuto, changerMotDePasse, supprimerCompte }
+module.exports = { getProfil, modifierProfil, modifierConfirmationAuto, modifierDisponibilites, changerMotDePasse, supprimerCompte }
