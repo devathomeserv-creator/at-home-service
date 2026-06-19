@@ -409,8 +409,16 @@ const DashboardClient = () => {
               {services.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun service disponible pour le moment.</p>}
               {services.map(service => (
                 <div key={service.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
-                  <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
-                  <h3 style={{ margin: '0.8rem 0 0.5rem', color: '#1A365D' }}>{service.titre}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
+                    <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
+                    {service.users && (
+                      <span onClick={() => navigate(`/prestataire/${service.users.id}`)} style={{ fontSize: '12px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {service.users.prenom} {service.users.nom} {service.users.ville && `· ${service.users.ville}`}
+                        {service.users.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '1px 6px', borderRadius: '20px', textDecoration: 'none' }}>✅</span>}
+                      </span>
+                    )}
+                  </div>
+                  <h3 style={{ margin: '0.5rem 0', color: '#1A365D' }}>{service.titre}</h3>
                   <p style={{ color: '#3D2B0F', fontSize: '14px', marginBottom: '1rem' }}>{service.description}</p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
