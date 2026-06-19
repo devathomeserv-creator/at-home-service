@@ -24,7 +24,7 @@ const obtenirServices = async (req, res) => {
 
     let query = supabase
       .from('services')
-      .select('*, users(id, nom, prenom, ville)')
+      .select('*, users(id, nom, prenom, ville, code_postal)')
       .eq('disponible', true)
 
     if (categorie) {
@@ -38,8 +38,10 @@ const obtenirServices = async (req, res) => {
     let resultats = data
 
     if (ville) {
+      const rechercheLower = ville.toLowerCase().trim()
       resultats = resultats.filter(s =>
-        s.users?.ville?.toLowerCase().includes(ville.toLowerCase())
+        s.users?.ville?.toLowerCase().includes(rechercheLower) ||
+        s.users?.code_postal?.includes(rechercheLower)
       )
     }
 

@@ -27,7 +27,7 @@ const Profil = () => {
   const [joursTravail, setJoursTravail] = useState([])
   const [heureDebut, setHeureDebut] = useState('09:00')
   const [heureFin, setHeureFin] = useState('18:00')
-  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '' })
+  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '', code_postal: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
   const joursDisponibles = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
@@ -40,7 +40,7 @@ const Profil = () => {
     try {
       const res = await getProfil()
       const u = res.data.user
-      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '', description: u.description || '', ville: u.ville || '' })
+      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '', description: u.description || '', ville: u.ville || '', code_postal: u.code_postal || '' })
       setConfirmationAuto(u.confirmation_auto || false)
       setJoursTravail(u.jours_travail || [])
       setHeureDebut(u.heure_debut || '09:00')
@@ -184,7 +184,10 @@ const Profil = () => {
               <input name="adresse" placeholder="Adresse" value={form.adresse} onChange={handleChange} style={inputStyle} />
               {user?.role === 'prestataire' && (
                 <>
-                  <input name="ville" placeholder="Ville (ex: Nice)" value={form.ville} onChange={handleChange} style={inputStyle} />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input name="ville" placeholder="Ville (ex: Nice)" value={form.ville} onChange={handleChange} style={{ ...inputStyle, flex: 2 }} />
+                    <input name="code_postal" placeholder="Code postal" value={form.code_postal} onChange={handleChange} style={{ ...inputStyle, flex: 1 }} />
+                  </div>
                   <textarea name="description" placeholder="Description de votre activité..." value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
                 </>
               )}

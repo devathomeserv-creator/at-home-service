@@ -5,7 +5,7 @@ const getProfil = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, description, jours_travail, heure_debut, heure_fin, ville, created_at')
+      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, description, jours_travail, heure_debut, heure_fin, ville, code_postal, created_at')
       .eq('id', req.user.id)
       .single()
 
@@ -18,11 +18,11 @@ const getProfil = async (req, res) => {
 
 const modifierProfil = async (req, res) => {
   try {
-    const { nom, prenom, telephone, adresse, description, ville } = req.body
+    const { nom, prenom, telephone, adresse, description, ville, code_postal } = req.body
 
     const { data, error } = await supabase
       .from('users')
-      .update({ nom, prenom, telephone, adresse, description, ville })
+      .update({ nom, prenom, telephone, adresse, description, ville, code_postal })
       .eq('id', req.user.id)
       .select()
 
