@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getServices } from '../services/api'
+import { getPrestatairesListe } from '../services/api'
 
 const imagesParCategorie = {
   coiffure: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop',
@@ -15,13 +15,21 @@ const imagesParCategorie = {
   photographe: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=300&h=200&fit=crop'
 }
 
+const Etoiles = ({ note }) => (
+  <div style={{ display: 'flex', gap: '2px' }}>
+    {[1, 2, 3, 4, 5].map(i => (
+      <span key={i} style={{ fontSize: '14px', color: i <= Math.round(note) ? '#F6AD55' : '#CBD5E0' }}>★</span>
+    ))}
+  </div>
+)
+
 const Accueil = () => {
   const navigate = useNavigate()
-  const [services, setServices] = useState([])
+  const [prestataires, setPrestataires] = useState([])
   const [recherche, setRecherche] = useState('')
   const [ville, setVille] = useState('')
   const [categorie, setCategorie] = useState('')
-  const [servicesFiltres, setServicesFiltres] = useState([])
+  const [prestatairesFiltres, setPrestatairesFiltres] = useState([])
   const [menuOuvert, setMenuOuvert] = useState(false)
 
   const categories = [
@@ -38,39 +46,34 @@ const Accueil = () => {
   ]
 
   useEffect(() => {
-    chargerServices()
+    chargerPrestataires()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ville])
+  }, [ville, categorie])
 
   useEffect(() => {
     filtrer()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recherche, categorie, services])
+  }, [recherche, prestataires])
 
-  const chargerServices = async () => {
+  const chargerPrestataires = async () => {
     try {
-      const res = await getServices(null, ville)
-      setServices(res.data.services)
-      setServicesFiltres(res.data.services)
+      const res = await getPrestatairesListe(categorie, ville)
+      setPrestataires(res.data.prestataires)
+      setPrestatairesFiltres(res.data.prestataires)
     } catch (err) {
       console.error(err)
     }
   }
 
   const filtrer = () => {
-    let resultats = services
-    if (categorie) {
-      resultats = resultats.filter(s => s.categorie === categorie)
-    }
+    let resultats = prestataires
     if (recherche) {
-      resultats = resultats.filter(s =>
-        s.titre.toLowerCase().includes(recherche.toLowerCase()) ||
-        s.categorie.toLowerCase().includes(recherche.toLowerCase()) ||
-        s.description?.toLowerCase().includes(recherche.toLowerCase()) ||
-        `${s.users?.prenom} ${s.users?.nom}`.toLowerCase().includes(recherche.toLowerCase())
+      resultats = resultats.filter(p =>
+        `${p.prenom} ${p.nom}`.toLowerCase().includes(recherche.toLowerCase()) ||
+        p.services.some(s => s.titre.toLowerCase().includes(recherche.toLowerCase()) || s.categorie.toLowerCase().includes(recherche.toLowerCase()))
       )
     }
-    setServicesFiltres(resultats)
+    setPrestatairesFiltres(resultats)
   }
 
   const filtrerCategorie = (cat) => {
@@ -118,8 +121,8 @@ const Accueil = () => {
           .hero-title { font-size: 22px !important; }
           .search-box { flex-direction: column !important; }
           .footer-grid { flex-direction: column !important; }
-          .service-card { flex-direction: column !important; }
-          .service-image { width: 100% !important; height: 160px !important; }
+          .presta-card { flex-direction: column !important; }
+          .presta-image { width: 100% !important; height: 160px !important; }
         }
       `}</style>
 
@@ -159,41 +162,50 @@ const Accueil = () => {
 
       <div style={{ flex: 1, maxWidth: '900px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         <h2 style={{ color: '#1A365D', marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>
-          {servicesFiltres.length} service{servicesFiltres.length > 1 ? 's' : ''} disponible{servicesFiltres.length > 1 ? 's' : ''}
+          {prestatairesFiltres.length} prestataire{prestatairesFiltres.length > 1 ? 's' : ''} disponible{prestatairesFiltres.length > 1 ? 's' : ''}
         </h2>
-        {servicesFiltres.length === 0 && (
+        {prestatairesFiltres.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#3D2B0F' }}>
-            <p style={{ fontSize: '18px' }}>Aucun service trouvé</p>
+            <p style={{ fontSize: '18px' }}>Aucun prestataire trouvé</p>
           </div>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {servicesFiltres.map(service => (
-            <div key={service.id} className="service-card" style={{ background: '#F5ECD8', borderRadius: '12px', border: '1px solid #A07840', display: 'flex', overflow: 'hidden' }}>
-              <div className="service-image" style={{ width: '180px', height: '160px', flexShrink: 0, overflow: 'hidden' }}>
-                <img src={service.photo_url || imagesParCategorie[service.categorie] || imagesParCategorie.coiffure} alt={service.categorie} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
-                  {service.users && (
-                    <p onClick={() => navigate(`/prestataire/${service.users.id}`)} style={{ margin: '0 0 6px', fontSize: '13px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
-                      👤 {service.users.prenom} {service.users.nom} {service.users.ville && `· ${service.users.ville}`}
-                      {service.users.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '1px 6px', borderRadius: '20px', textDecoration: 'none' }}>✅</span>}
-                    </p>
-                  )}
-                  <h3 style={{ margin: '0 0 4px', color: '#1A365D', fontFamily: 'Georgia, serif', fontSize: '18px' }}>{service.titre}</h3>
-                  <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', textTransform: 'capitalize' }}>{service.categorie}</span>
-                  <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '8px 0 0' }}>{service.description}</p>
+          {prestatairesFiltres.map(p => {
+            const categoriePrincipale = p.services[0]?.categorie || 'coiffure'
+            const prixMin = Math.min(...p.services.map(s => s.prix))
+            return (
+              <div key={p.id} className="presta-card" onClick={() => navigate(`/prestataire/${p.id}`)} style={{ background: '#F5ECD8', borderRadius: '12px', border: '1px solid #A07840', display: 'flex', overflow: 'hidden', cursor: 'pointer' }}>
+                <div className="presta-image" style={{ width: '180px', height: '160px', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
+                  {p.photo_url
+                    ? <img src={p.photo_url} alt={p.prenom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <img src={imagesParCategorie[categoriePrincipale] || imagesParCategorie.coiffure} alt={categoriePrincipale} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  }
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                   <div>
-                    <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#C53030' }}>{service.prix}€</span>
-                    <span style={{ color: '#3D2B0F', fontSize: '13px', marginLeft: '6px' }}>{service.duree} min</span>
+                    <h3 style={{ margin: '0 0 4px', color: '#1A365D', fontFamily: 'Georgia, serif', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      {p.prenom} {p.nom}
+                      {p.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>✅ Vérifié</span>}
+                    </h3>
+                    {(p.ville || p.code_postal) && <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 6px' }}>📍 {p.ville} {p.code_postal}</p>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                      <Etoiles note={p.moyenne} />
+                      <span style={{ color: '#3D2B0F', fontSize: '12px' }}>{p.moyenne} ({p.totalAvis} avis)</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {[...new Set(p.services.map(s => s.categorie))].map(cat => (
+                        <span key={cat} style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', textTransform: 'capitalize' }}>{cat}</span>
+                      ))}
+                    </div>
                   </div>
-                  <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Réserver</button>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                    <span style={{ color: '#3D2B0F', fontSize: '13px' }}>À partir de <strong style={{ color: '#C53030', fontSize: '16px' }}>{prixMin}€</strong></span>
+                    <button onClick={(e) => { e.stopPropagation(); navigate(`/prestataire/${p.id}`) }} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Voir le profil</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
