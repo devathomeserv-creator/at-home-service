@@ -1,11 +1,12 @@
 const supabase = require('../config/supabase')
 const bcrypt = require('bcryptjs')
+const axios = require('axios')
 
 const getProfil = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, description, jours_travail, heure_debut, heure_fin, ville, code_postal, created_at')
+      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, description, jours_travail, heure_debut, heure_fin, ville, code_postal, siret, verifie, latitude, longitude, created_at')
       .eq('id', req.user.id)
       .single()
 
@@ -20,9 +21,32 @@ const modifierProfil = async (req, res) => {
   try {
     const { nom, prenom, telephone, adresse, description, ville, code_postal } = req.body
 
+    let latitude = null
+    let longitude = null
+
+    if (adresse && ville) {
+      try {
+        const adresseComplete = `${adresse} ${code_postal || ''} ${ville}`
+        const geoRes = await axios.get(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(adresseComplete)}&limit=1`)
+        if (geoRes.data.features && geoRes.data.features.length > 0) {
+          const coords = geoRes.data.features[0].geometry.coordinates
+          longitude = coords[0]
+          latitude = coords[1]
+        }
+      } catch (geoError) {
+        console.error('Erreur géolocalisation:', geoError.message)
+      }
+    }
+
+    const updateData = { nom, prenom, telephone, adresse, description, ville, code_postal }
+    if (latitude && longitude) {
+      updateData.latitude = latitude
+      updateData.longitude = longitude
+    }
+
     const { data, error } = await supabase
       .from('users')
-      .update({ nom, prenom, telephone, adresse, description, ville, code_postal })
+      .update(updateData)
       .eq('id', req.user.id)
       .select()
 

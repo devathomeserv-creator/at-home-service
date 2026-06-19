@@ -80,6 +80,7 @@ const Accueil = () => {
           </div>
         </div>
         <div className="nav-desktop" style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => navigate('/carte')} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>🗺️ Carte</button>
           <button onClick={() => navigate('/auth')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Connexion</button>
           <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>S'inscrire</button>
         </div>
@@ -90,6 +91,7 @@ const Accueil = () => {
         </button>
         {menuOuvert && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#2B6CB0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <button onClick={() => { navigate('/carte'); setMenuOuvert(false) }} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>🗺️ Carte</button>
             <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Connexion</button>
             <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>S'inscrire</button>
           </div>
@@ -119,6 +121,9 @@ const Accueil = () => {
             Résultats pour : <strong>{ville}</strong> <span onClick={() => setVille('')} style={{ cursor: 'pointer', textDecoration: 'underline', marginLeft: '8px' }}>✕ effacer</span>
           </p>
         )}
+        <p style={{ marginTop: '16px' }}>
+          <span onClick={() => navigate('/carte')} style={{ color: '#1A365D', fontSize: '13px', textDecoration: 'underline', cursor: 'pointer' }}>🗺️ Voir tous les prestataires sur une carte</span>
+        </p>
       </div>
 
       <div style={{ background: '#C8A97A', padding: '32px 16px' }}>
@@ -227,6 +232,7 @@ const Accueil = () => {
           <div>
             <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>Liens utiles</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span onClick={() => navigate('/carte')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Carte des prestataires</span>
               <span onClick={() => navigate('/mentions-legales')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Mentions légales et CGU</span>
               <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Connexion</span>
               <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Créer un compte</span>
