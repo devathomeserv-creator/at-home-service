@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations } from '../services/api'
+import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
 
@@ -34,6 +34,7 @@ const DashboardPrestataire = () => {
   const [conversations, setConversations] = useState([])
   const [avis, setAvis] = useState([])
   const [moyenneAvis, setMoyenneAvis] = useState(0)
+  const [stats, setStats] = useState(null)
   const [vue, setVue] = useState('reservations')
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -50,6 +51,7 @@ const DashboardPrestataire = () => {
     chargerReservations()
     chargerAvis()
     chargerConversations()
+    chargerStats()
   }, [])
 
   const chargerServices = async () => {
@@ -89,6 +91,15 @@ const DashboardPrestataire = () => {
     }
   }
 
+  const chargerStats = async () => {
+    try {
+      const res = await getStatsPrestataire()
+      setStats(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
@@ -111,6 +122,7 @@ const DashboardPrestataire = () => {
       await modifierStatut(id, statut)
       setMessage('Statut mis à jour !')
       chargerReservations()
+      chargerStats()
     } catch (err) {
       setMessage('Erreur lors de la mise à jour')
     }
@@ -141,6 +153,7 @@ const DashboardPrestataire = () => {
           .nav-mobile { display: block !important; }
           .tabs { flex-wrap: wrap !important; }
           .tabs button { flex: 1 !important; font-size: 11px !important; padding: 8px 6px !important; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
 
@@ -166,9 +179,9 @@ const DashboardPrestataire = () => {
       </nav>
 
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {['reservations', 'services', 'messages', 'avis', 'ajouter'].map(v => (
-          <button key={v} onClick={() => { setVue(v); if (v === 'messages') chargerConversations() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
-            {v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'messages' ? '💬 Messages' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
+        {['stats', 'reservations', 'services', 'messages', 'avis', 'ajouter'].map(v => (
+          <button key={v} onClick={() => { setVue(v); if (v === 'messages') chargerConversations(); if (v === 'stats') chargerStats() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
+            {v === 'stats' ? '📊 Stats' : v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'messages' ? '💬 Messages' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
             {v === 'messages' && totalNonLus > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{totalNonLus}</span>}
           </button>
         ))}
@@ -178,6 +191,48 @@ const DashboardPrestataire = () => {
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
         {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={fermerChat} />}
+
+        {vue === 'stats' && stats && (
+          <div>
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Revenus ce mois</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#C53030', margin: 0 }}>{stats.revenusMois}€</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Revenus totaux</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#2B6CB0', margin: 0 }}>{stats.revenusTotal}€</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Réservations ce mois</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#1A365D', margin: 0 }}>{stats.reservationsMois}</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Taux de confirmation</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#059669', margin: 0 }}>{stats.tauxConfirmation}%</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Note moyenne</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#F6AD55', margin: 0 }}>{stats.moyenneAvis}★</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Total réservations</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#1A365D', margin: 0 }}>{stats.totalReservations}</p>
+              </div>
+            </div>
+
+            <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+              <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Services les plus demandés</h3>
+              {stats.servicePopulaire.length === 0 && <p style={{ color: '#3D2B0F', fontSize: '14px' }}>Pas encore assez de données.</p>}
+              {stats.servicePopulaire.map((s, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < stats.servicePopulaire.length - 1 ? '1px solid #E2D9C8' : 'none' }}>
+                  <span style={{ color: '#1A365D', fontSize: '14px' }}>{s.titre}</span>
+                  <span style={{ background: '#2B6CB0', color: 'white', padding: '2px 10px', borderRadius: '20px', fontSize: '12px' }}>{s.count} réservation{s.count > 1 ? 's' : ''}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {vue === 'reservations' && (
           <div>
