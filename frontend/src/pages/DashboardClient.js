@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations } from '../services/api'
+import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -39,6 +39,7 @@ const DashboardClient = () => {
   const [services, setServices] = useState([])
   const [reservations, setReservations] = useState([])
   const [conversations, setConversations] = useState([])
+  const [favoris, setFavoris] = useState([])
   const [vue, setVue] = useState('services')
   const [categorie, setCategorie] = useState('')
   const [message, setMessage] = useState('')
@@ -66,6 +67,7 @@ const DashboardClient = () => {
     chargerServices()
     chargerReservations()
     chargerConversations()
+    chargerFavoris()
   }, [])
 
   useEffect(() => {
@@ -118,6 +120,25 @@ const DashboardClient = () => {
     try {
       const res = await getMesConversations()
       setConversations(res.data.conversations)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const chargerFavoris = async () => {
+    try {
+      const res = await getMesFavoris()
+      setFavoris(res.data.favoris)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleRetirerFavori = async (prestataire_id) => {
+    try {
+      await retirerFavori(prestataire_id)
+      setMessage('Retiré des favoris')
+      chargerFavoris()
     } catch (err) {
       console.error(err)
     }
@@ -302,6 +323,7 @@ const DashboardClient = () => {
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <button onClick={() => setVue('services')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'services' ? '#2B6CB0' : '#F5ECD8', color: vue === 'services' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Services disponibles</button>
         <button onClick={() => setVue('reservations')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'reservations' ? '#2B6CB0' : '#F5ECD8', color: vue === 'reservations' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Mes réservations</button>
+        <button onClick={() => { setVue('favoris'); chargerFavoris() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'favoris' ? '#2B6CB0' : '#F5ECD8', color: vue === 'favoris' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>❤️ Favoris</button>
         <button onClick={() => { setVue('messages'); chargerConversations() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'messages' ? '#2B6CB0' : '#F5ECD8', color: vue === 'messages' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
           💬 Messages
           {totalNonLus > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{totalNonLus}</span>}
@@ -430,6 +452,32 @@ const DashboardClient = () => {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {vue === 'favoris' && (
+          <div>
+            {favoris.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun favori pour le moment. Cliquez sur le ❤️ sur un profil prestataire pour l'ajouter !</p>}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+              {favoris.map(fav => (
+                <div key={fav.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h3 style={{ margin: '0 0 4px', color: '#1A365D', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {fav.users?.prenom} {fav.users?.nom}
+                      {fav.users?.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '1px 6px', borderRadius: '20px' }}>✅</span>}
+                    </h3>
+                    <button onClick={() => handleRetirerFavori(fav.prestataire_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>❤️</button>
+                  </div>
+                  {fav.users?.ville && <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 8px' }}>📍 {fav.users.ville} {fav.users.code_postal}</p>}
+                  {fav.services?.length > 0 && (
+                    <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '1rem' }}>
+                      {fav.services.map(s => s.categorie).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
+                    </p>
+                  )}
+                  <button onClick={() => navigate(`/prestataire/${fav.prestataire_id}`)} style={{ width: '100%', background: '#2B6CB0', color: 'white', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Voir le profil</button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

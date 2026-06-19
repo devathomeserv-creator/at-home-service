@@ -14,6 +14,7 @@ const messagesRoutes = require('./routes/messagesRoutes')
 const verificationRoutes = require('./routes/verificationRoutes')
 const carteRoutes = require('./routes/carteRoutes')
 const statsRoutes = require('./routes/statsRoutes')
+const favorisRoutes = require('./routes/favorisRoutes')
 
 const app = express()
 app.use(cors())
@@ -31,6 +32,7 @@ app.use('/api/messages', messagesRoutes)
 app.use('/api/verification', verificationRoutes)
 app.use('/api/carte', carteRoutes)
 app.use('/api/stats', statsRoutes)
+app.use('/api/favoris', favorisRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Serveur marketplace en ligne !' })

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getProfilPublicPrestataire } from '../services/api'
+import { getProfilPublicPrestataire, ajouterFavori, retirerFavori, verifierFavori } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
 const Logo = () => (
@@ -31,9 +31,14 @@ const ProfilPrestataire = () => {
   const { user } = useAuth()
   const [data, setData] = useState(null)
   const [chargement, setChargement] = useState(true)
+  const [estFavori, setEstFavori] = useState(false)
 
   useEffect(() => {
     chargerProfil()
+    if (user?.role === 'client') {
+      chargerFavori()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const chargerProfil = async () => {
@@ -44,6 +49,33 @@ const ProfilPrestataire = () => {
       console.error(err)
     } finally {
       setChargement(false)
+    }
+  }
+
+  const chargerFavori = async () => {
+    try {
+      const res = await verifierFavori(id)
+      setEstFavori(res.data.estFavori)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const toggleFavori = async () => {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+    try {
+      if (estFavori) {
+        await retirerFavori(id)
+        setEstFavori(false)
+      } else {
+        await ajouterFavori(id)
+        setEstFavori(true)
+      }
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -83,7 +115,12 @@ const ProfilPrestataire = () => {
 
       <div style={{ flex: 1, maxWidth: '800px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
 
-        <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', border: '1px solid #A07840', marginBottom: '1.5rem' }}>
+        <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', border: '1px solid #A07840', marginBottom: '1.5rem', position: 'relative' }}>
+          {(!user || user.role === 'client') && (
+            <button onClick={toggleFavori} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: estFavori ? '#C53030' : 'white', color: estFavori ? 'white' : '#C53030', border: '1.5px solid #C53030', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {estFavori ? '❤️' : '🤍'}
+            </button>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
             <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#2B6CB0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '28px', fontWeight: 'bold', flexShrink: 0 }}>
               {prestataire.photo_url
