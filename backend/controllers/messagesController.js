@@ -99,4 +99,49 @@ const getMessagesNonLus = async (req, res) => {
   }
 }
 
-module.exports = { envoyerMessage, getMessages, getMessagesNonLus }
+const getMesConversations = async (req, res) => {
+  try {
+    const user_id = req.user.id
+
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select('booking_id, created_at')
+      .or(`expediteur_id.eq.${user_id},destinataire_id.eq.${user_id}`)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    const bookingIds = [...new Set(messages.map(m => m.booking_id))]
+
+    if (bookingIds.length === 0) {
+      return res.json({ conversations: [] })
+    }
+
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('*, services(*), users(*)')
+      .in('id', bookingIds)
+
+    const { data: nonLusData } = await supabase
+      .from('messages')
+      .select('booking_id')
+      .eq('destinataire_id', user_id)
+      .eq('lu', false)
+
+    const nonLusParBooking = {}
+    nonLusData.forEach(m => {
+      nonLusParBooking[m.booking_id] = (nonLusParBooking[m.booking_id] || 0) + 1
+    })
+
+    const conversations = bookings.map(b => ({
+      ...b,
+      nonLus: nonLusParBooking[b.id] || 0
+    }))
+
+    res.json({ conversations })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+module.exports = { envoyerMessage, getMessages, getMessagesNonLus, getMesConversations }

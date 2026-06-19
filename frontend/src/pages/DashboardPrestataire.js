@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis } from '../services/api'
+import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
 
@@ -31,6 +31,7 @@ const DashboardPrestataire = () => {
   const navigate = useNavigate()
   const [services, setServices] = useState([])
   const [reservations, setReservations] = useState([])
+  const [conversations, setConversations] = useState([])
   const [avis, setAvis] = useState([])
   const [moyenneAvis, setMoyenneAvis] = useState(0)
   const [vue, setVue] = useState('reservations')
@@ -48,6 +49,7 @@ const DashboardPrestataire = () => {
     chargerServices()
     chargerReservations()
     chargerAvis()
+    chargerConversations()
   }, [])
 
   const chargerServices = async () => {
@@ -73,6 +75,15 @@ const DashboardPrestataire = () => {
       const res = await getMesAvis()
       setAvis(res.data.avis)
       setMoyenneAvis(res.data.moyenne)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const chargerConversations = async () => {
+    try {
+      const res = await getMesConversations()
+      setConversations(res.data.conversations)
     } catch (err) {
       console.error(err)
     }
@@ -110,10 +121,17 @@ const DashboardPrestataire = () => {
     setShowChat(true)
   }
 
+  const fermerChat = () => {
+    setShowChat(false)
+    chargerConversations()
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/')
   }
+
+  const totalNonLus = conversations.reduce((acc, c) => acc + c.nonLus, 0)
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
@@ -148,9 +166,10 @@ const DashboardPrestataire = () => {
       </nav>
 
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {['reservations', 'services', 'avis', 'ajouter'].map(v => (
-          <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>
-            {v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
+        {['reservations', 'services', 'messages', 'avis', 'ajouter'].map(v => (
+          <button key={v} onClick={() => { setVue(v); if (v === 'messages') chargerConversations() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
+            {v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'messages' ? '💬 Messages' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
+            {v === 'messages' && totalNonLus > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{totalNonLus}</span>}
           </button>
         ))}
       </div>
@@ -158,7 +177,7 @@ const DashboardPrestataire = () => {
       <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
-        {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={() => setShowChat(false)} />}
+        {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={fermerChat} />}
 
         {vue === 'reservations' && (
           <div>
@@ -200,6 +219,23 @@ const DashboardPrestataire = () => {
                 <h3 style={{ margin: '0.8rem 0 0.5rem', color: '#1A365D' }}>{service.titre}</h3>
                 <p style={{ color: '#3D2B0F', fontSize: '14px' }}>{service.description}</p>
                 <p style={{ fontWeight: 'bold', color: '#C53030', marginTop: '0.5rem' }}>{service.prix}€ — {service.duree} min</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {vue === 'messages' && (
+          <div>
+            {conversations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune conversation pour le moment. Vous recevrez vos messages clients ici !</p>}
+            {conversations.map(conv => (
+              <div key={conv.id} onClick={() => ouvrirChat(conv)} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 4px', color: '#1A365D' }}>{conv.users?.prenom} {conv.users?.nom}</h3>
+                  <p style={{ color: '#3D2B0F', fontSize: '13px', margin: 0 }}>{conv.services?.titre} — {new Date(conv.date_rdv).toLocaleDateString('fr-FR')}</p>
+                </div>
+                {conv.nonLus > 0 && (
+                  <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{conv.nonLus}</span>
+                )}
               </div>
             ))}
           </div>

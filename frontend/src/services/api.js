@@ -38,3 +38,4 @@ export const getCreneauxOccupes = (prestataire_id) => API.get(`/prestataire/${pr
 export const envoyerMessage = (data) => API.post('/messages', data)
 export const getMessages = (booking_id) => API.get(`/messages/${booking_id}`)
 export const getMessagesNonLus = () => API.get('/messages/non-lus')
+export const getMesConversations = () => API.get('/messages/conversations')

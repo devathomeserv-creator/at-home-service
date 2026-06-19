@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes } from '../services/api'
+import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -38,6 +38,7 @@ const DashboardClient = () => {
   const navigate = useNavigate()
   const [services, setServices] = useState([])
   const [reservations, setReservations] = useState([])
+  const [conversations, setConversations] = useState([])
   const [vue, setVue] = useState('services')
   const [categorie, setCategorie] = useState('')
   const [message, setMessage] = useState('')
@@ -64,6 +65,7 @@ const DashboardClient = () => {
   useEffect(() => {
     chargerServices()
     chargerReservations()
+    chargerConversations()
   }, [])
 
   useEffect(() => {
@@ -107,6 +109,15 @@ const DashboardClient = () => {
     try {
       const res = await mesReservationsClient()
       setReservations(res.data.reservations)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const chargerConversations = async () => {
+    try {
+      const res = await getMesConversations()
+      setConversations(res.data.conversations)
     } catch (err) {
       console.error(err)
     }
@@ -230,6 +241,11 @@ const DashboardClient = () => {
     setShowChat(true)
   }
 
+  const fermerChat = () => {
+    setShowChat(false)
+    chargerConversations()
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -246,6 +262,8 @@ const DashboardClient = () => {
     if (statut === 'termine') return { bg: '#EBF8FF', color: '#2B6CB0' }
     return { bg: '#fef3c7', color: '#92400e' }
   }
+
+  const totalNonLus = conversations.reduce((acc, c) => acc + c.nonLus, 0)
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
@@ -284,12 +302,16 @@ const DashboardClient = () => {
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <button onClick={() => setVue('services')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'services' ? '#2B6CB0' : '#F5ECD8', color: vue === 'services' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Services disponibles</button>
         <button onClick={() => setVue('reservations')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'reservations' ? '#2B6CB0' : '#F5ECD8', color: vue === 'reservations' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Mes réservations</button>
+        <button onClick={() => { setVue('messages'); chargerConversations() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'messages' ? '#2B6CB0' : '#F5ECD8', color: vue === 'messages' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
+          💬 Messages
+          {totalNonLus > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{totalNonLus}</span>}
+        </button>
       </div>
 
       <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
-        {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={() => setShowChat(false)} />}
+        {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={fermerChat} />}
 
         {showReservationModal && serviceSelectionne && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
@@ -395,24 +417,36 @@ const DashboardClient = () => {
                   <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                   <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
 
-                  {res.statut !== 'annule' && (
+                  {(res.statut === 'en_attente' || res.statut === 'confirme') && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                      {(res.statut === 'en_attente' || res.statut === 'confirme') && (
-                        <>
-                          <button onClick={() => ouvrirModifier(res)} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✏️ Modifier</button>
-                          <button onClick={() => handleAnnuler(res.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ Annuler</button>
-                        </>
-                      )}
-                      <button onClick={() => ouvrirChat(res)} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>💬 Message</button>
+                      <button onClick={() => ouvrirModifier(res)} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✏️ Modifier</button>
+                      <button onClick={() => handleAnnuler(res.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ Annuler</button>
                     </div>
                   )}
 
                   {res.statut === 'termine' && (
-                    <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '0.5rem', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
+                    <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '1rem', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
                   )}
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {vue === 'messages' && (
+          <div>
+            {conversations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune conversation pour le moment. Envoyez un message depuis une réservation !</p>}
+            {conversations.map(conv => (
+              <div key={conv.id} onClick={() => ouvrirChat(conv)} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 4px', color: '#1A365D' }}>{conv.users?.prenom} {conv.users?.nom}</h3>
+                  <p style={{ color: '#3D2B0F', fontSize: '13px', margin: 0 }}>{conv.services?.titre} — {new Date(conv.date_rdv).toLocaleDateString('fr-FR')}</p>
+                </div>
+                {conv.nonLus > 0 && (
+                  <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{conv.nonLus}</span>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
