@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto, modifierDisponibilites } from '../services/api'
+import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto, modifierDisponibilites, verifierSiret } from '../services/api'
 
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -27,6 +27,9 @@ const Profil = () => {
   const [joursTravail, setJoursTravail] = useState([])
   const [heureDebut, setHeureDebut] = useState('09:00')
   const [heureFin, setHeureFin] = useState('18:00')
+  const [siretInput, setSiretInput] = useState('')
+  const [verifie, setVerifie] = useState(false)
+  const [chargementSiret, setChargementSiret] = useState(false)
   const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '', code_postal: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
@@ -45,6 +48,8 @@ const Profil = () => {
       setJoursTravail(u.jours_travail || [])
       setHeureDebut(u.heure_debut || '09:00')
       setHeureFin(u.heure_fin || '18:00')
+      setVerifie(u.verifie || false)
+      setSiretInput(u.siret || '')
     } catch (err) {
       console.error(err)
     }
@@ -117,6 +122,22 @@ const Profil = () => {
     }
   }
 
+  const handleVerifierSiret = async (e) => {
+    e.preventDefault()
+    setMessage('')
+    setErreur('')
+    setChargementSiret(true)
+    try {
+      const res = await verifierSiret(siretInput.replace(/\s/g, ''))
+      setVerifie(true)
+      setMessage(`✅ ${res.data.message} (${res.data.entreprise})`)
+    } catch (err) {
+      setErreur(err.response?.data?.message || 'Erreur lors de la vérification')
+    } finally {
+      setChargementSiret(false)
+    }
+  }
+
   const handleSupprimer = async () => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) return
     try {
@@ -137,7 +158,7 @@ const Profil = () => {
   const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }
 
   const tabs = user?.role === 'prestataire'
-    ? ['infos', 'parametres', 'disponibilites', 'mot-de-passe', 'supprimer']
+    ? ['infos', 'verification', 'parametres', 'disponibilites', 'mot-de-passe', 'supprimer']
     : ['infos', 'mot-de-passe', 'supprimer']
 
   return (
@@ -157,7 +178,10 @@ const Profil = () => {
             {user?.prenom?.charAt(0)}{user?.nom?.charAt(0)}
           </div>
           <div>
-            <h2 style={{ color: '#1A365D', margin: 0, fontFamily: 'Georgia, serif' }}>{user?.prenom} {user?.nom}</h2>
+            <h2 style={{ color: '#1A365D', margin: 0, fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {user?.prenom} {user?.nom}
+              {user?.role === 'prestataire' && verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '11px', padding: '2px 8px', borderRadius: '20px' }}>✅ Vérifié</span>}
+            </h2>
             <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '4px 0 0' }}>{user?.email}</p>
             <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '2px 10px', borderRadius: '20px', fontSize: '11px', textTransform: 'capitalize' }}>{user?.role}</span>
           </div>
@@ -166,7 +190,7 @@ const Profil = () => {
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           {tabs.map(v => (
             <button key={v} onClick={() => setVue(v)} style={{ flex: '1 1 auto', padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', fontSize: '12px' }}>
-              {v === 'infos' ? 'Mes infos' : v === 'parametres' ? 'Paramètres' : v === 'disponibilites' ? 'Disponibilités' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
+              {v === 'infos' ? 'Mes infos' : v === 'verification' ? 'Vérification' : v === 'parametres' ? 'Paramètres' : v === 'disponibilites' ? 'Disponibilités' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
             </button>
           ))}
         </div>
@@ -192,6 +216,36 @@ const Profil = () => {
                 </>
               )}
               <button type="submit" style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Sauvegarder</button>
+            </form>
+          </div>
+        )}
+
+        {vue === 'verification' && user?.role === 'prestataire' && (
+          <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+            <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Vérification de votre entreprise</h3>
+
+            {verifie ? (
+              <div style={{ background: '#d1fae5', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
+                <p style={{ color: '#065f46', margin: 0, fontWeight: 'bold' }}>✅ Votre profil est vérifié !</p>
+                <p style={{ color: '#065f46', margin: '4px 0 0', fontSize: '13px' }}>SIRET : {siretInput}</p>
+              </div>
+            ) : (
+              <p style={{ color: '#3D2B0F', fontSize: '13px', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+                Entrez votre numéro SIRET (14 chiffres). Nous vérifions automatiquement auprès du registre officiel des entreprises françaises que votre activité est bien déclarée et active.
+              </p>
+            )}
+
+            <form onSubmit={handleVerifierSiret}>
+              <input
+                placeholder="Numéro SIRET (14 chiffres)"
+                value={siretInput}
+                onChange={(e) => setSiretInput(e.target.value)}
+                maxLength={14}
+                style={inputStyle}
+              />
+              <button type="submit" disabled={chargementSiret} style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>
+                {chargementSiret ? 'Vérification en cours...' : verifie ? 'Mettre à jour mon SIRET' : 'Vérifier mon SIRET'}
+              </button>
             </form>
           </div>
         )}

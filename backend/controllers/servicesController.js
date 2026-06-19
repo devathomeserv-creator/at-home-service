@@ -24,7 +24,7 @@ const obtenirServices = async (req, res) => {
 
     let query = supabase
       .from('services')
-      .select('*, users(id, nom, prenom, ville, code_postal)')
+      .select('*, users(id, nom, prenom, ville, code_postal, verifie)')
       .eq('disponible', true)
 
     if (categorie) {
