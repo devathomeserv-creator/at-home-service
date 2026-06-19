@@ -2,12 +2,12 @@ const supabase = require('../config/supabase')
 
 const creerService = async (req, res) => {
   try {
-    const { categorie, titre, description, prix, duree } = req.body
+    const { categorie, titre, description, prix, duree, photo_url } = req.body
     const prestataire_id = req.user.id
 
     const { data, error } = await supabase
       .from('services')
-      .insert([{ prestataire_id, categorie, titre, description, prix, duree }])
+      .insert([{ prestataire_id, categorie, titre, description, prix, duree, photo_url }])
       .select()
 
     if (error) throw error
@@ -71,11 +71,11 @@ const obtenirMonService = async (req, res) => {
 const modifierService = async (req, res) => {
   try {
     const { id } = req.params
-    const { titre, description, prix, duree, disponible } = req.body
+    const { categorie, titre, description, prix, duree, disponible, photo_url } = req.body
 
     const { data, error } = await supabase
       .from('services')
-      .update({ titre, description, prix, duree, disponible })
+      .update({ categorie, titre, description, prix, duree, disponible, photo_url })
       .eq('id', id)
       .eq('prestataire_id', req.user.id)
       .select()
@@ -88,4 +88,22 @@ const modifierService = async (req, res) => {
   }
 }
 
-module.exports = { creerService, obtenirServices, obtenirMonService, modifierService }
+const supprimerService = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const { error } = await supabase
+      .from('services')
+      .delete()
+      .eq('id', id)
+      .eq('prestataire_id', req.user.id)
+
+    if (error) throw error
+
+    res.json({ message: 'Service supprimé avec succès' })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+module.exports = { creerService, obtenirServices, obtenirMonService, modifierService, supprimerService }

@@ -170,7 +170,7 @@ const Accueil = () => {
           {servicesFiltres.map(service => (
             <div key={service.id} className="service-card" style={{ background: '#F5ECD8', borderRadius: '12px', border: '1px solid #A07840', display: 'flex', overflow: 'hidden' }}>
               <div className="service-image" style={{ width: '180px', height: '160px', flexShrink: 0, overflow: 'hidden' }}>
-                <img src={imagesParCategorie[service.categorie] || imagesParCategorie.coiffure} alt={service.categorie} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={service.photo_url || imagesParCategorie[service.categorie] || imagesParCategorie.coiffure} alt={service.categorie} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>

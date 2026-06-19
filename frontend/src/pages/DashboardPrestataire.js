@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire } from '../services/api'
+import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
 
@@ -40,8 +40,13 @@ const DashboardPrestataire = () => {
   const [menuOuvert, setMenuOuvert] = useState(false)
   const [showChat, setShowChat] = useState(false)
   const [bookingChat, setBookingChat] = useState(null)
+  const [showModifierService, setShowModifierService] = useState(false)
+  const [serviceAModifier, setServiceAModifier] = useState(null)
   const [form, setForm] = useState({
-    categorie: 'coiffure', titre: '', description: '', prix: '', duree: ''
+    categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: ''
+  })
+  const [formModif, setFormModif] = useState({
+    categorie: '', titre: '', description: '', prix: '', duree: '', photo_url: ''
   })
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
@@ -109,11 +114,51 @@ const DashboardPrestataire = () => {
     try {
       await creerService({ ...form, prix: parseFloat(form.prix), duree: parseInt(form.duree) })
       setMessage('Service créé avec succès !')
-      setForm({ categorie: 'coiffure', titre: '', description: '', prix: '', duree: '' })
+      setForm({ categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: '' })
       chargerServices()
       setVue('services')
     } catch (err) {
       setMessage('Erreur lors de la création')
+    }
+  }
+
+  const ouvrirModifierService = (service) => {
+    setServiceAModifier(service)
+    setFormModif({
+      categorie: service.categorie,
+      titre: service.titre,
+      description: service.description || '',
+      prix: service.prix,
+      duree: service.duree,
+      photo_url: service.photo_url || ''
+    })
+    setShowModifierService(true)
+  }
+
+  const handleModifChange = (e) => {
+    setFormModif({ ...formModif, [e.target.name]: e.target.value })
+  }
+
+  const handleModifierService = async (e) => {
+    e.preventDefault()
+    try {
+      await modifierService(serviceAModifier.id, { ...formModif, prix: parseFloat(formModif.prix), duree: parseInt(formModif.duree) })
+      setMessage('Service modifié avec succès !')
+      setShowModifierService(false)
+      chargerServices()
+    } catch (err) {
+      setMessage('Erreur lors de la modification')
+    }
+  }
+
+  const handleSupprimerService = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) return
+    try {
+      await supprimerService(id)
+      setMessage('Service supprimé avec succès')
+      chargerServices()
+    } catch (err) {
+      setMessage('Erreur lors de la suppression')
     }
   }
 
@@ -144,6 +189,8 @@ const DashboardPrestataire = () => {
   }
 
   const totalNonLus = conversations.reduce((acc, c) => acc + c.nonLus, 0)
+
+  const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
@@ -191,6 +238,29 @@ const DashboardPrestataire = () => {
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
         {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={fermerChat} />}
+
+        {showModifierService && serviceAModifier && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: '1px solid #A07840', maxHeight: '90vh', overflowY: 'auto' }}>
+              <h3 style={{ color: '#1A365D', marginBottom: '1.5rem' }}>Modifier le service</h3>
+              <form onSubmit={handleModifierService}>
+                <select name="categorie" value={formModif.categorie} onChange={handleModifChange} style={inputStyle}>
+                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+                <input name="titre" placeholder="Titre du service" value={formModif.titre} onChange={handleModifChange} required style={inputStyle} />
+                <textarea name="description" placeholder="Description" value={formModif.description} onChange={handleModifChange} rows={3} style={inputStyle} />
+                <input name="prix" type="number" placeholder="Prix en euros" value={formModif.prix} onChange={handleModifChange} required style={inputStyle} />
+                <input name="duree" type="number" placeholder="Durée en minutes" value={formModif.duree} onChange={handleModifChange} required style={inputStyle} />
+                <input name="photo_url" placeholder="URL de la photo (optionnel)" value={formModif.photo_url} onChange={handleModifChange} style={inputStyle} />
+                <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '12px' }}>Si vide, une photo par défaut selon la catégorie sera utilisée.</p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="submit" style={{ flex: 1, padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Sauvegarder</button>
+                  <button type="button" onClick={() => setShowModifierService(false)} style={{ background: 'white', color: '#1A365D', border: '1px solid #A07840', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {vue === 'stats' && stats && (
           <div>
@@ -274,6 +344,10 @@ const DashboardPrestataire = () => {
                 <h3 style={{ margin: '0.8rem 0 0.5rem', color: '#1A365D' }}>{service.titre}</h3>
                 <p style={{ color: '#3D2B0F', fontSize: '14px' }}>{service.description}</p>
                 <p style={{ fontWeight: 'bold', color: '#C53030', marginTop: '0.5rem' }}>{service.prix}€ — {service.duree} min</p>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
+                  <button onClick={() => ouvrirModifierService(service)} style={{ flex: 1, background: '#2B6CB0', color: 'white', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✏️ Modifier</button>
+                  <button onClick={() => handleSupprimerService(service.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>🗑️</button>
+                </div>
               </div>
             ))}
           </div>
@@ -326,13 +400,15 @@ const DashboardPrestataire = () => {
           <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '2rem', border: '1px solid #A07840', maxWidth: '500px', margin: '0 auto' }}>
             <h3 style={{ marginTop: 0, color: '#1A365D', marginBottom: '1.5rem' }}>Ajouter un nouveau service</h3>
             <form onSubmit={handleCreerService}>
-              <select name="categorie" value={form.categorie} onChange={handleChange} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px' }}>
+              <select name="categorie" value={form.categorie} onChange={handleChange} style={inputStyle}>
                 {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
-              <input name="titre" placeholder="Titre du service" value={form.titre} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px' }} />
-              <textarea name="description" placeholder="Description" value={form.description} onChange={handleChange} rows={3} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', fontFamily: 'Georgia, serif' }} />
-              <input name="prix" type="number" placeholder="Prix en euros" value={form.prix} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px' }} />
-              <input name="duree" type="number" placeholder="Durée en minutes" value={form.duree} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px' }} />
+              <input name="titre" placeholder="Titre du service" value={form.titre} onChange={handleChange} required style={inputStyle} />
+              <textarea name="description" placeholder="Description" value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
+              <input name="prix" type="number" placeholder="Prix en euros" value={form.prix} onChange={handleChange} required style={inputStyle} />
+              <input name="duree" type="number" placeholder="Durée en minutes" value={form.duree} onChange={handleChange} required style={inputStyle} />
+              <input name="photo_url" placeholder="URL de la photo (optionnel)" value={form.photo_url} onChange={handleChange} style={inputStyle} />
+              <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '12px' }}>Si vide, une photo par défaut selon la catégorie sera utilisée.</p>
               <button type="submit" style={{ width: '100%', padding: '12px', background: '#C53030', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontFamily: 'Georgia, serif' }}>Créer le service</button>
             </form>
           </div>
