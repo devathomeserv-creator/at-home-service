@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getServices } from '../services/api'
 
+const imagesParCategorie = {
+  coiffure: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop',
+  barber: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop',
+  esthetique: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop',
+  massage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&h=200&fit=crop',
+  plomberie: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=300&h=200&fit=crop',
+  electricite: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=200&fit=crop',
+  maconnerie: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop',
+  renovation: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop',
+  'coach sportif': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
+  photographe: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=300&h=200&fit=crop'
+}
+
 const Accueil = () => {
   const navigate = useNavigate()
   const [services, setServices] = useState([])
@@ -12,16 +25,16 @@ const Accueil = () => {
   const [menuOuvert, setMenuOuvert] = useState(false)
 
   const categories = [
-    { nom: 'coiffure', image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop' },
-    { nom: 'barber', image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop' },
-    { nom: 'esthetique', image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop' },
-    { nom: 'massage', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&h=200&fit=crop' },
-    { nom: 'plomberie', image: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=300&h=200&fit=crop' },
-    { nom: 'electricite', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=200&fit=crop' },
-    { nom: 'maconnerie', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop' },
-    { nom: 'renovation', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop' },
-    { nom: 'coach sportif', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop' },
-    { nom: 'photographe', image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=300&h=200&fit=crop' }
+    { nom: 'coiffure', image: imagesParCategorie.coiffure },
+    { nom: 'barber', image: imagesParCategorie.barber },
+    { nom: 'esthetique', image: imagesParCategorie.esthetique },
+    { nom: 'massage', image: imagesParCategorie.massage },
+    { nom: 'plomberie', image: imagesParCategorie.plomberie },
+    { nom: 'electricite', image: imagesParCategorie.electricite },
+    { nom: 'maconnerie', image: imagesParCategorie.maconnerie },
+    { nom: 'renovation', image: imagesParCategorie.renovation },
+    { nom: 'coach sportif', image: imagesParCategorie['coach sportif'] },
+    { nom: 'photographe', image: imagesParCategorie.photographe }
   ]
 
   useEffect(() => {
@@ -105,6 +118,8 @@ const Accueil = () => {
           .hero-title { font-size: 22px !important; }
           .search-box { flex-direction: column !important; }
           .footer-grid { flex-direction: column !important; }
+          .service-card { flex-direction: column !important; }
+          .service-image { width: 100% !important; height: 160px !important; }
         }
       `}</style>
 
@@ -142,7 +157,7 @@ const Accueil = () => {
         </div>
       </div>
 
-      <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
+      <div style={{ flex: 1, maxWidth: '900px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         <h2 style={{ color: '#1A365D', marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>
           {servicesFiltres.length} service{servicesFiltres.length > 1 ? 's' : ''} disponible{servicesFiltres.length > 1 ? 's' : ''}
         </h2>
@@ -151,26 +166,31 @@ const Accueil = () => {
             <p style={{ fontSize: '18px' }}>Aucun service trouvé</p>
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {servicesFiltres.map(service => (
-            <div key={service.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
-                <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
-                {service.users && (
-                  <span onClick={() => navigate(`/prestataire/${service.users.id}`)} style={{ fontSize: '12px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    {service.users.prenom} {service.users.nom} {service.users.ville && `· ${service.users.ville}`}
-                    {service.users.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '1px 6px', borderRadius: '20px', textDecoration: 'none' }}>✅</span>}
-                  </span>
-                )}
+            <div key={service.id} className="service-card" style={{ background: '#F5ECD8', borderRadius: '12px', border: '1px solid #A07840', display: 'flex', overflow: 'hidden' }}>
+              <div className="service-image" style={{ width: '180px', height: '160px', flexShrink: 0, overflow: 'hidden' }}>
+                <img src={imagesParCategorie[service.categorie] || imagesParCategorie.coiffure} alt={service.categorie} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-              <h3 style={{ margin: '0.5rem 0', color: '#1A365D', fontFamily: 'Georgia, serif' }}>{service.titre}</h3>
-              <p style={{ color: '#3D2B0F', fontSize: '14px', marginBottom: '1rem' }}>{service.description}</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <div>
-                  <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#C53030' }}>{service.prix}€</span>
-                  <span style={{ color: '#3D2B0F', fontSize: '13px', marginLeft: '6px' }}>{service.duree} min</span>
+                  {service.users && (
+                    <p onClick={() => navigate(`/prestataire/${service.users.id}`)} style={{ margin: '0 0 6px', fontSize: '13px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
+                      👤 {service.users.prenom} {service.users.nom} {service.users.ville && `· ${service.users.ville}`}
+                      {service.users.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '1px 6px', borderRadius: '20px', textDecoration: 'none' }}>✅</span>}
+                    </p>
+                  )}
+                  <h3 style={{ margin: '0 0 4px', color: '#1A365D', fontFamily: 'Georgia, serif', fontSize: '18px' }}>{service.titre}</h3>
+                  <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', textTransform: 'capitalize' }}>{service.categorie}</span>
+                  <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '8px 0 0' }}>{service.description}</p>
                 </div>
-                <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Réserver</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                  <div>
+                    <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#C53030' }}>{service.prix}€</span>
+                    <span style={{ color: '#3D2B0F', fontSize: '13px', marginLeft: '6px' }}>{service.duree} min</span>
+                  </div>
+                  <button onClick={() => navigate('/auth')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Réserver</button>
+                </div>
               </div>
             </div>
           ))}
