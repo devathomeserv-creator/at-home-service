@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
 import fr from 'date-fns/locale/fr'
+import ChatModal from '../components/ChatModal'
 registerLocale('fr', fr)
 
 const Logo = () => (
@@ -44,6 +45,8 @@ const DashboardClient = () => {
   const [showAvisForm, setShowAvisForm] = useState(false)
   const [showReservationModal, setShowReservationModal] = useState(false)
   const [showModifierModal, setShowModifierModal] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [bookingChat, setBookingChat] = useState(null)
   const [serviceSelectionne, setServiceSelectionne] = useState(null)
   const [reservationSelectionnee, setReservationSelectionnee] = useState(null)
   const [dateSelectionnee, setDateSelectionnee] = useState(null)
@@ -222,6 +225,11 @@ const DashboardClient = () => {
     }
   }
 
+  const ouvrirChat = (reservation) => {
+    setBookingChat(reservation)
+    setShowChat(true)
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -280,6 +288,8 @@ const DashboardClient = () => {
 
       <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
+
+        {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={() => setShowChat(false)} />}
 
         {showReservationModal && serviceSelectionne && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
@@ -385,15 +395,20 @@ const DashboardClient = () => {
                   <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                   <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
 
-                  {(res.statut === 'en_attente' || res.statut === 'confirme') && (
+                  {res.statut !== 'annule' && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                      <button onClick={() => ouvrirModifier(res)} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✏️ Modifier</button>
-                      <button onClick={() => handleAnnuler(res.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ Annuler</button>
+                      {(res.statut === 'en_attente' || res.statut === 'confirme') && (
+                        <>
+                          <button onClick={() => ouvrirModifier(res)} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✏️ Modifier</button>
+                          <button onClick={() => handleAnnuler(res.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ Annuler</button>
+                        </>
+                      )}
+                      <button onClick={() => ouvrirChat(res)} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>💬 Message</button>
                     </div>
                   )}
 
                   {res.statut === 'termine' && (
-                    <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '1rem', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
+                    <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '0.5rem', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
                   )}
                 </div>
               )

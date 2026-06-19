@@ -35,3 +35,6 @@ export const modifierConfirmationAuto = (confirmation_auto) => API.put('/profil/
 export const modifierDisponibilites = (data) => API.put('/profil/disponibilites', data)
 export const getProfilPublicPrestataire = (id) => API.get(`/prestataire/${id}`)
 export const getCreneauxOccupes = (prestataire_id) => API.get(`/prestataire/${prestataire_id}/creneaux-occupes`)
+export const envoyerMessage = (data) => API.post('/messages', data)
+export const getMessages = (booking_id) => API.get(`/messages/${booking_id}`)
+export const getMessagesNonLus = () => API.get('/messages/non-lus')

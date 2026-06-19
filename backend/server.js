@@ -10,6 +10,7 @@ const reviewsRoutes = require('./routes/reviewsRoutes')
 const stripeRoutes = require('./routes/stripeRoutes')
 const profilRoutes = require('./routes/profilRoutes')
 const profilPublicRoutes = require('./routes/profilPublicRoutes')
+const messagesRoutes = require('./routes/messagesRoutes')
 
 const app = express()
 app.use(cors())
@@ -23,6 +24,7 @@ app.use('/api/reviews', reviewsRoutes)
 app.use('/api/stripe', stripeRoutes)
 app.use('/api/profil', profilRoutes)
 app.use('/api/prestataire', profilPublicRoutes)
+app.use('/api/messages', messagesRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Serveur marketplace en ligne !' })

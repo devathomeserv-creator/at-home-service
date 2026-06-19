@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis } from '../services/api'
 import { useNavigate } from 'react-router-dom'
+import ChatModal from '../components/ChatModal'
 
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -35,6 +36,8 @@ const DashboardPrestataire = () => {
   const [vue, setVue] = useState('reservations')
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [bookingChat, setBookingChat] = useState(null)
   const [form, setForm] = useState({
     categorie: 'coiffure', titre: '', description: '', prix: '', duree: ''
   })
@@ -102,6 +105,11 @@ const DashboardPrestataire = () => {
     }
   }
 
+  const ouvrirChat = (reservation) => {
+    setBookingChat(reservation)
+    setShowChat(true)
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -150,6 +158,8 @@ const DashboardPrestataire = () => {
       <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
+        {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={() => setShowChat(false)} />}
+
         {vue === 'reservations' && (
           <div>
             {reservations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune réservation pour le moment.</p>}
@@ -162,15 +172,20 @@ const DashboardPrestataire = () => {
                 <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Client : {res.users?.prenom} {res.users?.nom}</p>
                 <p style={{ color: '#3D2B0F' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                 <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
-                {res.statut === 'en_attente' && (
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                    <button onClick={() => changerStatut(res.id, 'confirme')} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Confirmer</button>
-                    <button onClick={() => changerStatut(res.id, 'annule')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
-                  </div>
-                )}
-                {res.statut === 'confirme' && (
-                  <button onClick={() => changerStatut(res.id, 'termine')} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '1rem', fontFamily: 'Georgia, serif' }}>Marquer terminé</button>
-                )}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
+                  {res.statut === 'en_attente' && (
+                    <>
+                      <button onClick={() => changerStatut(res.id, 'confirme')} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Confirmer</button>
+                      <button onClick={() => changerStatut(res.id, 'annule')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+                    </>
+                  )}
+                  {res.statut === 'confirme' && (
+                    <button onClick={() => changerStatut(res.id, 'termine')} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Marquer terminé</button>
+                  )}
+                  {res.statut !== 'annule' && (
+                    <button onClick={() => ouvrirChat(res)} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>💬 Message</button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
