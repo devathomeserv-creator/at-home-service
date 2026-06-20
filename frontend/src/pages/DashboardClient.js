@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getServices, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori } from '../services/api'
+import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -8,6 +8,19 @@ import { registerLocale } from 'react-datepicker'
 import fr from 'date-fns/locale/fr'
 import ChatModal from '../components/ChatModal'
 registerLocale('fr', fr)
+
+const imagesParCategorie = {
+  coiffure: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop',
+  barber: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop',
+  esthetique: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop',
+  massage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&h=200&fit=crop',
+  plomberie: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=300&h=200&fit=crop',
+  electricite: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=200&fit=crop',
+  maconnerie: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop',
+  renovation: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop',
+  'coach sportif': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
+  photographe: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=300&h=200&fit=crop'
+}
 
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -31,17 +44,26 @@ const Etoiles = ({ note, onSelect }) => (
   </div>
 )
 
+const EtoilesPetit = ({ note }) => (
+  <div style={{ display: 'flex', gap: '2px' }}>
+    {[1, 2, 3, 4, 5].map(i => (
+      <span key={i} style={{ fontSize: '14px', color: i <= Math.round(note) ? '#F6AD55' : '#CBD5E0' }}>★</span>
+    ))}
+  </div>
+)
+
 const joursMap = { 0: 'dimanche', 1: 'lundi', 2: 'mardi', 3: 'mercredi', 4: 'jeudi', 5: 'vendredi', 6: 'samedi' }
 
 const DashboardClient = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [services, setServices] = useState([])
+  const [prestataires, setPrestataires] = useState([])
   const [reservations, setReservations] = useState([])
   const [conversations, setConversations] = useState([])
   const [favoris, setFavoris] = useState([])
   const [vue, setVue] = useState('services')
   const [categorie, setCategorie] = useState('')
+  const [recherche, setRecherche] = useState('')
   const [message, setMessage] = useState('')
   const [avisForm, setAvisForm] = useState({ booking_id: null, service_id: null, note: 5, commentaire: '' })
   const [showAvisForm, setShowAvisForm] = useState(false)
@@ -64,11 +86,12 @@ const DashboardClient = () => {
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
 
   useEffect(() => {
-    chargerServices()
+    chargerPrestataires()
     chargerReservations()
     chargerConversations()
     chargerFavoris()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categorie])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -98,10 +121,10 @@ const DashboardClient = () => {
     }
   }, [])
 
-  const chargerServices = async (cat) => {
+  const chargerPrestataires = async () => {
     try {
-      const res = await getServices(cat)
-      setServices(res.data.services)
+      const res = await getPrestatairesListe(categorie)
+      setPrestataires(res.data.prestataires)
     } catch (err) {
       console.error(err)
     }
@@ -144,20 +167,19 @@ const DashboardClient = () => {
     }
   }
 
-  const ouvrirReservation = async (service) => {
-    setServiceSelectionne(service)
+  const ouvrirReservation = async (service, prestataire) => {
+    setServiceSelectionne({ ...service, prestataire_id: prestataire.id })
     setDateSelectionnee(null)
     setAdresse('')
     setShowReservationModal(true)
 
     try {
-      const prestataireId = service.users?.id || service.prestataire_id
-      const resProfil = await getProfilPublicPrestataire(prestataireId)
+      const resProfil = await getProfilPublicPrestataire(prestataire.id)
       setJoursTravail(resProfil.data.prestataire.jours_travail || [])
       setHeureDebut(resProfil.data.prestataire.heure_debut || '09:00')
       setHeureFin(resProfil.data.prestataire.heure_fin || '18:00')
 
-      const resCreneaux = await getCreneauxOccupes(prestataireId)
+      const resCreneaux = await getCreneauxOccupes(prestataire.id)
       setCreneauxOccupes(resCreneaux.data.creneauxOccupes || [])
     } catch (err) {
       console.error(err)
@@ -273,8 +295,7 @@ const DashboardClient = () => {
   }
 
   const filtrerCategorie = (cat) => {
-    setCategorie(cat)
-    chargerServices(cat)
+    setCategorie(categorie === cat ? '' : cat)
   }
 
   const statutColor = (statut) => {
@@ -286,6 +307,13 @@ const DashboardClient = () => {
 
   const totalNonLus = conversations.reduce((acc, c) => acc + c.nonLus, 0)
 
+  const prestatairesFiltres = recherche
+    ? prestataires.filter(p =>
+        `${p.prenom} ${p.nom}`.toLowerCase().includes(recherche.toLowerCase()) ||
+        p.services.some(s => s.titre.toLowerCase().includes(recherche.toLowerCase()))
+      )
+    : prestataires
+
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
       <style>{`
@@ -296,6 +324,8 @@ const DashboardClient = () => {
           .tabs button { flex: 1 !important; font-size: 12px !important; padding: 8px !important; }
           .cats { gap: 6px !important; }
           .cats button { padding: 4px 10px !important; font-size: 11px !important; }
+          .presta-card { flex-direction: column !important; }
+          .presta-image { width: 100% !important; height: 160px !important; }
         }
       `}</style>
 
@@ -330,7 +360,7 @@ const DashboardClient = () => {
         </button>
       </div>
 
-      <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
+      <div style={{ flex: 1, maxWidth: '900px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
 
         {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={fermerChat} />}
@@ -399,36 +429,51 @@ const DashboardClient = () => {
 
         {vue === 'services' && (
           <>
+            <input placeholder="Rechercher un prestataire ou un service..." value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ width: '100%', padding: '10px 14px', marginBottom: '1rem', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }} />
             <div className="cats" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
               <button onClick={() => filtrerCategorie('')} style={{ padding: '6px 16px', borderRadius: '20px', border: '1.5px solid #90CDF4', cursor: 'pointer', background: categorie === '' ? '#2B6CB0' : '#F5ECD8', color: categorie === '' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Tous</button>
               {categories.map(cat => (
                 <button key={cat} onClick={() => filtrerCategorie(cat)} style={{ padding: '6px 16px', borderRadius: '20px', border: '1.5px solid #90CDF4', cursor: 'pointer', background: categorie === cat ? '#2B6CB0' : '#F5ECD8', color: categorie === cat ? 'white' : '#1A365D', textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat}</button>
               ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
-              {services.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun service disponible pour le moment.</p>}
-              {services.map(service => (
-                <div key={service.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
-                    {service.users && (
-                      <span onClick={() => navigate(`/prestataire/${service.users.id}`)} style={{ fontSize: '13px', color: '#2B6CB0', cursor: 'pointer', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
-                        👤 {service.users.prenom} {service.users.nom} {service.users.ville && `· ${service.users.ville}`}
-                        {service.users.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '1px 6px', borderRadius: '20px', textDecoration: 'none' }}>✅</span>}
-                      </span>
-                    )}
-                    <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', textTransform: 'capitalize' }}>{service.categorie}</span>
-                  </div>
-                  <h3 style={{ margin: '0.5rem 0', color: '#1A365D' }}>{service.titre}</h3>
-                  <p style={{ color: '#3D2B0F', fontSize: '14px', marginBottom: '1rem' }}>{service.description}</p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#C53030' }}>{service.prix}€</span>
-                      <span style={{ color: '#3D2B0F', fontSize: '13px', marginLeft: '6px' }}>{service.duree} min</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {prestatairesFiltres.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun prestataire trouvé.</p>}
+              {prestatairesFiltres.map(p => {
+                const categoriePrincipale = p.services[0]?.categorie || 'coiffure'
+                const prixMin = Math.min(...p.services.map(s => s.prix))
+                return (
+                  <div key={p.id} className="presta-card" style={{ background: '#F5ECD8', borderRadius: '12px', border: '1px solid #A07840', display: 'flex', overflow: 'hidden' }}>
+                    <div className="presta-image" onClick={() => navigate(`/prestataire/${p.id}`)} style={{ width: '180px', height: '160px', flexShrink: 0, overflow: 'hidden', cursor: 'pointer' }}>
+                      {p.photo_url
+                        ? <img src={p.photo_url} alt={p.prenom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <img src={imagesParCategorie[categoriePrincipale] || imagesParCategorie.coiffure} alt={categoriePrincipale} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      }
                     </div>
-                    <button onClick={() => ouvrirReservation(service)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Réserver</button>
+                    <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <h3 onClick={() => navigate(`/prestataire/${p.id}`)} style={{ margin: '0 0 4px', color: '#1A365D', fontFamily: 'Georgia, serif', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', cursor: 'pointer' }}>
+                          {p.prenom} {p.nom}
+                          {p.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>✅ Vérifié</span>}
+                        </h3>
+                        {(p.ville || p.code_postal) && <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 6px' }}>📍 {p.ville} {p.code_postal}</p>}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                          <EtoilesPetit note={p.moyenne} />
+                          <span style={{ color: '#3D2B0F', fontSize: '12px' }}>{p.moyenne} ({p.totalAvis} avis)</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {p.services.map(s => (
+                            <span key={s.titre} style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '2px 8px', borderRadius: '20px', fontSize: '11px' }}>{s.titre} — {s.prix}€</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                        <span style={{ color: '#3D2B0F', fontSize: '13px' }}>À partir de <strong style={{ color: '#C53030', fontSize: '16px' }}>{prixMin}€</strong></span>
+                        <button onClick={() => ouvrirReservation(p.services[0], p)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Réserver</button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </>
         )}
