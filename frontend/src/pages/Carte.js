@@ -12,10 +12,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 })
 
+const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
+
 const Carte = () => {
   const navigate = useNavigate()
   const [prestataires, setPrestataires] = useState([])
   const [chargement, setChargement] = useState(true)
+  const [recherche, setRecherche] = useState('')
+  const [categorie, setCategorie] = useState('')
 
   useEffect(() => {
     chargerPrestataires()
@@ -32,10 +36,28 @@ const Carte = () => {
     }
   }
 
+  const filtrerCategorie = (cat) => {
+    setCategorie(categorie === cat ? '' : cat)
+  }
+
+  const prestatairesFiltres = prestataires.filter(p => {
+    const correspondCategorie = !categorie || p.services.some(s => s.categorie === categorie)
+    const correspondRecherche = !recherche ||
+      `${p.prenom} ${p.nom}`.toLowerCase().includes(recherche.toLowerCase()) ||
+      p.services.some(s => s.titre.toLowerCase().includes(recherche.toLowerCase()))
+    return correspondCategorie && correspondRecherche
+  })
+
   const centreCarte = [46.603354, 1.888334]
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        @media (max-width: 600px) {
+          .filtres-carte { gap: 6px !important; }
+          .filtres-carte button { padding: 4px 10px !important; font-size: 11px !important; }
+        }
+      `}</style>
       <nav style={{ background: '#2B6CB0', padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '36px', height: '36px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -49,8 +71,22 @@ const Carte = () => {
       </nav>
 
       <div style={{ padding: '1rem 1.5rem', background: '#B8926A' }}>
-        <h1 style={{ color: '#1A365D', fontSize: '20px', margin: 0, fontFamily: 'Georgia, serif' }}>🗺️ Trouvez un prestataire près de chez vous</h1>
-        <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '4px 0 0' }}>{prestataires.length} prestataire{prestataires.length > 1 ? 's' : ''} localisé{prestataires.length > 1 ? 's' : ''}</p>
+        <h1 style={{ color: '#1A365D', fontSize: '20px', margin: '0 0 8px', fontFamily: 'Georgia, serif' }}>🗺️ Trouvez un prestataire près de chez vous</h1>
+        <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 12px' }}>{prestatairesFiltres.length} prestataire{prestatairesFiltres.length > 1 ? 's' : ''} localisé{prestatairesFiltres.length > 1 ? 's' : ''}</p>
+
+        <input
+          placeholder="Rechercher un prestataire ou un service..."
+          value={recherche}
+          onChange={(e) => setRecherche(e.target.value)}
+          style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif', maxWidth: '500px' }}
+        />
+
+        <div className="filtres-carte" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button onClick={() => filtrerCategorie('')} style={{ padding: '6px 16px', borderRadius: '20px', border: '1.5px solid #90CDF4', cursor: 'pointer', background: categorie === '' ? '#2B6CB0' : '#F5ECD8', color: categorie === '' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Tous</button>
+          {categories.map(cat => (
+            <button key={cat} onClick={() => filtrerCategorie(cat)} style={{ padding: '6px 16px', borderRadius: '20px', border: '1.5px solid #90CDF4', cursor: 'pointer', background: categorie === cat ? '#2B6CB0' : '#F5ECD8', color: categorie === cat ? 'white' : '#1A365D', textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat}</button>
+          ))}
+        </div>
       </div>
 
       <div style={{ flex: 1, minHeight: '500px' }}>
@@ -65,7 +101,7 @@ const Carte = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {prestataires.map(p => (
+            {prestatairesFiltres.map(p => (
               <Marker key={p.id} position={[p.latitude, p.longitude]}>
                 <Popup>
                   <div style={{ fontFamily: 'Georgia, serif', minWidth: '180px' }}>
