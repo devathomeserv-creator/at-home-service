@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase')
+const { envoyerEmailNouveauMessage } = require('../config/email')
 
 const envoyerMessage = async (req, res) => {
   try {
@@ -30,6 +31,25 @@ const envoyerMessage = async (req, res) => {
       .select()
 
     if (error) throw error
+
+    const { data: expediteur } = await supabase
+      .from('users')
+      .select('prenom, nom')
+      .eq('id', expediteur_id)
+      .single()
+
+    const { data: destinataire } = await supabase
+      .from('users')
+      .select('email')
+      .eq('id', destinataire_id)
+      .single()
+
+    if (destinataire?.email) {
+      await envoyerEmailNouveauMessage(destinataire.email, {
+        expediteurNom: `${expediteur.prenom} ${expediteur.nom}`,
+        contenu
+      })
+    }
 
     res.status(201).json({ message: 'Message envoyé', data: data[0] })
   } catch (error) {

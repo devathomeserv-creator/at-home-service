@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase')
+const { envoyerEmailNouvelAvis } = require('../config/email')
 
 const laisserAvis = async (req, res) => {
   try {
@@ -33,6 +34,27 @@ const laisserAvis = async (req, res) => {
       .select()
 
     if (error) throw error
+
+    const { data: service } = await supabase
+      .from('services')
+      .select('titre, users(email)')
+      .eq('id', service_id)
+      .single()
+
+    const { data: client } = await supabase
+      .from('users')
+      .select('prenom, nom')
+      .eq('id', client_id)
+      .single()
+
+    if (service?.users?.email) {
+      await envoyerEmailNouvelAvis(service.users.email, {
+        clientNom: `${client.prenom} ${client.nom}`,
+        service: service.titre,
+        note,
+        commentaire
+      })
+    }
 
     res.status(201).json({ message: 'Avis publié avec succès !', avis: data[0] })
   } catch (error) {
