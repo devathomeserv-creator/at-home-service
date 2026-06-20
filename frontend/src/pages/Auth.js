@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { inscription, connexion } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
 const Auth = () => {
-  const [mode, setMode] = useState('connexion')
+  const [searchParams] = useSearchParams()
+  const codeParrainUrl = searchParams.get('parrain') || ''
+  const [mode, setMode] = useState(codeParrainUrl ? 'inscription' : 'connexion')
   const [form, setForm] = useState({
-    nom: '', prenom: '', email: '', mot_de_passe: '', role: 'client', telephone: ''
+    nom: '', prenom: '', email: '', mot_de_passe: '', role: 'client', telephone: '', code_parrain: codeParrainUrl
   })
   const [erreur, setErreur] = useState('')
   const [chargement, setChargement] = useState(false)
@@ -74,6 +76,12 @@ const Auth = () => {
         </div>
       </div>
 
+      {codeParrainUrl && (
+        <div style={{ background: '#d1fae5', color: '#065f46', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', fontSize: '13px', maxWidth: '420px', textAlign: 'center' }}>
+          🎉 Vous avez été parrainé ! Code : <strong>{codeParrainUrl}</strong>
+        </div>
+      )}
+
       <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #A07840' }}>
         <p style={{ textAlign: 'center', color: '#3D2B0F', fontSize: '14px', fontStyle: 'italic', marginBottom: '1.5rem', lineHeight: 1.6 }}>
           Plus besoin de chercher, un clic et trouvez votre artisan à domicile
@@ -94,6 +102,7 @@ const Auth = () => {
                 <option value="client">Je suis un client</option>
                 <option value="prestataire">Je suis un prestataire</option>
               </select>
+              <input name="code_parrain" placeholder="Code de parrainage (optionnel)" value={form.code_parrain} onChange={handleChange} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />
             </>
           )}
           <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />

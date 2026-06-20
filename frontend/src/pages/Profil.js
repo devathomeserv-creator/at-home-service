@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto, modifierDisponibilites, verifierSiret } from '../services/api'
+import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto, modifierDisponibilites, verifierSiret, getMonParrainage } from '../services/api'
 
 const Logo = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -30,6 +30,8 @@ const Profil = () => {
   const [siretInput, setSiretInput] = useState('')
   const [verifie, setVerifie] = useState(false)
   const [chargementSiret, setChargementSiret] = useState(false)
+  const [parrainage, setParrainage] = useState(null)
+  const [lienParrainCopie, setLienParrainCopie] = useState(false)
   const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '', code_postal: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
@@ -37,6 +39,7 @@ const Profil = () => {
 
   useEffect(() => {
     chargerProfil()
+    chargerParrainage()
   }, [])
 
   const chargerProfil = async () => {
@@ -50,6 +53,15 @@ const Profil = () => {
       setHeureFin(u.heure_fin || '18:00')
       setVerifie(u.verifie || false)
       setSiretInput(u.siret || '')
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const chargerParrainage = async () => {
+    try {
+      const res = await getMonParrainage()
+      setParrainage(res.data)
     } catch (err) {
       console.error(err)
     }
@@ -138,6 +150,32 @@ const Profil = () => {
     }
   }
 
+  const handleCopierLienParrainage = async () => {
+    if (!parrainage) return
+    const lien = `${window.location.origin}/auth?parrain=${parrainage.code_parrainage}`
+    try {
+      await navigator.clipboard.writeText(lien)
+      setLienParrainCopie(true)
+      setTimeout(() => setLienParrainCopie(false), 2000)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handlePartagerParrainage = async () => {
+    if (!parrainage) return
+    const lien = `${window.location.origin}/auth?parrain=${parrainage.code_parrainage}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Rejoins At Home Service', text: `Utilise mon code ${parrainage.code_parrainage} pour t'inscrire !`, url: lien })
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error(err)
+      }
+    } else {
+      handleCopierLienParrainage()
+    }
+  }
+
   const handleSupprimer = async () => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) return
     try {
@@ -158,8 +196,8 @@ const Profil = () => {
   const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }
 
   const tabs = user?.role === 'prestataire'
-    ? ['infos', 'verification', 'parametres', 'disponibilites', 'mot-de-passe', 'supprimer']
-    : ['infos', 'mot-de-passe', 'supprimer']
+    ? ['infos', 'verification', 'parametres', 'disponibilites', 'parrainage', 'mot-de-passe', 'supprimer']
+    : ['infos', 'parrainage', 'mot-de-passe', 'supprimer']
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
@@ -190,7 +228,7 @@ const Profil = () => {
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           {tabs.map(v => (
             <button key={v} onClick={() => setVue(v)} style={{ flex: '1 1 auto', padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', fontSize: '12px' }}>
-              {v === 'infos' ? 'Mes infos' : v === 'verification' ? 'Vérification' : v === 'parametres' ? 'Paramètres' : v === 'disponibilites' ? 'Disponibilités' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
+              {v === 'infos' ? 'Mes infos' : v === 'verification' ? 'Vérification' : v === 'parametres' ? 'Paramètres' : v === 'disponibilites' ? 'Disponibilités' : v === 'parrainage' ? '🎁 Parrainage' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
             </button>
           ))}
         </div>
@@ -279,6 +317,38 @@ const Profil = () => {
             <p style={{ color: '#3D2B0F', fontSize: '13px', marginBottom: '8px' }}>Heure de fin :</p>
             <input type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} style={inputStyle} />
             <button onClick={handleDisponibilites} style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', marginTop: '8px' }}>Sauvegarder mes disponibilités</button>
+          </div>
+        )}
+
+        {vue === 'parrainage' && parrainage && (
+          <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+            <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>🎁 Parrainez vos amis</h3>
+            <p style={{ color: '#3D2B0F', fontSize: '13px', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+              Partagez votre code unique avec vos amis. Quand ils s'inscrivent avec, vous êtes lié à leur compte !
+            </p>
+
+            <div style={{ background: 'white', borderRadius: '12px', padding: '1.5rem', textAlign: 'center', marginBottom: '1.5rem', border: '2px dashed #2B6CB0' }}>
+              <p style={{ color: '#3D2B0F', fontSize: '12px', margin: '0 0 8px' }}>Votre code de parrainage</p>
+              <p style={{ color: '#2B6CB0', fontSize: '28px', fontWeight: 'bold', margin: 0, letterSpacing: '2px' }}>{parrainage.code_parrainage}</p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <button onClick={handlePartagerParrainage} style={{ flex: 1, background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>📤 Partager mon lien</button>
+              <button onClick={handleCopierLienParrainage} style={{ background: 'white', color: '#1A365D', border: '1.5px solid #1A365D', padding: '12px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>
+                {lienParrainCopie ? '✅ Copié !' : '🔗 Copier'}
+              </button>
+            </div>
+
+            <div style={{ borderTop: '1px solid #A07840', paddingTop: '1rem' }}>
+              <p style={{ color: '#1A365D', fontWeight: 'bold', marginBottom: '0.8rem' }}>Vos filleuls ({parrainage.totalFilleuls})</p>
+              {parrainage.filleuls.length === 0 && <p style={{ color: '#3D2B0F', fontSize: '13px' }}>Aucun filleul pour le moment. Partagez votre code !</p>}
+              {parrainage.filleuls.map(f => (
+                <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #E2D9C8' }}>
+                  <span style={{ color: '#1A365D', fontSize: '14px' }}>{f.prenom} {f.nom}</span>
+                  <span style={{ color: '#3D2B0F', fontSize: '12px' }}>{new Date(f.created_at).toLocaleDateString('fr-FR')}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
