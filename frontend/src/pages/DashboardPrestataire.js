@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis, ajouterRealisation, getMesRealisations, supprimerRealisation } from '../services/api'
+import { uploadRealisation } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
 
@@ -45,7 +46,9 @@ const DashboardPrestataire = () => {
   const [serviceAModifier, setServiceAModifier] = useState(null)
   const [avisEnReponse, setAvisEnReponse] = useState(null)
   const [texteReponse, setTexteReponse] = useState('')
-  const [formRealisation, setFormRealisation] = useState({ titre: '', description: '', media_url: '', type_media: 'photo' })
+  const [formRealisation, setFormRealisation] = useState({ titre: '', description: '', type_media: 'photo' })
+  const [fichierSelectionne, setFichierSelectionne] = useState(null)
+  const [uploadEnCours, setUploadEnCours] = useState(false)
   const [form, setForm] = useState({
     categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: ''
   })
@@ -219,15 +222,29 @@ const DashboardPrestataire = () => {
     setFormRealisation({ ...formRealisation, [e.target.name]: e.target.value })
   }
 
+  const handleFichierChange = (e) => {
+    setFichierSelectionne(e.target.files[0])
+  }
+
   const handleAjouterRealisation = async (e) => {
     e.preventDefault()
+    if (!fichierSelectionne) {
+      setMessage('Veuillez sélectionner un fichier')
+      return
+    }
+    setUploadEnCours(true)
     try {
-      await ajouterRealisation(formRealisation)
+      const media_url = await uploadRealisation(fichierSelectionne, user.id)
+      await ajouterRealisation({ ...formRealisation, media_url })
       setMessage('Réalisation ajoutée avec succès !')
-      setFormRealisation({ titre: '', description: '', media_url: '', type_media: 'photo' })
+      setFormRealisation({ titre: '', description: '', type_media: 'photo' })
+      setFichierSelectionne(null)
+      document.getElementById('fichier-input').value = ''
       chargerRealisations()
     } catch (err) {
-      setMessage('Erreur lors de l\'ajout')
+      setMessage('Erreur lors de l\'ajout : ' + err.message)
+    } finally {
+      setUploadEnCours(false)
     }
   }
 
@@ -423,9 +440,11 @@ const DashboardPrestataire = () => {
                 </select>
                 <input name="titre" placeholder="Titre (ex: Coupe avant/après)" value={formRealisation.titre} onChange={handleFormRealisationChange} style={inputStyle} />
                 <textarea name="description" placeholder="Description (optionnel)" value={formRealisation.description} onChange={handleFormRealisationChange} rows={2} style={inputStyle} />
-                <input name="media_url" placeholder="URL de la photo ou vidéo" value={formRealisation.media_url} onChange={handleFormRealisationChange} required style={inputStyle} />
-                <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '12px' }}>Pour une vidéo, utilisez un lien YouTube ou un fichier vidéo direct (.mp4).</p>
-                <button type="submit" style={{ width: '100%', padding: '12px', background: '#C53030', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontFamily: 'Georgia, serif' }}>Ajouter</button>
+                <input id="fichier-input" type="file" accept={formRealisation.type_media === 'photo' ? 'image/*' : 'video/*'} onChange={handleFichierChange} style={inputStyle} />
+                <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '12px' }}>Sélectionnez une photo ou vidéo depuis votre appareil.</p>
+                <button type="submit" disabled={uploadEnCours} style={{ width: '100%', padding: '12px', background: '#C53030', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontFamily: 'Georgia, serif' }}>
+                  {uploadEnCours ? 'Envoi en cours...' : 'Ajouter'}
+                </button>
               </form>
             </div>
 
