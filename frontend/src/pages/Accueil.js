@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPrestatairesListe } from '../services/api'
+import { ajouterRecherche, getHistorique, retirerRecherche } from '../services/historiqueRecherche'
 
 const imagesParCategorie = {
   coiffure: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop',
@@ -31,6 +32,7 @@ const Accueil = () => {
   const [categorie, setCategorie] = useState('')
   const [prestatairesFiltres, setPrestatairesFiltres] = useState([])
   const [menuOuvert, setMenuOuvert] = useState(false)
+  const [historique, setHistorique] = useState([])
 
   const categories = [
     { nom: 'coiffure', image: imagesParCategorie.coiffure },
@@ -47,6 +49,7 @@ const Accueil = () => {
 
   useEffect(() => {
     chargerPrestataires()
+    setHistorique(getHistorique())
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ville, categorie])
 
@@ -78,6 +81,23 @@ const Accueil = () => {
 
   const filtrerCategorie = (cat) => {
     setCategorie(categorie === cat ? '' : cat)
+  }
+
+  const handleRecherche = () => {
+    if (recherche.trim()) {
+      ajouterRecherche(recherche.trim())
+      setHistorique(getHistorique())
+    }
+  }
+
+  const handleClicHistorique = (terme) => {
+    setRecherche(terme)
+  }
+
+  const handleRetirerHistorique = (terme, e) => {
+    e.stopPropagation()
+    retirerRecherche(terme)
+    setHistorique(getHistorique())
   }
 
   return (
@@ -130,10 +150,21 @@ const Accueil = () => {
         <h1 className="hero-title" style={{ fontSize: '32px', color: '#1A365D', marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>Des pros à domicile,<br />quand vous en avez besoin</h1>
         <p style={{ color: '#3D2B0F', fontSize: '15px', fontStyle: 'italic', marginBottom: '32px', padding: '0 8px' }}>Plus besoin de chercher, un clic et trouvez votre artisan à domicile</p>
         <div className="search-box" style={{ background: '#F5ECD8', borderRadius: '12px', padding: '16px', maxWidth: '700px', margin: '0 auto', display: 'flex', gap: '8px', border: '1px solid #A07840' }}>
-          <input placeholder="Quel service ou prestataire ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ flex: 2, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
+          <input placeholder="Quel service ou prestataire ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleRecherche()} style={{ flex: 2, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
           <input placeholder="📍 Ville (ex: Nice)" value={ville} onChange={(e) => setVille(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: '1.5px solid #90CDF4', fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%' }} />
-          <button style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>Rechercher</button>
+          <button onClick={handleRecherche} style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>Rechercher</button>
         </div>
+        {historique.length > 0 && (
+          <div style={{ maxWidth: '700px', margin: '12px auto 0', display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+            <span style={{ color: '#1A365D', fontSize: '12px', marginRight: '4px' }}>Récentes :</span>
+            {historique.map(terme => (
+              <span key={terme} onClick={() => handleClicHistorique(terme)} style={{ background: '#F5ECD8', color: '#1A365D', padding: '4px 10px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', border: '1px solid #A07840', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                🕐 {terme}
+                <span onClick={(e) => handleRetirerHistorique(terme, e)} style={{ color: '#C53030', fontWeight: 'bold' }}>✕</span>
+              </span>
+            ))}
+          </div>
+        )}
         {ville && (
           <p style={{ color: '#1A365D', fontSize: '13px', marginTop: '12px' }}>
             Résultats pour : <strong>{ville}</strong> <span onClick={() => setVille('')} style={{ cursor: 'pointer', textDecoration: 'underline', marginLeft: '8px' }}>✕ effacer</span>
