@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getProfilPublicPrestataire, ajouterFavori, retirerFavori, verifierFavori } from '../services/api'
+import { getProfilPublicPrestataire, ajouterFavori, retirerFavori, verifierFavori, getRealisationsPrestataire } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
 const Logo = () => (
@@ -33,9 +33,11 @@ const ProfilPrestataire = () => {
   const [chargement, setChargement] = useState(true)
   const [estFavori, setEstFavori] = useState(false)
   const [lienCopie, setLienCopie] = useState(false)
+  const [realisations, setRealisations] = useState([])
 
   useEffect(() => {
     chargerProfil()
+    chargerRealisations()
     if (user?.role === 'client') {
       chargerFavori()
     }
@@ -50,6 +52,15 @@ const ProfilPrestataire = () => {
       console.error(err)
     } finally {
       setChargement(false)
+    }
+  }
+
+  const chargerRealisations = async () => {
+    try {
+      const res = await getRealisationsPrestataire(id)
+      setRealisations(res.data.realisations)
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -178,6 +189,31 @@ const ProfilPrestataire = () => {
             </div>
           </div>
         </div>
+
+        {realisations.length > 0 && (
+          <>
+            <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>📸 Réalisations</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+              {realisations.map(r => (
+                <div key={r.id} style={{ background: '#F5ECD8', borderRadius: '12px', border: '1px solid #A07840', overflow: 'hidden' }}>
+                  <div style={{ height: '160px', background: '#1A365D', overflow: 'hidden' }}>
+                    {r.type_media === 'photo' ? (
+                      <img src={r.media_url} alt={r.titre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <video src={r.media_url} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    )}
+                  </div>
+                  {(r.titre || r.description) && (
+                    <div style={{ padding: '0.8rem' }}>
+                      {r.titre && <p style={{ margin: '0 0 4px', color: '#1A365D', fontWeight: 'bold', fontSize: '13px' }}>{r.titre}</p>}
+                      {r.description && <p style={{ margin: 0, color: '#3D2B0F', fontSize: '12px' }}>{r.description}</p>}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>Services proposés</h2>
         {services.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun service disponible pour le moment.</p>}

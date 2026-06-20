@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis } from '../services/api'
+import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis, ajouterRealisation, getMesRealisations, supprimerRealisation } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
 
@@ -35,6 +35,7 @@ const DashboardPrestataire = () => {
   const [avis, setAvis] = useState([])
   const [moyenneAvis, setMoyenneAvis] = useState(0)
   const [stats, setStats] = useState(null)
+  const [realisations, setRealisations] = useState([])
   const [vue, setVue] = useState('reservations')
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -44,6 +45,7 @@ const DashboardPrestataire = () => {
   const [serviceAModifier, setServiceAModifier] = useState(null)
   const [avisEnReponse, setAvisEnReponse] = useState(null)
   const [texteReponse, setTexteReponse] = useState('')
+  const [formRealisation, setFormRealisation] = useState({ titre: '', description: '', media_url: '', type_media: 'photo' })
   const [form, setForm] = useState({
     categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: ''
   })
@@ -59,6 +61,7 @@ const DashboardPrestataire = () => {
     chargerAvis()
     chargerConversations()
     chargerStats()
+    chargerRealisations()
   }, [])
 
   const chargerServices = async () => {
@@ -102,6 +105,15 @@ const DashboardPrestataire = () => {
     try {
       const res = await getStatsPrestataire()
       setStats(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const chargerRealisations = async () => {
+    try {
+      const res = await getMesRealisations()
+      setRealisations(res.data.realisations)
     } catch (err) {
       console.error(err)
     }
@@ -203,6 +215,33 @@ const DashboardPrestataire = () => {
     }
   }
 
+  const handleFormRealisationChange = (e) => {
+    setFormRealisation({ ...formRealisation, [e.target.name]: e.target.value })
+  }
+
+  const handleAjouterRealisation = async (e) => {
+    e.preventDefault()
+    try {
+      await ajouterRealisation(formRealisation)
+      setMessage('Réalisation ajoutée avec succès !')
+      setFormRealisation({ titre: '', description: '', media_url: '', type_media: 'photo' })
+      chargerRealisations()
+    } catch (err) {
+      setMessage('Erreur lors de l\'ajout')
+    }
+  }
+
+  const handleSupprimerRealisation = async (id) => {
+    if (!window.confirm('Supprimer cette réalisation ?')) return
+    try {
+      await supprimerRealisation(id)
+      setMessage('Réalisation supprimée')
+      chargerRealisations()
+    } catch (err) {
+      setMessage('Erreur lors de la suppression')
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -246,9 +285,9 @@ const DashboardPrestataire = () => {
       </nav>
 
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {['stats', 'reservations', 'services', 'messages', 'avis', 'ajouter'].map(v => (
+        {['stats', 'reservations', 'services', 'realisations', 'messages', 'avis', 'ajouter'].map(v => (
           <button key={v} onClick={() => { setVue(v); if (v === 'messages') chargerConversations(); if (v === 'stats') chargerStats() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
-            {v === 'stats' ? '📊 Stats' : v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'messages' ? '💬 Messages' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
+            {v === 'stats' ? '📊 Stats' : v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'realisations' ? '📸 Réalisations' : v === 'messages' ? '💬 Messages' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
             {v === 'messages' && totalNonLus > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{totalNonLus}</span>}
           </button>
         ))}
@@ -370,6 +409,45 @@ const DashboardPrestataire = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {vue === 'realisations' && (
+          <div>
+            <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', marginBottom: '1.5rem' }}>
+              <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Ajouter une réalisation</h3>
+              <form onSubmit={handleAjouterRealisation}>
+                <select name="type_media" value={formRealisation.type_media} onChange={handleFormRealisationChange} style={inputStyle}>
+                  <option value="photo">📷 Photo</option>
+                  <option value="video">🎥 Vidéo</option>
+                </select>
+                <input name="titre" placeholder="Titre (ex: Coupe avant/après)" value={formRealisation.titre} onChange={handleFormRealisationChange} style={inputStyle} />
+                <textarea name="description" placeholder="Description (optionnel)" value={formRealisation.description} onChange={handleFormRealisationChange} rows={2} style={inputStyle} />
+                <input name="media_url" placeholder="URL de la photo ou vidéo" value={formRealisation.media_url} onChange={handleFormRealisationChange} required style={inputStyle} />
+                <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '12px' }}>Pour une vidéo, utilisez un lien YouTube ou un fichier vidéo direct (.mp4).</p>
+                <button type="submit" style={{ width: '100%', padding: '12px', background: '#C53030', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontFamily: 'Georgia, serif' }}>Ajouter</button>
+              </form>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+              {realisations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune réalisation ajoutée pour le moment.</p>}
+              {realisations.map(r => (
+                <div key={r.id} style={{ background: '#F5ECD8', borderRadius: '12px', border: '1px solid #A07840', overflow: 'hidden' }}>
+                  <div style={{ height: '160px', background: '#1A365D', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    {r.type_media === 'photo' ? (
+                      <img src={r.media_url} alt={r.titre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <video src={r.media_url} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    )}
+                  </div>
+                  <div style={{ padding: '1rem' }}>
+                    {r.titre && <h4 style={{ margin: '0 0 4px', color: '#1A365D', fontFamily: 'Georgia, serif' }}>{r.titre}</h4>}
+                    {r.description && <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 8px' }}>{r.description}</p>}
+                    <button onClick={() => handleSupprimerRealisation(r.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '12px' }}>🗑️ Supprimer</button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

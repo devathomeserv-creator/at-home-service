@@ -50,3 +50,7 @@ export const retirerFavori = (prestataire_id) => API.delete(`/favoris/${prestata
 export const getMesFavoris = () => API.get('/favoris')
 export const verifierFavori = (prestataire_id) => API.get(`/favoris/verifier/${prestataire_id}`)
 export const getPrestatairesListe = (categorie, ville) => API.get('/prestataires', { params: { categorie, ville } })
+export const ajouterRealisation = (data) => API.post('/realisations', data)
+export const getMesRealisations = () => API.get('/realisations/mes-realisations')
+export const getRealisationsPrestataire = (prestataire_id) => API.get(`/realisations/prestataire/${prestataire_id}`)
+export const supprimerRealisation = (id) => API.delete(`/realisations/${id}`)
