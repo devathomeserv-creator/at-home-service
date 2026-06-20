@@ -32,6 +32,7 @@ const ProfilPrestataire = () => {
   const [data, setData] = useState(null)
   const [chargement, setChargement] = useState(true)
   const [estFavori, setEstFavori] = useState(false)
+  const [lienCopie, setLienCopie] = useState(false)
 
   useEffect(() => {
     chargerProfil()
@@ -79,6 +80,27 @@ const ProfilPrestataire = () => {
     }
   }
 
+  const handlePartager = async () => {
+    const lien = `${window.location.origin}/prestataire/${id}`
+    const titre = data ? `${data.prestataire.prenom} ${data.prestataire.nom} sur At Home Service` : 'At Home Service'
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: titre, url: lien })
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error(err)
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(lien)
+        setLienCopie(true)
+        setTimeout(() => setLienCopie(false), 2000)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  }
+
   const handleReserver = (serviceId) => {
     if (!user) {
       navigate('/auth')
@@ -116,10 +138,20 @@ const ProfilPrestataire = () => {
       <div style={{ flex: 1, maxWidth: '800px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
 
         <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', border: '1px solid #A07840', marginBottom: '1.5rem', position: 'relative' }}>
-          {(!user || user.role === 'client') && (
-            <button onClick={toggleFavori} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: estFavori ? '#C53030' : 'white', color: estFavori ? 'white' : '#C53030', border: '1.5px solid #C53030', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {estFavori ? '❤️' : '🤍'}
+          <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', display: 'flex', gap: '8px' }}>
+            <button onClick={handlePartager} style={{ background: 'white', color: '#1A365D', border: '1.5px solid #1A365D', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              🔗
             </button>
+            {(!user || user.role === 'client') && (
+              <button onClick={toggleFavori} style={{ background: estFavori ? '#C53030' : 'white', color: estFavori ? 'white' : '#C53030', border: '1.5px solid #C53030', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {estFavori ? '❤️' : '🤍'}
+              </button>
+            )}
+          </div>
+          {lienCopie && (
+            <div style={{ position: 'absolute', top: '4.5rem', right: '1.5rem', background: '#1A365D', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}>
+              Lien copié !
+            </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
             <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#2B6CB0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '28px', fontWeight: 'bold', flexShrink: 0 }}>
