@@ -28,6 +28,7 @@ export const modifierReservation = (id, data) => API.put(`/bookings/${id}/modifi
 export const laisserAvis = (data) => API.post('/reviews', data)
 export const getAvisService = (service_id) => API.get(`/reviews/service/${service_id}`)
 export const getMesAvis = () => API.get('/reviews/mes-avis')
+export const repondreAvis = (id, reponse) => API.put(`/reviews/${id}/repondre`, { reponse })
 export const creerPaiement = (data) => API.post('/stripe/paiement', data)
 export const getProfil = () => API.get('/profil')
 export const modifierProfil = (data) => API.put('/profil', data)

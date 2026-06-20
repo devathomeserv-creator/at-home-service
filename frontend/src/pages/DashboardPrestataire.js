@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService } from '../services/api'
+import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
 
@@ -42,6 +42,8 @@ const DashboardPrestataire = () => {
   const [bookingChat, setBookingChat] = useState(null)
   const [showModifierService, setShowModifierService] = useState(false)
   const [serviceAModifier, setServiceAModifier] = useState(null)
+  const [avisEnReponse, setAvisEnReponse] = useState(null)
+  const [texteReponse, setTexteReponse] = useState('')
   const [form, setForm] = useState({
     categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: ''
   })
@@ -181,6 +183,24 @@ const DashboardPrestataire = () => {
   const fermerChat = () => {
     setShowChat(false)
     chargerConversations()
+  }
+
+  const ouvrirReponseAvis = (avisItem) => {
+    setAvisEnReponse(avisItem.id)
+    setTexteReponse(avisItem.reponse_prestataire || '')
+  }
+
+  const handleRepondreAvis = async (id) => {
+    if (!texteReponse.trim()) return
+    try {
+      await repondreAvis(id, texteReponse)
+      setMessage('Réponse publiée avec succès !')
+      setAvisEnReponse(null)
+      setTexteReponse('')
+      chargerAvis()
+    } catch (err) {
+      setMessage('Erreur lors de la publication')
+    }
   }
 
   const handleLogout = () => {
@@ -391,6 +411,33 @@ const DashboardPrestataire = () => {
                 </div>
                 {a.commentaire && <p style={{ color: '#3D2B0F', fontSize: '14px', fontStyle: 'italic' }}>"{a.commentaire}"</p>}
                 <p style={{ color: '#A07840', fontSize: '12px', marginTop: '8px' }}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</p>
+
+                {a.reponse_prestataire && avisEnReponse !== a.id && (
+                  <div style={{ background: 'white', borderRadius: '8px', padding: '12px', marginTop: '12px', borderLeft: '3px solid #2B6CB0' }}>
+                    <p style={{ color: '#2B6CB0', fontSize: '12px', fontWeight: 'bold', margin: '0 0 4px' }}>Votre réponse :</p>
+                    <p style={{ color: '#3D2B0F', fontSize: '13px', margin: 0 }}>{a.reponse_prestataire}</p>
+                  </div>
+                )}
+
+                {avisEnReponse === a.id ? (
+                  <div style={{ marginTop: '12px' }}>
+                    <textarea
+                      value={texteReponse}
+                      onChange={(e) => setTexteReponse(e.target.value)}
+                      placeholder="Répondre à cet avis..."
+                      rows={3}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', fontFamily: 'Georgia, serif', boxSizing: 'border-box', marginBottom: '8px' }}
+                    />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => handleRepondreAvis(a.id)} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Publier la réponse</button>
+                      <button onClick={() => setAvisEnReponse(null)} style={{ background: 'white', color: '#1A365D', border: '1px solid #A07840', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Annuler</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={() => ouvrirReponseAvis(a)} style={{ background: 'none', border: '1px solid #2B6CB0', color: '#2B6CB0', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '12px', marginTop: '12px' }}>
+                    {a.reponse_prestataire ? '✏️ Modifier ma réponse' : '💬 Répondre'}
+                  </button>
+                )}
               </div>
             ))}
           </div>

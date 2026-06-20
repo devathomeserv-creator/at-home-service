@@ -91,4 +91,34 @@ const getAvisPrestataire = async (req, res) => {
   }
 }
 
-module.exports = { laisserAvis, getAvisService, getAvisPrestataire }
+const repondreAvis = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { reponse } = req.body
+    const prestataire_id = req.user.id
+
+    const { data: avis } = await supabase
+      .from('reviews')
+      .select('*, services(prestataire_id)')
+      .eq('id', id)
+      .single()
+
+    if (!avis || avis.services.prestataire_id !== prestataire_id) {
+      return res.status(403).json({ message: 'Accès non autorisé' })
+    }
+
+    const { data, error } = await supabase
+      .from('reviews')
+      .update({ reponse_prestataire: reponse, date_reponse: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+
+    if (error) throw error
+
+    res.json({ message: 'Réponse publiée avec succès', avis: data[0] })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+module.exports = { laisserAvis, getAvisService, getAvisPrestataire, repondreAvis }

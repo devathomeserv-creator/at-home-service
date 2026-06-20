@@ -211,6 +211,13 @@ const ProfilPrestataire = () => {
             </div>
             {a.commentaire && <p style={{ color: '#3D2B0F', fontSize: '14px', fontStyle: 'italic' }}>"{a.commentaire}"</p>}
             <p style={{ color: '#A07840', fontSize: '12px', marginTop: '8px' }}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</p>
+
+            {a.reponse_prestataire && (
+              <div style={{ background: 'white', borderRadius: '8px', padding: '12px', marginTop: '12px', borderLeft: '3px solid #2B6CB0' }}>
+                <p style={{ color: '#2B6CB0', fontSize: '12px', fontWeight: 'bold', margin: '0 0 4px' }}>Réponse de {prestataire.prenom} :</p>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: 0 }}>{a.reponse_prestataire}</p>
+              </div>
+            )}
           </div>
         ))}
       </div>
