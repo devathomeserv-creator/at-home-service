@@ -22,8 +22,8 @@ const imagesParCategorie = {
   photographe: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=300&h=200&fit=crop'
 }
 
-const Logo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+const Logo = ({ onClick }) => (
+  <div onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
     <div style={{ width: '36px', height: '36px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
         <path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V10.5Z" fill="#2B6CB0"/>
@@ -330,7 +330,7 @@ const DashboardClient = () => {
       `}</style>
 
       <nav style={{ background: '#2B6CB0', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-        <Logo />
+        <Logo onClick={() => navigate('/')} />
         <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <span style={{ color: '#BEE3F8', fontSize: '14px' }}>Bonjour {user?.prenom} !</span>
           <button onClick={() => navigate('/profil')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
