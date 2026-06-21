@@ -340,13 +340,16 @@ const DashboardPrestataire = () => {
 
         {vue === 'stats' && stats && (
           <div>
+            <div style={{ background: '#EBF8FF', borderRadius: '12px', padding: '1rem 1.5rem', border: '1px solid #90CDF4', marginBottom: '1rem', fontSize: '13px', color: '#1A365D' }}>
+              ℹ️ At Home Service prélève une commission de <strong>{stats.tauxCommission}%</strong> sur chaque réservation. Les montants ci-dessous correspondent à ce que vous touchez réellement (net de commission).
+            </div>
             <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
               <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
-                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Revenus ce mois</p>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Net à percevoir ce mois</p>
                 <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#C53030', margin: 0 }}>{stats.revenusMois}€</p>
               </div>
               <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
-                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Revenus totaux</p>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Net total perçu</p>
                 <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#2B6CB0', margin: 0 }}>{stats.revenusTotal}€</p>
               </div>
               <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
@@ -392,6 +395,9 @@ const DashboardPrestataire = () => {
                 <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Client : {res.users?.prenom} {res.users?.nom}</p>
                 <p style={{ color: '#3D2B0F' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                 <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
+                {res.montant_net > 0 && (
+                  <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>Net à percevoir : <strong>{res.montant_net}€</strong> (sur {res.services?.prix}€)</p>
+                )}
                 <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
                   {res.statut === 'en_attente' && (
                     <>
