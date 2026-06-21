@@ -7,6 +7,7 @@ import DashboardClient from './pages/DashboardClient'
 import DashboardPrestataire from './pages/DashboardPrestataire'
 import DashboardAdmin from './pages/DashboardAdmin'
 import MentionsLegales from './pages/MentionsLegales'
+import Confidentialite from './pages/Confidentialite'
 import Profil from './pages/Profil'
 import ProfilPrestataire from './pages/ProfilPrestataire'
 import Carte from './pages/Carte'
@@ -37,6 +38,7 @@ const App = () => {
         <Route path="/" element={<Accueil />} />
         <Route path="/auth" element={<RouteAuth><Auth /></RouteAuth>} />
         <Route path="/mentions-legales" element={<MentionsLegales />} />
+        <Route path="/confidentialite" element={<Confidentialite />} />
         <Route path="/carte" element={<Carte />} />
         <Route path="/profil" element={<RoutePrategee><Profil /></RoutePrategee>} />
         <Route path="/prestataire/:id" element={<ProfilPrestataire />} />

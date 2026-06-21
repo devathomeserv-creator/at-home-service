@@ -297,6 +297,7 @@ const Accueil = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <span onClick={() => navigate('/carte')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Carte des prestataires</span>
               <span onClick={() => navigate('/mentions-legales')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Mentions légales et CGU</span>
+              <span onClick={() => navigate('/confidentialite')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Politique de confidentialité</span>
               <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Connexion</span>
               <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Créer un compte</span>
               <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Devenir prestataire</span>
