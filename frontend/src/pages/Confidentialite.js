@@ -59,6 +59,11 @@ const Confidentialite = () => {
             Vos données sont accessibles uniquement par : l'équipe d'At Home Service pour la gestion de la plateforme, le prestataire ou le client avec lequel vous interagissez (dans le cadre strict d'une réservation), et nos sous-traitants techniques (Supabase pour l'hébergement des données, Stripe pour les paiements, Resend pour les emails). Aucune donnée n'est vendue ou transmise à des tiers à des fins commerciales.
           </p>
 
+          <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', fontSize: '18px', marginTop: '1.5rem', marginBottom: '0.8rem' }}>4 bis. Répertoire client du prestataire</h2>
+          <p style={{ color: '#3D2B0F', fontSize: '14px', lineHeight: 1.7, marginBottom: '1rem' }}>
+            Au moment de chaque réservation, vous pouvez choisir, via une case à cocher dédiée et non pré-cochée, d'autoriser le prestataire à conserver vos coordonnées (nom, email, téléphone) dans un répertoire client personnel, après la fin de la prestation. Ce consentement est facultatif et indépendant de la réalisation de la réservation. Le prestataire ne peut utiliser ces informations que dans le cadre de son activité professionnelle (par exemple pour vous recontacter en vue d'une nouvelle prestation), et ne peut ni les revendre ni les transmettre à des tiers. Vous pouvez à tout moment demander le retrait de vos données de ce répertoire en nous contactant à devathomeserv@gmail.com ; la suppression de votre compte entraîne automatiquement votre retrait de tous les répertoires clients des prestataires.
+          </p>
+
           <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', fontSize: '18px', marginTop: '1.5rem', marginBottom: '0.8rem' }}>5. Combien de temps conservons-nous vos données ?</h2>
           <p style={{ color: '#3D2B0F', fontSize: '14px', lineHeight: 1.7, marginBottom: '1rem' }}>
             Vos données sont conservées pendant toute la durée de votre inscription sur la plateforme. En cas de suppression de votre compte, vos données personnelles sont supprimées dans un délai raisonnable, sauf obligation légale de conservation (notamment en matière comptable et fiscale).
