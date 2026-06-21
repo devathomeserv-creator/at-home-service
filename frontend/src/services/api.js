@@ -55,3 +55,19 @@ export const getMesRealisations = () => API.get('/realisations/mes-realisations'
 export const getRealisationsPrestataire = (prestataire_id) => API.get(`/realisations/prestataire/${prestataire_id}`)
 export const supprimerRealisation = (id) => API.delete(`/realisations/${id}`)
 export const getMonParrainage = () => API.get('/parrainage')
+export const telechargerFacture = async (booking_id) => {
+  const token = localStorage.getItem('token')
+  const response = await fetch(`https://loving-nature-production-145d.up.railway.app/api/facture/${booking_id}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  if (!response.ok) throw new Error('Erreur lors du téléchargement')
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `facture-${booking_id.slice(0, 8)}.pdf`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.URL.revokeObjectURL(url)
+}

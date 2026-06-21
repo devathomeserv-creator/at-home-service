@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori } from '../services/api'
+import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -82,6 +82,7 @@ const DashboardClient = () => {
   const [heureDebut, setHeureDebut] = useState('09:00')
   const [heureFin, setHeureFin] = useState('18:00')
   const [creneauxOccupes, setCreneauxOccupes] = useState([])
+  const [telechargementEnCours, setTelechargementEnCours] = useState(null)
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
 
@@ -289,13 +290,24 @@ const DashboardClient = () => {
     chargerConversations()
   }
 
+  const handleTelechargerFacture = async (booking_id) => {
+    setTelechargementEnCours(booking_id)
+    try {
+      await telechargerFacture(booking_id)
+    } catch (err) {
+      setMessage('Erreur lors du téléchargement de la facture')
+    } finally {
+      setTelechargementEnCours(null)
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/')
   }
 
   const filtrerCategorie = (cat) => {
-    setCategorie(categorie === cat ? '' : cat)
+    setCategorie(cat)
   }
 
   const statutColor = (statut) => {
@@ -500,7 +512,12 @@ const DashboardClient = () => {
                   )}
 
                   {res.statut === 'termine' && (
-                    <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginTop: '1rem', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
+                      <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
+                      <button onClick={() => handleTelechargerFacture(res.id)} disabled={telechargementEnCours === res.id} style={{ background: '#1A365D', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>
+                        {telechargementEnCours === res.id ? 'Génération...' : '📄 Télécharger la facture'}
+                      </button>
+                    </div>
                   )}
                 </div>
               )
