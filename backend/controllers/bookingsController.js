@@ -1,6 +1,7 @@
 const supabase = require('../config/supabase')
 const { envoyerEmailReservation, envoyerEmailConfirmation } = require('../config/email')
 const { rembourserPaiement } = require('./stripeController')
+const { notifierCreneauLibere } = require('./listeAttenteController')
 
 const TAUX_COMMISSION = 0.10
 
@@ -142,6 +143,10 @@ const modifierStatut = async (req, res) => {
       )
     }
 
+    if (statut === 'annule' && booking) {
+      await notifierCreneauLibere(booking.service_id, booking.date_rdv)
+    }
+
     res.json({ message: 'Statut mis à jour', reservation: data[0] })
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message })
@@ -195,6 +200,8 @@ const annulerReservation = async (req, res) => {
 
     if (error) throw error
 
+    await notifierCreneauLibere(booking.service_id, booking.date_rdv)
+
     res.json({ message: `Réservation annulée avec succès.${messageRemboursement}`, rembourse })
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message })
@@ -222,6 +229,9 @@ const modifierReservation = async (req, res) => {
       return res.status(400).json({ message: 'Cette réservation ne peut pas être modifiée' })
     }
 
+    const ancienneDate = booking.date_rdv
+    const ancienServiceId = booking.service_id
+
     const { data, error } = await supabase
       .from('bookings')
       .update({ date_rdv, adresse_intervention, statut: 'en_attente' })
@@ -229,6 +239,10 @@ const modifierReservation = async (req, res) => {
       .select()
 
     if (error) throw error
+
+    if (ancienneDate !== date_rdv) {
+      await notifierCreneauLibere(ancienServiceId, ancienneDate)
+    }
 
     res.json({ message: 'Réservation modifiée avec succès', reservation: data[0] })
   } catch (error) {

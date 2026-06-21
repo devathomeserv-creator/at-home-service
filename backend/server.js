@@ -21,6 +21,7 @@ const parrainageRoutes = require('./routes/parrainageRoutes')
 const factureRoutes = require('./routes/factureRoutes')
 const signalementsRoutes = require('./routes/signalementsRoutes')
 const clientsRoutes = require('./routes/clientsRoutes')
+const listeAttenteRoutes = require('./routes/listeAttenteRoutes')
 
 const app = express()
 app.use(cors())
@@ -45,6 +46,7 @@ app.use('/api/parrainage', parrainageRoutes)
 app.use('/api/facture', factureRoutes)
 app.use('/api/signalements', signalementsRoutes)
 app.use('/api/clients', clientsRoutes)
+app.use('/api/liste-attente', listeAttenteRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Serveur marketplace en ligne !' })
