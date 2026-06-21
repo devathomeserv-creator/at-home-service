@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { getRevenusPlateforme } from '../services/api'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import axios from 'axios'
 
 const Logo = ({ onClick }) => (
@@ -24,6 +26,7 @@ const DashboardAdmin = () => {
   const [users, setUsers] = useState([])
   const [reservations, setReservations] = useState([])
   const [signalements, setSignalements] = useState([])
+  const [revenus, setRevenus] = useState(null)
   const [stats, setStats] = useState({ totalUsers: 0, totalClients: 0, totalPrestataires: 0, totalReservations: 0 })
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -70,11 +73,22 @@ const DashboardAdmin = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
+  const chargerRevenus = useCallback(async () => {
+    try {
+      const res = await getRevenusPlateforme()
+      setRevenus(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
   useEffect(() => {
     chargerUsers()
     chargerReservations()
     chargerSignalements()
-  }, [chargerUsers, chargerReservations, chargerSignalements])
+    chargerRevenus()
+  }, [chargerUsers, chargerReservations, chargerSignalements, chargerRevenus])
 
   const supprimerUser = async (id) => {
     if (!window.confirm('Supprimer cet utilisateur ?')) return
@@ -117,6 +131,17 @@ const DashboardAdmin = () => {
     return { bg: '#fef3c7', color: '#92400e' }
   }
 
+  const formaterMois = (cle) => {
+    const [annee, mois] = cle.split('-')
+    const noms = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
+    return `${noms[parseInt(mois) - 1]} ${annee}`
+  }
+
+  const donneesGraphique = revenus?.evolutionMensuelle.map(item => ({
+    mois: formaterMois(item.mois),
+    revenus: item.montant
+  })) || []
+
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
       <style>{`
@@ -151,9 +176,9 @@ const DashboardAdmin = () => {
       </nav>
 
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {['stats', 'users', 'reservations', 'signalements'].map(v => (
+        {['stats', 'revenus', 'users', 'reservations', 'signalements'].map(v => (
           <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
-            {v === 'stats' ? 'Statistiques' : v === 'users' ? 'Utilisateurs' : v === 'reservations' ? 'Réservations' : '🚩 Signalements'}
+            {v === 'stats' ? 'Statistiques' : v === 'revenus' ? '💰 Revenus' : v === 'users' ? 'Utilisateurs' : v === 'reservations' ? 'Réservations' : '🚩 Signalements'}
             {v === 'signalements' && signalementsEnAttente > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{signalementsEnAttente}</span>}
           </button>
         ))}
@@ -170,6 +195,49 @@ const DashboardAdmin = () => {
                 <p style={{ fontSize: '40px', fontWeight: 'bold', color: '#2B6CB0', margin: 0 }}>{stat.value}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {vue === 'revenus' && revenus && (
+          <div>
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Commission ce mois</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#C53030', margin: 0 }}>{revenus.commissionMois}€</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Commission totale</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#2B6CB0', margin: 0 }}>{revenus.commissionTotale}€</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Volume total traité</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#1A365D', margin: 0 }}>{revenus.volumeTotal}€</p>
+              </div>
+              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
+                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Taux de commission</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#059669', margin: 0 }}>{revenus.tauxCommission}%</p>
+              </div>
+            </div>
+
+            <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+              <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Évolution de la commission (6 derniers mois)</h3>
+              {donneesGraphique.length === 0 ? (
+                <p style={{ color: '#3D2B0F', fontSize: '14px' }}>Pas encore assez de données pour afficher un graphique.</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={donneesGraphique}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2D9C8" />
+                    <XAxis dataKey="mois" stroke="#3D2B0F" fontSize={12} />
+                    <YAxis stroke="#3D2B0F" fontSize={12} />
+                    <Tooltip
+                      contentStyle={{ background: 'white', border: '1px solid #A07840', borderRadius: '8px', fontFamily: 'Georgia, serif' }}
+                      formatter={(value) => [`${value}€`, 'Commission']}
+                    />
+                    <Bar dataKey="revenus" fill="#2B6CB0" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         )}
 
