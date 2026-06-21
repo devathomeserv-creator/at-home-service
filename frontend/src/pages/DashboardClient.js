@@ -83,6 +83,7 @@ const DashboardClient = () => {
   const [heureFin, setHeureFin] = useState('18:00')
   const [creneauxOccupes, setCreneauxOccupes] = useState([])
   const [telechargementEnCours, setTelechargementEnCours] = useState(null)
+  const [consentementDonnees, setConsentementDonnees] = useState(false)
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
 
@@ -101,6 +102,7 @@ const DashboardClient = () => {
     const date_rdv = params.get('date_rdv')
     const adresseParam = params.get('adresse')
     const session_id = params.get('session_id')
+    const consentementParam = params.get('consentement')
 
     if (paiement === 'succes' && service_id && date_rdv && adresseParam) {
       const finaliserReservation = async () => {
@@ -119,7 +121,8 @@ const DashboardClient = () => {
             service_id,
             date_rdv,
             adresse_intervention: decodeURIComponent(adresseParam),
-            payment_intent_id
+            payment_intent_id,
+            consentement_donnees: consentementParam === 'true'
           })
           setMessage('Paiement réussi ! Votre réservation est confirmée !')
           setVue('reservations')
@@ -189,6 +192,7 @@ const DashboardClient = () => {
     setServiceSelectionne({ ...service, prestataire_id: prestataire.id })
     setDateSelectionnee(null)
     setAdresse('')
+    setConsentementDonnees(false)
     setShowReservationModal(true)
 
     try {
@@ -237,7 +241,8 @@ const DashboardClient = () => {
       const res = await creerPaiement({
         service_id: serviceSelectionne.id,
         date_rdv: dateSelectionnee.toISOString(),
-        adresse_intervention: adresse
+        adresse_intervention: adresse,
+        consentement_donnees: consentementDonnees
       })
       window.location.href = res.data.url
     } catch (err) {
@@ -418,7 +423,22 @@ const DashboardClient = () => {
                 filterTime={filtrerHeureValide}
               />
               <p style={{ color: '#3D2B0F', margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Votre adresse :</p>
-              <input placeholder="Ex: 12 rue de la Paix, Nice" value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1.5rem', boxSizing: 'border-box' }} />
+              <input placeholder="Ex: 12 rue de la Paix, Nice" value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1rem', boxSizing: 'border-box' }} />
+
+              <div style={{ background: 'white', borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: '1px solid #90CDF4' }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={consentementDonnees}
+                    onChange={(e) => setConsentementDonnees(e.target.checked)}
+                    style={{ marginTop: '3px', flexShrink: 0 }}
+                  />
+                  <span style={{ color: '#3D2B0F', fontSize: '12px', lineHeight: 1.5 }}>
+                    J'accepte que le prestataire conserve mes coordonnées (nom, contact) dans son répertoire client pour faciliter une future prise de contact. Vous pouvez retirer ce consentement à tout moment depuis votre profil ou en nous contactant. <span onClick={() => navigate('/confidentialite')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>En savoir plus</span>.
+                  </span>
+                </label>
+              </div>
+
               <p style={{ color: '#3D2B0F', fontSize: '11px', marginBottom: '1rem', fontStyle: 'italic' }}>
                 💡 Annulation gratuite avec remboursement automatique jusqu'à 24h avant le rendez-vous.
               </p>

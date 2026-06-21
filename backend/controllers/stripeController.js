@@ -3,7 +3,7 @@ const supabase = require('../config/supabase')
 
 const creerPaiement = async (req, res) => {
   try {
-    const { service_id, date_rdv, adresse_intervention } = req.body
+    const { service_id, date_rdv, adresse_intervention, consentement_donnees } = req.body
     const client_id = req.user.id
 
     const { data: service } = await supabase
@@ -32,7 +32,7 @@ const creerPaiement = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `https://at-home-service.vercel.app/client?paiement=succes&service_id=${service_id}&date_rdv=${date_rdv}&adresse=${encodeURIComponent(adresse_intervention)}&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `https://at-home-service.vercel.app/client?paiement=succes&service_id=${service_id}&date_rdv=${date_rdv}&adresse=${encodeURIComponent(adresse_intervention)}&consentement=${consentement_donnees ? 'true' : 'false'}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `https://at-home-service.vercel.app/client?paiement=annule`,
       metadata: {
         client_id,
