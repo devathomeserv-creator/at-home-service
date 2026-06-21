@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture, recupererPaiementIntent } from '../services/api'
+import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture, recupererPaiementIntent, ajouterListeAttente, getMaListeAttente, retirerListeAttente } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -61,6 +61,7 @@ const DashboardClient = () => {
   const [reservations, setReservations] = useState([])
   const [conversations, setConversations] = useState([])
   const [favoris, setFavoris] = useState([])
+  const [listeAttente, setListeAttente] = useState([])
   const [vue, setVue] = useState('services')
   const [categorie, setCategorie] = useState('')
   const [recherche, setRecherche] = useState('')
@@ -178,6 +179,15 @@ const DashboardClient = () => {
     }
   }
 
+  const chargerListeAttente = async () => {
+    try {
+      const res = await getMaListeAttente()
+      setListeAttente(res.data.liste)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleRetirerFavori = async (prestataire_id) => {
     try {
       await retirerFavori(prestataire_id)
@@ -213,6 +223,13 @@ const DashboardClient = () => {
     return joursTravail.includes(jour)
   }
 
+  const estCreneauOccupe = (time) => {
+    return creneauxOccupes.some(creneau => {
+      const dateCreneau = new Date(creneau)
+      return dateCreneau.getTime() === time.getTime()
+    })
+  }
+
   const filtrerHeureValide = (time) => {
     const heures = time.getHours()
     const minutes = time.getMinutes()
@@ -220,12 +237,7 @@ const DashboardClient = () => {
 
     if (heureActuelle < heureDebut || heureActuelle >= heureFin) return false
 
-    const estOccupe = creneauxOccupes.some(creneau => {
-      const dateCreneau = new Date(creneau)
-      return dateCreneau.getTime() === time.getTime()
-    })
-
-    return !estOccupe
+    return true
   }
 
   const confirmerReservation = async () => {
@@ -237,6 +249,12 @@ const DashboardClient = () => {
       setMessage('Veuillez entrer votre adresse')
       return
     }
+
+    if (estCreneauOccupe(dateSelectionnee)) {
+      setMessage('Ce créneau est déjà pris. Vous pouvez vous inscrire en liste d\'attente.')
+      return
+    }
+
     try {
       const res = await creerPaiement({
         service_id: serviceSelectionne.id,
@@ -247,6 +265,33 @@ const DashboardClient = () => {
       window.location.href = res.data.url
     } catch (err) {
       setMessage('Erreur lors du paiement')
+    }
+  }
+
+  const handleListeAttente = async () => {
+    if (!dateSelectionnee) {
+      setMessage('Veuillez choisir une date et heure pour la liste d\'attente')
+      return
+    }
+    try {
+      await ajouterListeAttente({
+        service_id: serviceSelectionne.id,
+        date_souhaitee: dateSelectionnee.toISOString()
+      })
+      setMessage('Vous êtes inscrit en liste d\'attente pour ce créneau ! Vous serez notifié par email s\'il se libère.')
+      setShowReservationModal(false)
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Erreur lors de l\'inscription')
+    }
+  }
+
+  const handleRetirerListeAttente = async (id) => {
+    try {
+      await retirerListeAttente(id)
+      setMessage('Retiré de la liste d\'attente')
+      chargerListeAttente()
+    } catch (err) {
+      setMessage('Erreur lors du retrait')
     }
   }
 
@@ -387,6 +432,7 @@ const DashboardClient = () => {
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <button onClick={() => setVue('services')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'services' ? '#2B6CB0' : '#F5ECD8', color: vue === 'services' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Services disponibles</button>
         <button onClick={() => setVue('reservations')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'reservations' ? '#2B6CB0' : '#F5ECD8', color: vue === 'reservations' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Mes réservations</button>
+        <button onClick={() => { setVue('attente'); chargerListeAttente() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'attente' ? '#2B6CB0' : '#F5ECD8', color: vue === 'attente' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>⏳ Liste d'attente</button>
         <button onClick={() => { setVue('favoris'); chargerFavoris() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'favoris' ? '#2B6CB0' : '#F5ECD8', color: vue === 'favoris' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>❤️ Favoris</button>
         <button onClick={() => { setVue('messages'); chargerConversations() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'messages' ? '#2B6CB0' : '#F5ECD8', color: vue === 'messages' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
           💬 Messages
@@ -422,6 +468,11 @@ const DashboardClient = () => {
                 filterDate={filtrerJourValide}
                 filterTime={filtrerHeureValide}
               />
+              {dateSelectionnee && estCreneauOccupe(dateSelectionnee) && (
+                <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: '1px solid #F6AD55' }}>
+                  <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>⏳ Ce créneau est déjà pris. Vous pouvez vous inscrire en liste d'attente pour être notifié s'il se libère.</p>
+                </div>
+              )}
               <p style={{ color: '#3D2B0F', margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Votre adresse :</p>
               <input placeholder="Ex: 12 rue de la Paix, Nice" value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
@@ -443,7 +494,11 @@ const DashboardClient = () => {
                 💡 Annulation gratuite avec remboursement automatique jusqu'à 24h avant le rendez-vous.
               </p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <button onClick={confirmerReservation} style={{ flex: 1, background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Payer et réserver</button>
+                {dateSelectionnee && estCreneauOccupe(dateSelectionnee) ? (
+                  <button onClick={handleListeAttente} style={{ flex: 1, background: '#F6AD55', color: '#1A365D', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', fontWeight: 'bold' }}>⏳ Rejoindre la liste d'attente</button>
+                ) : (
+                  <button onClick={confirmerReservation} style={{ flex: 1, background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Payer et réserver</button>
+                )}
                 <button onClick={() => setShowReservationModal(false)} style={{ background: '#F5ECD8', color: '#1A365D', border: '1px solid #A07840', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
               </div>
             </div>
@@ -565,6 +620,27 @@ const DashboardClient = () => {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {vue === 'attente' && (
+          <div>
+            {listeAttente.length === 0 && <p style={{ color: '#3D2B0F' }}>Vous n'êtes inscrit sur aucune liste d'attente pour le moment.</p>}
+            {listeAttente.map(item => (
+              <div key={item.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <h3 style={{ margin: 0, color: '#1A365D' }}>{item.services?.titre}</h3>
+                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: item.statut === 'notifie' ? '#d1fae5' : '#fef3c7', color: item.statut === 'notifie' ? '#065f46' : '#92400e' }}>
+                    {item.statut === 'notifie' ? '✅ Créneau libéré !' : '⏳ En attente'}
+                  </span>
+                </div>
+                <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Prestataire : {item.services?.users?.prenom} {item.services?.users?.nom}</p>
+                <p style={{ color: '#3D2B0F' }}>Date souhaitée : {new Date(item.date_souhaitee).toLocaleString('fr-FR')}</p>
+                {item.statut === 'en_attente' && (
+                  <button onClick={() => handleRetirerListeAttente(item.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px', marginTop: '1rem' }}>✗ Quitter la liste d'attente</button>
+                )}
+              </div>
+            ))}
           </div>
         )}
 

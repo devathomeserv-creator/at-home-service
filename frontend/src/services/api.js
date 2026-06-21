@@ -61,6 +61,9 @@ export const getSignalements = () => API.get('/signalements')
 export const modifierStatutSignalement = (id, statut) => API.put(`/signalements/${id}/statut`, { statut })
 export const getRevenusPlateforme = () => API.get('/admin/revenus')
 export const getMesClients = () => API.get('/clients')
+export const ajouterListeAttente = (data) => API.post('/liste-attente', data)
+export const getMaListeAttente = () => API.get('/liste-attente')
+export const retirerListeAttente = (id) => API.delete(`/liste-attente/${id}`)
 export const telechargerFacture = async (booking_id) => {
   const token = localStorage.getItem('token')
   const response = await fetch(`https://loving-nature-production-145d.up.railway.app/api/facture/${booking_id}`, {
