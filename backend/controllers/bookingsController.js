@@ -1,9 +1,10 @@
 const supabase = require('../config/supabase')
 const { envoyerEmailReservation, envoyerEmailConfirmation } = require('../config/email')
+const { rembourserPaiement } = require('./stripeController')
 
 const creerReservation = async (req, res) => {
   try {
-    const { service_id, date_rdv, adresse_intervention, note } = req.body
+    const { service_id, date_rdv, adresse_intervention, note, payment_intent_id } = req.body
     const client_id = req.user.id
 
     const { data: service } = await supabase
@@ -30,7 +31,7 @@ const creerReservation = async (req, res) => {
 
     const { data, error } = await supabase
       .from('bookings')
-      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut }])
+      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut, payment_intent_id }])
       .select()
 
     if (error) throw error
@@ -162,14 +163,34 @@ const annulerReservation = async (req, res) => {
       return res.status(400).json({ message: 'Cette réservation ne peut pas être annulée' })
     }
 
+    const maintenant = new Date()
+    const dateRdv = new Date(booking.date_rdv)
+    const heuresAvant = (dateRdv - maintenant) / (1000 * 60 * 60)
+    const eligibleRemboursement = heuresAvant >= 24
+
+    let messageRemboursement = ''
+    let rembourse = false
+
+    if (eligibleRemboursement && booking.payment_intent_id && !booking.rembourse) {
+      const resultat = await rembourserPaiement(booking.payment_intent_id)
+      if (resultat.success) {
+        rembourse = true
+        messageRemboursement = ' Vous avez été remboursé automatiquement.'
+      } else {
+        messageRemboursement = ' Le remboursement automatique a échoué, contactez le support.'
+      }
+    } else if (!eligibleRemboursement) {
+      messageRemboursement = ' Aucun remboursement automatique (annulation à moins de 24h du rendez-vous).'
+    }
+
     const { error } = await supabase
       .from('bookings')
-      .update({ statut: 'annule' })
+      .update({ statut: 'annule', rembourse })
       .eq('id', id)
 
     if (error) throw error
 
-    res.json({ message: 'Réservation annulée avec succès' })
+    res.json({ message: `Réservation annulée avec succès.${messageRemboursement}`, rembourse })
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur', error: error.message })
   }

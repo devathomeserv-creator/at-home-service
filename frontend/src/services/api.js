@@ -30,6 +30,7 @@ export const getAvisService = (service_id) => API.get(`/reviews/service/${servic
 export const getMesAvis = () => API.get('/reviews/mes-avis')
 export const repondreAvis = (id, reponse) => API.put(`/reviews/${id}/repondre`, { reponse })
 export const creerPaiement = (data) => API.post('/stripe/paiement', data)
+export const recupererPaiementIntent = (session_id) => API.get(`/stripe/session/${session_id}`)
 export const getProfil = () => API.get('/profil')
 export const modifierProfil = (data) => API.put('/profil', data)
 export const changerMotDePasse = (data) => API.put('/profil/mot-de-passe', data)

@@ -32,8 +32,8 @@ const creerPaiement = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: `http://localhost:3000/client?paiement=succes&service_id=${service_id}&date_rdv=${date_rdv}&adresse=${encodeURIComponent(adresse_intervention)}`,
-      cancel_url: `http://localhost:3000/client?paiement=annule`,
+      success_url: `https://at-home-service.vercel.app/client?paiement=succes&service_id=${service_id}&date_rdv=${date_rdv}&adresse=${encodeURIComponent(adresse_intervention)}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://at-home-service.vercel.app/client?paiement=annule`,
       metadata: {
         client_id,
         service_id,
@@ -48,4 +48,31 @@ const creerPaiement = async (req, res) => {
   }
 }
 
-module.exports = { creerPaiement }
+const recupererPaiementIntent = async (req, res) => {
+  try {
+    const { session_id } = req.params
+
+    const session = await stripe.checkout.sessions.retrieve(session_id)
+
+    res.json({ payment_intent_id: session.payment_intent })
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur', error: error.message })
+  }
+}
+
+const rembourserPaiement = async (payment_intent_id) => {
+  try {
+    if (!payment_intent_id) return { success: false, message: 'Pas de paiement à rembourser' }
+
+    await stripe.refunds.create({
+      payment_intent: payment_intent_id
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error('Erreur remboursement Stripe:', error.message)
+    return { success: false, message: error.message }
+  }
+}
+
+module.exports = { creerPaiement, recupererPaiementIntent, rembourserPaiement }

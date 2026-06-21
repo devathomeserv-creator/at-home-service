@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture } from '../services/api'
+import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture, recupererPaiementIntent } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -100,26 +100,43 @@ const DashboardClient = () => {
     const service_id = params.get('service_id')
     const date_rdv = params.get('date_rdv')
     const adresseParam = params.get('adresse')
+    const session_id = params.get('session_id')
 
     if (paiement === 'succes' && service_id && date_rdv && adresseParam) {
-      creerReservation({
-        service_id,
-        date_rdv,
-        adresse_intervention: decodeURIComponent(adresseParam)
-      }).then(() => {
-        setMessage('Paiement réussi ! Votre réservation est confirmée !')
-        setVue('reservations')
-        chargerReservations()
-        window.history.replaceState({}, '', '/client')
-      }).catch(() => {
-        setMessage('Erreur lors de la création de la réservation')
-      })
+      const finaliserReservation = async () => {
+        let payment_intent_id = null
+        try {
+          if (session_id) {
+            const resSession = await recupererPaiementIntent(session_id)
+            payment_intent_id = resSession.data.payment_intent_id
+          }
+        } catch (err) {
+          console.error(err)
+        }
+
+        try {
+          await creerReservation({
+            service_id,
+            date_rdv,
+            adresse_intervention: decodeURIComponent(adresseParam),
+            payment_intent_id
+          })
+          setMessage('Paiement réussi ! Votre réservation est confirmée !')
+          setVue('reservations')
+          chargerReservations()
+          window.history.replaceState({}, '', '/client')
+        } catch (err) {
+          setMessage('Erreur lors de la création de la réservation')
+        }
+      }
+      finaliserReservation()
     }
 
     if (paiement === 'annule') {
       setMessage('Paiement annulé. Vous pouvez réessayer.')
       window.history.replaceState({}, '', '/client')
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const chargerPrestataires = async () => {
@@ -231,8 +248,8 @@ const DashboardClient = () => {
   const handleAnnuler = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) return
     try {
-      await annulerReservation(id)
-      setMessage('Réservation annulée avec succès')
+      const res = await annulerReservation(id)
+      setMessage(res.data.message)
       chargerReservations()
     } catch (err) {
       setMessage(err.response?.data?.message || 'Erreur lors de l\'annulation')
@@ -402,6 +419,9 @@ const DashboardClient = () => {
               />
               <p style={{ color: '#3D2B0F', margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Votre adresse :</p>
               <input placeholder="Ex: 12 rue de la Paix, Nice" value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', marginBottom: '1.5rem', boxSizing: 'border-box' }} />
+              <p style={{ color: '#3D2B0F', fontSize: '11px', marginBottom: '1rem', fontStyle: 'italic' }}>
+                💡 Annulation gratuite avec remboursement automatique jusqu'à 24h avant le rendez-vous.
+              </p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <button onClick={confirmerReservation} style={{ flex: 1, background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Payer et réserver</button>
                 <button onClick={() => setShowReservationModal(false)} style={{ background: '#F5ECD8', color: '#1A365D', border: '1px solid #A07840', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
@@ -503,6 +523,9 @@ const DashboardClient = () => {
                   </div>
                   <p style={{ color: '#3D2B0F', marginTop: '0.5rem' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                   <p style={{ color: '#3D2B0F' }}>Adresse : {res.adresse_intervention}</p>
+                  {res.statut === 'annule' && res.rembourse && (
+                    <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>✅ Remboursé automatiquement</p>
+                  )}
 
                   {(res.statut === 'en_attente' || res.statut === 'confirme') && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
