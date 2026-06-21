@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis, ajouterRealisation, getMesRealisations, supprimerRealisation } from '../services/api'
+import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis, ajouterRealisation, getMesRealisations, supprimerRealisation, getMesClients } from '../services/api'
 import { uploadRealisation } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
@@ -37,6 +37,7 @@ const DashboardPrestataire = () => {
   const [moyenneAvis, setMoyenneAvis] = useState(0)
   const [stats, setStats] = useState(null)
   const [realisations, setRealisations] = useState([])
+  const [clients, setClients] = useState([])
   const [vue, setVue] = useState('reservations')
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -65,6 +66,7 @@ const DashboardPrestataire = () => {
     chargerConversations()
     chargerStats()
     chargerRealisations()
+    chargerClients()
   }, [])
 
   const chargerServices = async () => {
@@ -117,6 +119,15 @@ const DashboardPrestataire = () => {
     try {
       const res = await getMesRealisations()
       setRealisations(res.data.realisations)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const chargerClients = async () => {
+    try {
+      const res = await getMesClients()
+      setClients(res.data.clients)
     } catch (err) {
       console.error(err)
     }
@@ -302,9 +313,9 @@ const DashboardPrestataire = () => {
       </nav>
 
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {['stats', 'reservations', 'services', 'realisations', 'messages', 'avis', 'ajouter'].map(v => (
-          <button key={v} onClick={() => { setVue(v); if (v === 'messages') chargerConversations(); if (v === 'stats') chargerStats() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
-            {v === 'stats' ? '📊 Stats' : v === 'reservations' ? 'Réservations' : v === 'services' ? 'Services' : v === 'realisations' ? '📸 Réalisations' : v === 'messages' ? '💬 Messages' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
+        {['stats', 'reservations', 'clients', 'services', 'realisations', 'messages', 'avis', 'ajouter'].map(v => (
+          <button key={v} onClick={() => { setVue(v); if (v === 'messages') chargerConversations(); if (v === 'stats') chargerStats(); if (v === 'clients') chargerClients() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
+            {v === 'stats' ? '📊 Stats' : v === 'reservations' ? 'Réservations' : v === 'clients' ? '👥 Mes clients' : v === 'services' ? 'Services' : v === 'realisations' ? '📸 Réalisations' : v === 'messages' ? '💬 Messages' : v === 'avis' ? `Avis (${moyenneAvis}★)` : 'Ajouter'}
             {v === 'messages' && totalNonLus > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{totalNonLus}</span>}
           </button>
         ))}
@@ -414,6 +425,31 @@ const DashboardPrestataire = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {vue === 'clients' && (
+          <div>
+            <div style={{ background: '#EBF8FF', borderRadius: '12px', padding: '1rem 1.5rem', border: '1px solid #90CDF4', marginBottom: '1.5rem', fontSize: '13px', color: '#1A365D' }}>
+              ℹ️ Ce répertoire liste uniquement les clients ayant explicitement accepté que leurs coordonnées soient conservées par vous. Conformément au RGPD, ces données ne doivent être utilisées que pour votre activité professionnelle.
+            </div>
+            {clients.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun client n'a encore donné son consentement pour figurer dans ce répertoire.</p>}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
+              {clients.map(c => (
+                <div key={c.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
+                  <h3 style={{ margin: '0 0 4px', color: '#1A365D' }}>{c.prenom} {c.nom}</h3>
+                  <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 4px' }}>{c.email}</p>
+                  {c.telephone && <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 8px' }}>📞 {c.telephone}</p>}
+                  <p style={{ color: '#3D2B0F', fontSize: '12px', margin: '0 0 4px' }}>{c.totalReservations} réservation{c.totalReservations > 1 ? 's' : ''}</p>
+                  <p style={{ color: '#3D2B0F', fontSize: '12px', margin: '0 0 8px' }}>Dernière prestation : {new Date(c.derniereReservation).toLocaleDateString('fr-FR')}</p>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {c.services.map(s => (
+                      <span key={s} style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '2px 8px', borderRadius: '20px', fontSize: '11px' }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
