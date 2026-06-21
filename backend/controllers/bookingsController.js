@@ -2,6 +2,8 @@ const supabase = require('../config/supabase')
 const { envoyerEmailReservation, envoyerEmailConfirmation } = require('../config/email')
 const { rembourserPaiement } = require('./stripeController')
 
+const TAUX_COMMISSION = 0.10
+
 const creerReservation = async (req, res) => {
   try {
     const { service_id, date_rdv, adresse_intervention, note, payment_intent_id } = req.body
@@ -29,9 +31,12 @@ const creerReservation = async (req, res) => {
 
     const statut = service.users.confirmation_auto ? 'confirme' : 'en_attente'
 
+    const commission = Math.round(service.prix * TAUX_COMMISSION * 100) / 100
+    const montant_net = Math.round((service.prix - commission) * 100) / 100
+
     const { data, error } = await supabase
       .from('bookings')
-      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut, payment_intent_id }])
+      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut, payment_intent_id, commission, montant_net }])
       .select()
 
     if (error) throw error

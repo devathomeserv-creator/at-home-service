@@ -1,5 +1,7 @@
 const supabase = require('../config/supabase')
 
+const TAUX_COMMISSION = 0.10
+
 const getStatsPrestataire = async (req, res) => {
   try {
     const prestataire_id = req.user.id
@@ -27,12 +29,21 @@ const getStatsPrestataire = async (req, res) => {
     const reservationsMois = bookings.filter(b => new Date(b.created_at) >= debutMois)
     const reservationsTerminees = bookings.filter(b => b.statut === 'termine')
 
+    const calculerMontantNet = (b) => {
+      if (b.montant_net) return b.montant_net
+      const prix = b.services?.prix || 0
+      return Math.round((prix * (1 - TAUX_COMMISSION)) * 100) / 100
+    }
+
     const revenusMois = reservationsMois
       .filter(b => b.statut === 'termine' || b.statut === 'confirme')
-      .reduce((acc, b) => acc + (b.services?.prix || 0), 0)
+      .reduce((acc, b) => acc + calculerMontantNet(b), 0)
 
     const revenusTotal = reservationsTerminees
-      .reduce((acc, b) => acc + (b.services?.prix || 0), 0)
+      .reduce((acc, b) => acc + calculerMontantNet(b), 0)
+
+    const commissionTotale = reservationsTerminees
+      .reduce((acc, b) => acc + (b.commission || Math.round((b.services?.prix || 0) * TAUX_COMMISSION * 100) / 100), 0)
 
     const compteurServices = {}
     bookings.forEach(b => {
@@ -56,8 +67,10 @@ const getStatsPrestataire = async (req, res) => {
       : 0
 
     res.json({
-      revenusMois,
-      revenusTotal,
+      revenusMois: Math.round(revenusMois * 100) / 100,
+      revenusTotal: Math.round(revenusTotal * 100) / 100,
+      commissionTotale: Math.round(commissionTotale * 100) / 100,
+      tauxCommission: TAUX_COMMISSION * 100,
       totalReservations: bookings.length,
       reservationsMois: reservationsMois.length,
       reservationsTerminees: reservationsTerminees.length,
