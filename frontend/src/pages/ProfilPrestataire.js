@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getProfilPublicPrestataire, ajouterFavori, retirerFavori, verifierFavori, getRealisationsPrestataire } from '../services/api'
+import { getProfilPublicPrestataire, ajouterFavori, retirerFavori, verifierFavori, getRealisationsPrestataire, creerSignalement } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
 const Logo = () => (
@@ -25,6 +25,14 @@ const Etoiles = ({ note }) => (
   </div>
 )
 
+const motifsSignalement = [
+  'Comportement inapproprié',
+  'Service non conforme à la description',
+  'Tentative de fraude',
+  'Profil suspect ou faux',
+  'Autre'
+]
+
 const ProfilPrestataire = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -34,6 +42,11 @@ const ProfilPrestataire = () => {
   const [estFavori, setEstFavori] = useState(false)
   const [lienCopie, setLienCopie] = useState(false)
   const [realisations, setRealisations] = useState([])
+  const [showSignalement, setShowSignalement] = useState(false)
+  const [motifSignalement, setMotifSignalement] = useState(motifsSignalement[0])
+  const [descriptionSignalement, setDescriptionSignalement] = useState('')
+  const [signalementEnvoye, setSignalementEnvoye] = useState(false)
+  const [erreurSignalement, setErreurSignalement] = useState('')
 
   useEffect(() => {
     chargerProfil()
@@ -112,6 +125,29 @@ const ProfilPrestataire = () => {
     }
   }
 
+  const ouvrirSignalement = () => {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+    setMotifSignalement(motifsSignalement[0])
+    setDescriptionSignalement('')
+    setSignalementEnvoye(false)
+    setErreurSignalement('')
+    setShowSignalement(true)
+  }
+
+  const handleEnvoyerSignalement = async (e) => {
+    e.preventDefault()
+    setErreurSignalement('')
+    try {
+      await creerSignalement({ prestataire_id: id, motif: motifSignalement, description: descriptionSignalement })
+      setSignalementEnvoye(true)
+    } catch (err) {
+      setErreurSignalement(err.response?.data?.message || 'Erreur lors de l\'envoi du signalement')
+    }
+  }
+
   const handleReserver = (serviceId) => {
     if (!user) {
       navigate('/auth')
@@ -147,6 +183,35 @@ const ProfilPrestataire = () => {
       </nav>
 
       <div style={{ flex: 1, maxWidth: '800px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
+
+        {showSignalement && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '420px', border: '1px solid #A07840' }}>
+              {signalementEnvoye ? (
+                <>
+                  <h3 style={{ color: '#1A365D', marginBottom: '1rem' }}>Signalement envoyé</h3>
+                  <p style={{ color: '#3D2B0F', fontSize: '14px', marginBottom: '1.5rem' }}>Merci, notre équipe va examiner votre signalement dans les plus brefs délais.</p>
+                  <button onClick={() => setShowSignalement(false)} style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Fermer</button>
+                </>
+              ) : (
+                <>
+                  <h3 style={{ color: '#1A365D', marginBottom: '1rem' }}>Signaler ce prestataire</h3>
+                  <form onSubmit={handleEnvoyerSignalement}>
+                    <select value={motifSignalement} onChange={(e) => setMotifSignalement(e.target.value)} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px' }}>
+                      {motifsSignalement.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    <textarea placeholder="Décrivez la situation (optionnel)" value={descriptionSignalement} onChange={(e) => setDescriptionSignalement(e.target.value)} rows={4} style={{ width: '100%', padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', fontFamily: 'Georgia, serif', boxSizing: 'border-box' }} />
+                    {erreurSignalement && <p style={{ color: '#C53030', fontSize: '13px', marginBottom: '10px' }}>{erreurSignalement}</p>}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button type="submit" style={{ flex: 1, padding: '12px', background: '#C53030', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Envoyer le signalement</button>
+                      <button type="button" onClick={() => setShowSignalement(false)} style={{ background: 'white', color: '#1A365D', border: '1px solid #A07840', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+                    </div>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', border: '1px solid #A07840', marginBottom: '1.5rem', position: 'relative' }}>
           <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', display: 'flex', gap: '8px' }}>
@@ -187,6 +252,9 @@ const ProfilPrestataire = () => {
                 <p style={{ color: '#3D2B0F', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{prestataire.description}</p>
               )}
             </div>
+          </div>
+          <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+            <span onClick={ouvrirSignalement} style={{ color: '#A07840', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>🚩 Signaler ce prestataire</span>
           </div>
         </div>
 

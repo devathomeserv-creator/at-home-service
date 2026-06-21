@@ -23,6 +23,7 @@ const DashboardAdmin = () => {
   const [vue, setVue] = useState('stats')
   const [users, setUsers] = useState([])
   const [reservations, setReservations] = useState([])
+  const [signalements, setSignalements] = useState([])
   const [stats, setStats] = useState({ totalUsers: 0, totalClients: 0, totalPrestataires: 0, totalReservations: 0 })
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -59,10 +60,21 @@ const DashboardAdmin = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
+  const chargerSignalements = useCallback(async () => {
+    try {
+      const res = await API.get('/signalements')
+      setSignalements(res.data.signalements)
+    } catch (err) {
+      console.error(err)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
   useEffect(() => {
     chargerUsers()
     chargerReservations()
-  }, [chargerUsers, chargerReservations])
+    chargerSignalements()
+  }, [chargerUsers, chargerReservations, chargerSignalements])
 
   const supprimerUser = async (id) => {
     if (!window.confirm('Supprimer cet utilisateur ?')) return
@@ -72,6 +84,16 @@ const DashboardAdmin = () => {
       chargerUsers()
     } catch (err) {
       setMessage('Erreur lors de la suppression')
+    }
+  }
+
+  const changerStatutSignalement = async (id, statut) => {
+    try {
+      await API.put(`/signalements/${id}/statut`, { statut })
+      setMessage('Statut du signalement mis à jour')
+      chargerSignalements()
+    } catch (err) {
+      setMessage('Erreur lors de la mise à jour')
     }
   }
 
@@ -86,6 +108,14 @@ const DashboardAdmin = () => {
     { label: 'Prestataires', value: stats.totalPrestataires },
     { label: 'Réservations', value: stats.totalReservations }
   ]
+
+  const signalementsEnAttente = signalements.filter(s => s.statut === 'en_attente').length
+
+  const statutColorSignalement = (statut) => {
+    if (statut === 'traite') return { bg: '#d1fae5', color: '#065f46' }
+    if (statut === 'rejete') return { bg: '#fee2e2', color: '#991b1b' }
+    return { bg: '#fef3c7', color: '#92400e' }
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
@@ -121,9 +151,10 @@ const DashboardAdmin = () => {
       </nav>
 
       <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {['stats', 'users', 'reservations'].map(v => (
-          <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>
-            {v === 'stats' ? 'Statistiques' : v === 'users' ? 'Utilisateurs' : 'Réservations'}
+        {['stats', 'users', 'reservations', 'signalements'].map(v => (
+          <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
+            {v === 'stats' ? 'Statistiques' : v === 'users' ? 'Utilisateurs' : v === 'reservations' ? 'Réservations' : '🚩 Signalements'}
+            {v === 'signalements' && signalementsEnAttente > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{signalementsEnAttente}</span>}
           </button>
         ))}
       </div>
@@ -172,6 +203,33 @@ const DashboardAdmin = () => {
                 <p style={{ color: '#3D2B0F', fontSize: '14px' }}>Adresse : {res.adresse_intervention}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {vue === 'signalements' && (
+          <div>
+            {signalements.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun signalement pour le moment.</p>}
+            {signalements.map(s => {
+              const sc = statutColorSignalement(s.statut)
+              return (
+                <div key={s.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                    <h3 style={{ margin: 0, color: '#1A365D' }}>{s.motif}</h3>
+                    <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: sc.bg, color: sc.color }}>{s.statut}</span>
+                  </div>
+                  <p style={{ color: '#3D2B0F', marginTop: '0.5rem', fontSize: '14px' }}>Signalé par : {s.client?.prenom} {s.client?.nom} ({s.client?.email})</p>
+                  <p style={{ color: '#3D2B0F', fontSize: '14px' }}>Prestataire concerné : {s.prestataire?.prenom} {s.prestataire?.nom} ({s.prestataire?.email})</p>
+                  {s.description && <p style={{ color: '#3D2B0F', fontSize: '14px', fontStyle: 'italic', marginTop: '0.5rem' }}>"{s.description}"</p>}
+                  <p style={{ color: '#A07840', fontSize: '12px', marginTop: '0.5rem' }}>{new Date(s.created_at).toLocaleDateString('fr-FR')}</p>
+                  {s.statut === 'en_attente' && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
+                      <button onClick={() => changerStatutSignalement(s.id, 'traite')} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Marquer traité</button>
+                      <button onClick={() => changerStatutSignalement(s.id, 'rejete')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Rejeter</button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

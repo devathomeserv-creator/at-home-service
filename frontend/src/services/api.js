@@ -55,6 +55,9 @@ export const getMesRealisations = () => API.get('/realisations/mes-realisations'
 export const getRealisationsPrestataire = (prestataire_id) => API.get(`/realisations/prestataire/${prestataire_id}`)
 export const supprimerRealisation = (id) => API.delete(`/realisations/${id}`)
 export const getMonParrainage = () => API.get('/parrainage')
+export const creerSignalement = (data) => API.post('/signalements', data)
+export const getSignalements = () => API.get('/signalements')
+export const modifierStatutSignalement = (id, statut) => API.put(`/signalements/${id}/statut`, { statut })
 export const telechargerFacture = async (booking_id) => {
   const token = localStorage.getItem('token')
   const response = await fetch(`https://loving-nature-production-145d.up.railway.app/api/facture/${booking_id}`, {
