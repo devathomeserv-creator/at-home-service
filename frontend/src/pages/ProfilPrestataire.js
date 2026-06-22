@@ -244,9 +244,14 @@ const ProfilPrestataire = () => {
               {(prestataire.ville || prestataire.code_postal) && (
                 <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 8px' }}>📍 {prestataire.ville} {prestataire.code_postal}</p>
               )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                 <Etoiles note={moyenne} />
                 <span style={{ color: '#3D2B0F', fontSize: '14px' }}>{moyenne} ({totalAvis} avis)</span>
+                {prestataire.lien_google && (
+                  <a href={prestataire.lien_google} target="_blank" rel="noopener noreferrer" style={{ background: 'white', color: '#2B6CB0', border: '1px solid #2B6CB0', padding: '3px 10px', borderRadius: '20px', fontSize: '12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    🔵 Voir les avis Google
+                  </a>
+                )}
               </div>
               {prestataire.description && (
                 <p style={{ color: '#3D2B0F', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{prestataire.description}</p>
@@ -302,7 +307,14 @@ const ProfilPrestataire = () => {
           ))}
         </div>
 
-        <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>Avis clients ({totalAvis})</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
+          <h2 style={{ color: '#1A365D', fontFamily: 'Georgia, serif', margin: 0 }}>Avis clients ({totalAvis})</h2>
+          {prestataire.lien_google && (
+            <a href={prestataire.lien_google} target="_blank" rel="noopener noreferrer" style={{ background: '#2B6CB0', color: 'white', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontFamily: 'Georgia, serif' }}>
+              ⭐ Laisser un avis sur Google
+            </a>
+          )}
+        </div>
         {avis.length === 0 && <p style={{ color: '#3D2B0F', marginBottom: '2rem' }}>Aucun avis pour le moment.</p>}
         {avis.map(a => (
           <div key={a.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>

@@ -32,7 +32,7 @@ const Profil = () => {
   const [chargementSiret, setChargementSiret] = useState(false)
   const [parrainage, setParrainage] = useState(null)
   const [lienParrainCopie, setLienParrainCopie] = useState(false)
-  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '', code_postal: '' })
+  const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '', code_postal: '', lien_google: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
   const joursDisponibles = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
@@ -46,7 +46,7 @@ const Profil = () => {
     try {
       const res = await getProfil()
       const u = res.data.user
-      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '', description: u.description || '', ville: u.ville || '', code_postal: u.code_postal || '' })
+      setForm({ nom: u.nom || '', prenom: u.prenom || '', telephone: u.telephone || '', adresse: u.adresse || '', description: u.description || '', ville: u.ville || '', code_postal: u.code_postal || '', lien_google: u.lien_google || '' })
       setConfirmationAuto(u.confirmation_auto || false)
       setJoursTravail(u.jours_travail || [])
       setHeureDebut(u.heure_debut || '09:00')
@@ -251,6 +251,8 @@ const Profil = () => {
                     <input name="code_postal" placeholder="Code postal" value={form.code_postal} onChange={handleChange} style={{ ...inputStyle, flex: 1 }} />
                   </div>
                   <textarea name="description" placeholder="Description de votre activité..." value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
+                  <input name="lien_google" placeholder="Lien vers votre fiche Google (optionnel)" value={form.lien_google} onChange={handleChange} style={inputStyle} />
+                  <p style={{ color: '#3D2B0F', fontSize: '12px', marginBottom: '12px' }}>Ce lien apparaîtra sur votre profil public pour permettre aux clients de consulter ou laisser un avis sur votre fiche Google.</p>
                 </>
               )}
               <button type="submit" style={{ width: '100%', padding: '12px', background: '#2B6CB0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Sauvegarder</button>
