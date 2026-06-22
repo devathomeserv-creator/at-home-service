@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { inscription, connexion } from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 
 const Auth = () => {
   const [searchParams] = useSearchParams()
@@ -15,6 +16,7 @@ const Auth = () => {
   const [installPrompt, setInstallPrompt] = useState(null)
   const [appInstallable, setAppInstallable] = useState(false)
   const { login } = useAuth()
+  const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -61,18 +63,24 @@ const Auth = () => {
     }
   }
 
+  const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', boxSizing: 'border-box' }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+    <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', position: 'relative' }}>
+
+      <button onClick={toggleTheme} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }} title={themeMode === 'clair' ? 'Mode sombre' : 'Mode clair'}>
+        {themeMode === 'clair' ? '🌙' : '☀️'}
+      </button>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
-        <div style={{ width: '48px', height: '48px', background: '#2B6CB0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '48px', height: '48px', background: c.bleu, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
             <path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V10.5Z" fill="white"/>
           </svg>
         </div>
         <div>
-          <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#1A365D', lineHeight: 1.1 }}>At Home Service</div>
-          <div style={{ fontSize: '11px', color: '#3D2B0F', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
+          <div style={{ fontSize: '22px', fontWeight: 'bold', color: c.texteFonce, lineHeight: 1.1 }}>At Home Service</div>
+          <div style={{ fontSize: '11px', color: c.texte, letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
         </div>
       </div>
 
@@ -82,51 +90,51 @@ const Auth = () => {
         </div>
       )}
 
-      <div style={{ background: '#F5ECD8', borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '420px', border: '1px solid #A07840' }}>
-        <p style={{ textAlign: 'center', color: '#3D2B0F', fontSize: '14px', fontStyle: 'italic', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+      <div style={{ background: c.fondClair, borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '420px', border: `1px solid ${c.bordure}` }}>
+        <p style={{ textAlign: 'center', color: c.texte, fontSize: '14px', fontStyle: 'italic', marginBottom: '1.5rem', lineHeight: 1.6 }}>
           Plus besoin de chercher, un clic et trouvez votre artisan à domicile
         </p>
 
-        <div style={{ display: 'flex', marginBottom: '1.5rem', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid #90CDF4' }}>
-          <button onClick={() => setMode('connexion')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'connexion' ? '#2B6CB0' : 'white', color: mode === 'connexion' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Connexion</button>
-          <button onClick={() => setMode('inscription')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'inscription' ? '#2B6CB0' : 'white', color: mode === 'inscription' ? 'white' : '#1A365D', fontFamily: 'Georgia, serif' }}>Inscription</button>
+        <div style={{ display: 'flex', marginBottom: '1.5rem', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${c.bleuClair}` }}>
+          <button onClick={() => setMode('connexion')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'connexion' ? c.bleu : c.blanc, color: mode === 'connexion' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Connexion</button>
+          <button onClick={() => setMode('inscription')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'inscription' ? c.bleu : c.blanc, color: mode === 'inscription' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Inscription</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           {mode === 'inscription' && (
             <>
-              <input name="nom" placeholder="Nom" value={form.nom} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />
-              <input name="prenom" placeholder="Prénom" value={form.prenom} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />
-              <input name="telephone" placeholder="Téléphone" value={form.telephone} onChange={handleChange} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />
-              <select name="role" value={form.role} onChange={handleChange} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }}>
+              <input name="nom" placeholder="Nom" value={form.nom} onChange={handleChange} required style={inputStyle} />
+              <input name="prenom" placeholder="Prénom" value={form.prenom} onChange={handleChange} required style={inputStyle} />
+              <input name="telephone" placeholder="Téléphone" value={form.telephone} onChange={handleChange} style={inputStyle} />
+              <select name="role" value={form.role} onChange={handleChange} style={inputStyle}>
                 <option value="client">Je suis un client</option>
                 <option value="prestataire">Je suis un prestataire</option>
               </select>
-              <input name="code_parrain" placeholder="Code de parrainage (optionnel)" value={form.code_parrain} onChange={handleChange} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />
+              <input name="code_parrain" placeholder="Code de parrainage (optionnel)" value={form.code_parrain} onChange={handleChange} style={inputStyle} />
             </>
           )}
-          <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />
-          <input name="mot_de_passe" type="password" placeholder="Mot de passe" value={form.mot_de_passe} onChange={handleChange} required style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: '1.5px solid #90CDF4', background: 'white', color: '#1A202C', fontSize: '14px', boxSizing: 'border-box' }} />
+          <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required style={inputStyle} />
+          <input name="mot_de_passe" type="password" placeholder="Mot de passe" value={form.mot_de_passe} onChange={handleChange} required style={inputStyle} />
 
-          {erreur && <p style={{ color: '#C53030', fontSize: '14px', marginBottom: '10px', textAlign: 'center' }}>{erreur}</p>}
+          {erreur && <p style={{ color: c.rouge, fontSize: '14px', marginBottom: '10px', textAlign: 'center' }}>{erreur}</p>}
 
-          <button type="submit" disabled={chargement} style={{ width: '100%', padding: '12px', background: '#C53030', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', marginTop: '4px', fontFamily: 'Georgia, serif' }}>
+          <button type="submit" disabled={chargement} style={{ width: '100%', padding: '12px', background: c.rouge, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', marginTop: '4px', fontFamily: 'Georgia, serif' }}>
             {chargement ? 'Chargement...' : mode === 'connexion' ? 'Se connecter' : "S'inscrire"}
           </button>
         </form>
 
         {appInstallable && (
-          <button onClick={installerApp} style={{ width: '100%', padding: '12px', background: '#1A365D', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', marginTop: '12px', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <button onClick={installerApp} style={{ width: '100%', padding: '12px', background: c.texteFonce, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', marginTop: '12px', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             📱 Télécharger l'application
           </button>
         )}
       </div>
 
-      <p style={{ color: '#3D2B0F', fontSize: '12px', marginTop: '1rem' }}>
-        <span onClick={() => navigate('/mentions-legales')} style={{ cursor: 'pointer', textDecoration: 'underline', color: '#1A365D' }}>Mentions légales et CGU</span>
+      <p style={{ color: c.texte, fontSize: '12px', marginTop: '1rem' }}>
+        <span onClick={() => navigate('/mentions-legales')} style={{ cursor: 'pointer', textDecoration: 'underline', color: c.texteFonce }}>Mentions légales et CGU</span>
       </p>
 
-      <p style={{ color: '#3D2B0F', fontSize: '12px', marginTop: '0.5rem' }}>© 2026 At Home Service — Tous droits réservés</p>
+      <p style={{ color: c.texte, fontSize: '12px', marginTop: '0.5rem' }}>© 2026 At Home Service — Tous droits réservés</p>
     </div>
   )
 }
