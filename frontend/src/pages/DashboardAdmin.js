@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useNavigate } from 'react-router-dom'
-import { getRevenusPlateforme } from '../services/api'
+import { getRevenusPlateforme, getModeMaintenance, modifierModeMaintenance } from '../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import axios from 'axios'
 
@@ -15,6 +15,7 @@ const DashboardAdmin = () => {
   const [reservations, setReservations] = useState([])
   const [signalements, setSignalements] = useState([])
   const [revenus, setRevenus] = useState(null)
+  const [maintenanceActive, setMaintenanceActive] = useState(false)
   const [stats, setStats] = useState({ totalUsers: 0, totalClients: 0, totalPrestataires: 0, totalReservations: 0 })
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
@@ -71,12 +72,23 @@ const DashboardAdmin = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
+  const chargerMaintenance = useCallback(async () => {
+    try {
+      const res = await getModeMaintenance()
+      setMaintenanceActive(res.data.mode_maintenance)
+    } catch (err) {
+      console.error(err)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
   useEffect(() => {
     chargerUsers()
     chargerReservations()
     chargerSignalements()
     chargerRevenus()
-  }, [chargerUsers, chargerReservations, chargerSignalements, chargerRevenus])
+    chargerMaintenance()
+  }, [chargerUsers, chargerReservations, chargerSignalements, chargerRevenus, chargerMaintenance])
 
   const supprimerUser = async (id) => {
     if (!window.confirm('Supprimer cet utilisateur ?')) return
@@ -96,6 +108,18 @@ const DashboardAdmin = () => {
       chargerSignalements()
     } catch (err) {
       setMessage('Erreur lors de la mise à jour')
+    }
+  }
+
+  const toggleMaintenance = async () => {
+    const nouvelEtat = !maintenanceActive
+    if (nouvelEtat && !window.confirm('Activer le mode maintenance ? Tous les visiteurs (sauf vous) verront une page "On revient bientôt".')) return
+    try {
+      await modifierModeMaintenance(nouvelEtat)
+      setMaintenanceActive(nouvelEtat)
+      setMessage(nouvelEtat ? 'Mode maintenance activé' : 'Mode maintenance désactivé')
+    } catch (err) {
+      setMessage('Erreur lors de la mise à jour du mode maintenance')
     }
   }
 
@@ -155,6 +179,9 @@ const DashboardAdmin = () => {
           </div>
         </div>
         <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {maintenanceActive && (
+            <span style={{ background: '#fef3c7', color: '#92400e', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>🚧 Maintenance active</span>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
             {themeMode === 'clair' ? '🌙' : '☀️'}
           </button>
@@ -178,9 +205,9 @@ const DashboardAdmin = () => {
       </nav>
 
       <div className="tabs" style={{ background: c.fondMoyen, padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        {['stats', 'revenus', 'users', 'reservations', 'signalements'].map(v => (
+        {['stats', 'revenus', 'users', 'reservations', 'signalements', 'parametres'].map(v => (
           <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? c.bleu : c.fondClair, color: vue === v ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif', position: 'relative' }}>
-            {v === 'stats' ? 'Statistiques' : v === 'revenus' ? '💰 Revenus' : v === 'users' ? 'Utilisateurs' : v === 'reservations' ? 'Réservations' : '🚩 Signalements'}
+            {v === 'stats' ? 'Statistiques' : v === 'revenus' ? '💰 Revenus' : v === 'users' ? 'Utilisateurs' : v === 'reservations' ? 'Réservations' : v === 'signalements' ? '🚩 Signalements' : '⚙️ Paramètres'}
             {v === 'signalements' && signalementsEnAttente > 0 && <span style={{ background: c.rouge, color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{signalementsEnAttente}</span>}
           </button>
         ))}
@@ -300,6 +327,21 @@ const DashboardAdmin = () => {
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {vue === 'parametres' && (
+          <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>Paramètres de la plateforme</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: c.blanc, borderRadius: '8px', border: `1px solid ${c.bordure}` }}>
+              <div>
+                <p style={{ color: c.texteFonce, fontWeight: 'bold', margin: '0 0 4px', fontSize: '14px' }}>🚧 Mode maintenance</p>
+                <p style={{ color: c.texte, fontSize: '12px', margin: 0, maxWidth: '400px' }}>Quand activé, tous les visiteurs (sauf vous en tant qu'admin) voient une page "On revient bientôt" au lieu du site.</p>
+              </div>
+              <div onClick={toggleMaintenance} style={{ width: '48px', height: '26px', borderRadius: '13px', cursor: 'pointer', flexShrink: 0, marginLeft: '1rem', background: maintenanceActive ? c.rouge : '#CBD5E0', position: 'relative', transition: 'background 0.3s' }}>
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.3s', left: maintenanceActive ? '25px' : '3px' }} />
+              </div>
+            </div>
           </div>
         )}
       </div>

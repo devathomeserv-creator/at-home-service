@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { getModeMaintenance } from './services/api'
 import Accueil from './pages/Accueil'
 import Auth from './pages/Auth'
 import DashboardClient from './pages/DashboardClient'
@@ -11,6 +12,7 @@ import Confidentialite from './pages/Confidentialite'
 import Profil from './pages/Profil'
 import ProfilPrestataire from './pages/ProfilPrestataire'
 import Carte from './pages/Carte'
+import Maintenance from './pages/Maintenance'
 
 const RoutePrategee = ({ children, role }) => {
   const { user, loading } = useAuth()
@@ -32,6 +34,32 @@ const RouteAuth = ({ children }) => {
 }
 
 const App = () => {
+  const { user, loading: loadingAuth } = useAuth()
+  const [maintenanceActive, setMaintenanceActive] = useState(false)
+  const [verificationFaite, setVerificationFaite] = useState(false)
+
+  useEffect(() => {
+    const verifier = async () => {
+      try {
+        const res = await getModeMaintenance()
+        setMaintenanceActive(res.data.mode_maintenance)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setVerificationFaite(true)
+      }
+    }
+    verifier()
+  }, [])
+
+  if (!verificationFaite || loadingAuth) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>Chargement...</div>
+  }
+
+  if (maintenanceActive && (!user || user.role !== 'admin')) {
+    return <Maintenance />
+  }
+
   return (
     <BrowserRouter>
       <Routes>
