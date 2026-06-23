@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture, recupererPaiementIntent, ajouterListeAttente, getMaListeAttente, retirerListeAttente } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
@@ -32,10 +33,12 @@ const EtoilesPetit = ({ note }) => (
 )
 
 const joursMap = { 0: 'dimanche', 1: 'lundi', 2: 'mardi', 3: 'mercredi', 4: 'jeudi', 5: 'vendredi', 6: 'samedi' }
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
 const DashboardClient = () => {
   const { user, logout } = useAuth()
   const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
   const navigate = useNavigate()
   const [prestataires, setPrestataires] = useState([])
   const [reservations, setReservations] = useState([])
@@ -59,6 +62,7 @@ const DashboardClient = () => {
   const [adresse, setAdresse] = useState('')
   const [adresseModifiee, setAdresseModifiee] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
   const [joursTravail, setJoursTravail] = useState([])
   const [heureDebut, setHeureDebut] = useState('09:00')
   const [heureFin, setHeureFin] = useState('18:00')
@@ -67,6 +71,7 @@ const DashboardClient = () => {
   const [consentementDonnees, setConsentementDonnees] = useState(false)
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
+  const categorieKey = (nom) => nom.replace(' ', '_')
 
   useEffect(() => {
     chargerPrestataires()
@@ -400,13 +405,25 @@ const DashboardClient = () => {
             <div style={{ fontSize: '9px', color: '#FEB2B2', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
           </div>
         </div>
-        <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: '7rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
             {themeMode === 'clair' ? '🌙' : '☀️'}
           </button>
-          <span style={{ color: '#BEE3F8', fontSize: '14px' }}>Bonjour {user?.prenom} !</span>
-          <button onClick={() => navigate('/profil')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
-          <button onClick={handleLogout} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
+          <span style={{ color: '#BEE3F8', fontSize: '14px' }}>{t('bonjour')} {user?.prenom} !</span>
+          <button onClick={() => navigate('/profil')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('mon_profil')}</button>
+          <button onClick={handleLogout} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('deconnexion')}</button>
         </div>
         <button onClick={() => setMenuOuvert(!menuOuvert)} className="nav-mobile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'none' }}>
           <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
@@ -415,21 +432,26 @@ const DashboardClient = () => {
         </button>
         {menuOuvert && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: c.bleu, padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
-            <p style={{ color: '#BEE3F8', fontSize: '14px', margin: 0 }}>Bonjour {user?.prenom} !</p>
-            <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{themeMode === 'clair' ? '🌙 Mode sombre' : '☀️ Mode clair'}</button>
-            <button onClick={() => { navigate('/profil'); setMenuOuvert(false) }} style={{ background: 'white', color: c.bleu, border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
-            <button onClick={handleLogout} style={{ background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {Object.keys(drapeaux).map(l => (
+                <button key={l} onClick={() => changerLangue(l)} style={{ background: langue === l ? 'white' : 'rgba(255,255,255,0.2)', color: langue === l ? c.bleu : 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>{drapeaux[l]}</button>
+              ))}
+            </div>
+            <p style={{ color: '#BEE3F8', fontSize: '14px', margin: 0 }}>{t('bonjour')} {user?.prenom} !</p>
+            <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{themeMode === 'clair' ? '🌙' : '☀️'}</button>
+            <button onClick={() => { navigate('/profil'); setMenuOuvert(false) }} style={{ background: 'white', color: c.bleu, border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('mon_profil')}</button>
+            <button onClick={handleLogout} style={{ background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('deconnexion')}</button>
           </div>
         )}
       </nav>
 
       <div className="tabs" style={{ background: c.fondMoyen, padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        <button onClick={() => setVue('services')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'services' ? c.bleu : c.fondClair, color: vue === 'services' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Services disponibles</button>
-        <button onClick={() => setVue('reservations')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'reservations' ? c.bleu : c.fondClair, color: vue === 'reservations' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Mes réservations</button>
-        <button onClick={() => { setVue('attente'); chargerListeAttente() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'attente' ? c.bleu : c.fondClair, color: vue === 'attente' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>⏳ Liste d'attente</button>
-        <button onClick={() => { setVue('favoris'); chargerFavoris() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'favoris' ? c.bleu : c.fondClair, color: vue === 'favoris' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>❤️ Favoris</button>
+        <button onClick={() => setVue('services')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'services' ? c.bleu : c.fondClair, color: vue === 'services' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('services_disponibles')}</button>
+        <button onClick={() => setVue('reservations')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'reservations' ? c.bleu : c.fondClair, color: vue === 'reservations' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('mes_reservations')}</button>
+        <button onClick={() => { setVue('attente'); chargerListeAttente() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'attente' ? c.bleu : c.fondClair, color: vue === 'attente' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('liste_attente')}</button>
+        <button onClick={() => { setVue('favoris'); chargerFavoris() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'favoris' ? c.bleu : c.fondClair, color: vue === 'favoris' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('favoris')}</button>
         <button onClick={() => { setVue('messages'); chargerConversations() }} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === 'messages' ? c.bleu : c.fondClair, color: vue === 'messages' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif', position: 'relative' }}>
-          💬 Messages
+          {t('messages')}
           {totalNonLus > 0 && <span style={{ background: c.rouge, color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{totalNonLus}</span>}
         </button>
       </div>
@@ -442,12 +464,12 @@ const DashboardClient = () => {
         {showReservationModal && serviceSelectionne && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
             <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: `1px solid ${c.bordure}`, maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3 style={{ color: c.texteFonce, marginBottom: '0.5rem' }}>Réserver — {serviceSelectionne.titre}</h3>
+              <h3 style={{ color: c.texteFonce, marginBottom: '0.5rem' }}>{t('reserver_titre')} {serviceSelectionne.titre}</h3>
               <p style={{ color: c.rouge, fontWeight: 'bold', marginBottom: '1rem' }}>{serviceSelectionne.prix}€ · {serviceSelectionne.duree} min</p>
               <p style={{ color: c.texte, fontSize: '12px', marginBottom: '1rem', fontStyle: 'italic' }}>
-                Disponible : {joursTravail.join(', ')} de {heureDebut} à {heureFin}
+                {t('disponible_label')} {joursTravail.join(', ')} {t('de_a')} {heureDebut} - {heureFin}
               </p>
-              <p style={{ color: c.texte, marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>Choisissez une date et heure :</p>
+              <p style={{ color: c.texte, marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>{t('choisir_date_heure')}</p>
               <DatePicker
                 selected={dateSelectionnee}
                 onChange={(date) => setDateSelectionnee(date)}
@@ -464,11 +486,11 @@ const DashboardClient = () => {
               />
               {dateSelectionnee && estCreneauOccupe(dateSelectionnee) && (
                 <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: '1px solid #F6AD55' }}>
-                  <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>⏳ Ce créneau est déjà pris. Vous pouvez vous inscrire en liste d'attente pour être notifié s'il se libère.</p>
+                  <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>{t('creneau_pris_attente')}</p>
                 </div>
               )}
-              <p style={{ color: c.texte, margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Votre adresse :</p>
-              <input placeholder="Ex: 12 rue de la Paix, Nice" value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', marginBottom: '1rem', boxSizing: 'border-box' }} />
+              <p style={{ color: c.texte, margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>{t('votre_adresse')}</p>
+              <input placeholder={t('placeholder_adresse')} value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
               <div style={{ background: c.blanc, borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: `1px solid ${c.bleuClair}` }}>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
@@ -479,21 +501,21 @@ const DashboardClient = () => {
                     style={{ marginTop: '3px', flexShrink: 0 }}
                   />
                   <span style={{ color: c.texte, fontSize: '12px', lineHeight: 1.5 }}>
-                    J'accepte que le prestataire conserve mes coordonnées (nom, contact) dans son répertoire client pour faciliter une future prise de contact. Vous pouvez retirer ce consentement à tout moment depuis votre profil ou en nous contactant. <span onClick={() => navigate('/confidentialite')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>En savoir plus</span>.
+                    {t('consentement_texte')} <span onClick={() => navigate('/confidentialite')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{t('en_savoir_plus')}</span>.
                   </span>
                 </label>
               </div>
 
               <p style={{ color: c.texte, fontSize: '11px', marginBottom: '1rem', fontStyle: 'italic' }}>
-                💡 Annulation gratuite avec remboursement automatique jusqu'à 24h avant le rendez-vous.
+                {t('annulation_gratuite_info')}
               </p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {dateSelectionnee && estCreneauOccupe(dateSelectionnee) ? (
-                  <button onClick={handleListeAttente} style={{ flex: 1, background: '#F6AD55', color: '#1A365D', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', fontWeight: 'bold' }}>⏳ Rejoindre la liste d'attente</button>
+                  <button onClick={handleListeAttente} style={{ flex: 1, background: '#F6AD55', color: '#1A365D', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', fontWeight: 'bold' }}>{t('rejoindre_liste_attente')}</button>
                 ) : (
-                  <button onClick={confirmerReservation} style={{ flex: 1, background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Payer et réserver</button>
+                  <button onClick={confirmerReservation} style={{ flex: 1, background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('payer_reserver')}</button>
                 )}
-                <button onClick={() => setShowReservationModal(false)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+                <button onClick={() => setShowReservationModal(false)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
               </div>
             </div>
           </div>
@@ -502,14 +524,14 @@ const DashboardClient = () => {
         {showModifierModal && reservationSelectionnee && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
             <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: `1px solid ${c.bordure}`, maxHeight: '90vh', overflowY: 'auto' }}>
-              <h3 style={{ color: c.texteFonce, marginBottom: '1.5rem' }}>Modifier la réservation</h3>
-              <p style={{ color: c.texte, marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>Nouvelle date et heure :</p>
+              <h3 style={{ color: c.texteFonce, marginBottom: '1.5rem' }}>{t('modifier_reservation')}</h3>
+              <p style={{ color: c.texte, marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>{t('nouvelle_date_heure')}</p>
               <DatePicker selected={dateModifiee} onChange={(date) => setDateModifiee(date)} showTimeSelect timeFormat="HH:mm" timeIntervals={30} dateFormat="dd/MM/yyyy à HH:mm" minDate={new Date()} locale="fr" inline />
-              <p style={{ color: c.texte, margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>Adresse :</p>
+              <p style={{ color: c.texte, margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>{t('adresse_label')}</p>
               <input value={adresseModifiee} onChange={(e) => setAdresseModifiee(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', marginBottom: '1.5rem', boxSizing: 'border-box' }} />
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <button onClick={handleModifier} style={{ flex: 1, background: c.bleu, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Confirmer la modification</button>
-                <button onClick={() => setShowModifierModal(false)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+                <button onClick={handleModifier} style={{ flex: 1, background: c.bleu, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('confirmer_modification')}</button>
+                <button onClick={() => setShowModifierModal(false)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
               </div>
             </div>
           </div>
@@ -517,32 +539,32 @@ const DashboardClient = () => {
 
         {showAvisForm && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1rem' }}>Laisser un avis</h3>
-            <p style={{ color: c.texte, marginBottom: '8px', fontSize: '14px' }}>Votre note :</p>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1rem' }}>{t('laisser_avis')}</h3>
+            <p style={{ color: c.texte, marginBottom: '8px', fontSize: '14px' }}>{t('votre_note')}</p>
             <div style={{ display: 'flex', gap: '4px' }}>
               {[1, 2, 3, 4, 5].map(i => (
                 <span key={i} onClick={() => setAvisForm({ ...avisForm, note: i })} style={{ fontSize: '24px', cursor: 'pointer', color: i <= avisForm.note ? '#F6AD55' : '#CBD5E0' }}>★</span>
               ))}
             </div>
-            <textarea placeholder="Votre commentaire..." value={avisForm.commentaire} onChange={(e) => setAvisForm({ ...avisForm, commentaire: e.target.value })} rows={3} style={{ width: '100%', padding: '10px 14px', marginTop: '12px', marginBottom: '12px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', fontFamily: 'Georgia, serif' }} />
+            <textarea placeholder={t('placeholder_commentaire')} value={avisForm.commentaire} onChange={(e) => setAvisForm({ ...avisForm, commentaire: e.target.value })} rows={3} style={{ width: '100%', padding: '10px 14px', marginTop: '12px', marginBottom: '12px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', fontFamily: 'Georgia, serif' }} />
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <button onClick={envoyerAvis} style={{ background: c.bleu, color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Publier l'avis</button>
-              <button onClick={() => setShowAvisForm(false)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+              <button onClick={envoyerAvis} style={{ background: c.bleu, color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('publier_avis')}</button>
+              <button onClick={() => setShowAvisForm(false)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
             </div>
           </div>
         )}
 
         {vue === 'services' && (
           <>
-            <input placeholder="Rechercher un prestataire ou un service..." value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ width: '100%', padding: '10px 14px', marginBottom: '1rem', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }} />
+            <input placeholder={t('placeholder_recherche_presta')} value={recherche} onChange={(e) => setRecherche(e.target.value)} style={{ width: '100%', padding: '10px 14px', marginBottom: '1rem', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }} />
             <div className="cats" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-              <button onClick={() => filtrerCategorie('')} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === '' ? c.bleu : c.fondClair, color: categorie === '' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Tous</button>
+              <button onClick={() => filtrerCategorie('')} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === '' ? c.bleu : c.fondClair, color: categorie === '' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('tous')}</button>
               {categories.map(cat => (
-                <button key={cat} onClick={() => filtrerCategorie(cat)} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === cat ? c.bleu : c.fondClair, color: categorie === cat ? 'white' : c.texteFonce, textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat}</button>
+                <button key={cat} onClick={() => filtrerCategorie(cat)} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === cat ? c.bleu : c.fondClair, color: categorie === cat ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t(categorieKey(cat))}</button>
               ))}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {prestatairesFiltres.length === 0 && <p style={{ color: c.texte }}>Aucun prestataire trouvé.</p>}
+              {prestatairesFiltres.length === 0 && <p style={{ color: c.texte }}>{t('aucun_prestataire_trouve')}</p>}
               {prestatairesFiltres.map(p => {
                 const categoriePrincipale = p.services[0]?.categorie || 'coiffure'
                 const prixMin = Math.min(...p.services.map(s => s.prix))
@@ -558,12 +580,12 @@ const DashboardClient = () => {
                       <div>
                         <h3 onClick={() => navigate(`/prestataire/${p.id}`)} style={{ margin: '0 0 4px', color: c.texteFonce, fontFamily: 'Georgia, serif', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', cursor: 'pointer' }}>
                           {p.prenom} {p.nom}
-                          {p.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>✅ Vérifié</span>}
+                          {p.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>{t('verifie')}</span>}
                         </h3>
                         {(p.ville || p.code_postal) && <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 6px' }}>📍 {p.ville} {p.code_postal}</p>}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                           <EtoilesPetit note={p.moyenne} />
-                          <span style={{ color: c.texte, fontSize: '12px' }}>{p.moyenne} ({p.totalAvis} avis)</span>
+                          <span style={{ color: c.texte, fontSize: '12px' }}>{p.moyenne} ({p.totalAvis} {t('avis')})</span>
                         </div>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                           {p.services.map(s => (
@@ -572,8 +594,8 @@ const DashboardClient = () => {
                         </div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                        <span style={{ color: c.texte, fontSize: '13px' }}>À partir de <strong style={{ color: c.rouge, fontSize: '16px' }}>{prixMin}€</strong></span>
-                        <button onClick={() => ouvrirReservation(p.services[0], p)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Réserver</button>
+                        <span style={{ color: c.texte, fontSize: '13px' }}>{t('a_partir_de')} <strong style={{ color: c.rouge, fontSize: '16px' }}>{prixMin}€</strong></span>
+                        <button onClick={() => ouvrirReservation(p.services[0], p)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('reserver')}</button>
                       </div>
                     </div>
                   </div>
@@ -585,7 +607,7 @@ const DashboardClient = () => {
 
         {vue === 'reservations' && (
           <div>
-            {reservations.length === 0 && <p style={{ color: c.texte }}>Aucune réservation pour le moment.</p>}
+            {reservations.length === 0 && <p style={{ color: c.texte }}>{t('aucune_reservation')}</p>}
             {reservations.map(res => {
               const sc = statutColor(res.statut)
               return (
@@ -594,24 +616,24 @@ const DashboardClient = () => {
                     <h3 style={{ margin: 0, color: c.texteFonce }}>{res.services?.titre}</h3>
                     <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: sc.bg, color: sc.color }}>{res.statut}</span>
                   </div>
-                  <p style={{ color: c.texte, marginTop: '0.5rem' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
-                  <p style={{ color: c.texte }}>Adresse : {res.adresse_intervention}</p>
+                  <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('date_label')} {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
+                  <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
                   {res.statut === 'annule' && res.rembourse && (
-                    <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>✅ Remboursé automatiquement</p>
+                    <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>{t('rembourse_auto')}</p>
                   )}
 
                   {(res.statut === 'en_attente' || res.statut === 'confirme') && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                      <button onClick={() => ouvrirModifier(res)} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✏️ Modifier</button>
-                      <button onClick={() => handleAnnuler(res.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ Annuler</button>
+                      <button onClick={() => ouvrirModifier(res)} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>{t('modifier')}</button>
+                      <button onClick={() => handleAnnuler(res.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ {t('annuler')}</button>
                     </div>
                   )}
 
                   {res.statut === 'termine' && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                      <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>⭐ Laisser un avis</button>
+                      <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>{t('laisser_avis_btn')}</button>
                       <button onClick={() => handleTelechargerFacture(res.id)} disabled={telechargementEnCours === res.id} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>
-                        {telechargementEnCours === res.id ? 'Génération...' : '📄 Télécharger la facture'}
+                        {telechargementEnCours === res.id ? t('telechargement_facture') : t('telecharger_facture')}
                       </button>
                     </div>
                   )}
@@ -623,19 +645,19 @@ const DashboardClient = () => {
 
         {vue === 'attente' && (
           <div>
-            {listeAttente.length === 0 && <p style={{ color: c.texte }}>Vous n'êtes inscrit sur aucune liste d'attente pour le moment.</p>}
+            {listeAttente.length === 0 && <p style={{ color: c.texte }}>{t('aucune_liste_attente')}</p>}
             {listeAttente.map(item => (
               <div key={item.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <h3 style={{ margin: 0, color: c.texteFonce }}>{item.services?.titre}</h3>
                   <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: item.statut === 'notifie' ? '#d1fae5' : '#fef3c7', color: item.statut === 'notifie' ? '#065f46' : '#92400e' }}>
-                    {item.statut === 'notifie' ? '✅ Créneau libéré !' : '⏳ En attente'}
+                    {item.statut === 'notifie' ? t('creneau_libere') : t('en_attente_statut')}
                   </span>
                 </div>
-                <p style={{ color: c.texte, marginTop: '0.5rem' }}>Prestataire : {item.services?.users?.prenom} {item.services?.users?.nom}</p>
-                <p style={{ color: c.texte }}>Date souhaitée : {new Date(item.date_souhaitee).toLocaleString('fr-FR')}</p>
+                <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('prestataire_label')} {item.services?.users?.prenom} {item.services?.users?.nom}</p>
+                <p style={{ color: c.texte }}>{t('date_souhaitee_label')} {new Date(item.date_souhaitee).toLocaleString('fr-FR')}</p>
                 {item.statut === 'en_attente' && (
-                  <button onClick={() => handleRetirerListeAttente(item.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px', marginTop: '1rem' }}>✗ Quitter la liste d'attente</button>
+                  <button onClick={() => handleRetirerListeAttente(item.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px', marginTop: '1rem' }}>{t('quitter_attente')}</button>
                 )}
               </div>
             ))}
@@ -644,7 +666,7 @@ const DashboardClient = () => {
 
         {vue === 'favoris' && (
           <div>
-            {favoris.length === 0 && <p style={{ color: c.texte }}>Aucun favori pour le moment. Cliquez sur le ❤️ sur un profil prestataire pour l'ajouter !</p>}
+            {favoris.length === 0 && <p style={{ color: c.texte }}>{t('aucun_favori')}</p>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
               {favoris.map(fav => (
                 <div key={fav.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
@@ -661,7 +683,7 @@ const DashboardClient = () => {
                       {fav.services.map(s => s.categorie).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
                     </p>
                   )}
-                  <button onClick={() => navigate(`/prestataire/${fav.prestataire_id}`)} style={{ width: '100%', background: c.bleu, color: 'white', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Voir le profil</button>
+                  <button onClick={() => navigate(`/prestataire/${fav.prestataire_id}`)} style={{ width: '100%', background: c.bleu, color: 'white', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('voir_profil')}</button>
                 </div>
               ))}
             </div>
@@ -670,7 +692,7 @@ const DashboardClient = () => {
 
         {vue === 'messages' && (
           <div>
-            {conversations.length === 0 && <p style={{ color: c.texte }}>Aucune conversation pour le moment. Envoyez un message depuis une réservation !</p>}
+            {conversations.length === 0 && <p style={{ color: c.texte }}>{t('aucune_conversation')}</p>}
             {conversations.map(conv => (
               <div key={conv.id} onClick={() => ouvrirChat(conv)} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}`, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
@@ -687,7 +709,7 @@ const DashboardClient = () => {
       </div>
 
       <footer style={{ background: c.texteFonce, color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
-        © 2026 At Home Service — Tous droits réservés
+        {t('footer_droits')}
       </footer>
     </div>
   )

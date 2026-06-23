@@ -1,6 +1,5 @@
 export const traductions = {
   fr: {
-    // Navigation
     connexion: 'Connexion',
     inscription: "S'inscrire",
     carte: 'Carte',
@@ -9,8 +8,8 @@ export const traductions = {
     mon_espace: '← Mon espace',
     accueil: '← Accueil',
     retour: 'Retour',
+    bonjour: 'Bonjour',
 
-    // Page d'accueil
     hero_titre: 'Des pros à domicile,',
     hero_titre_2: 'quand vous en avez besoin',
     hero_sous_titre: 'Plus besoin de chercher, un clic et trouvez votre artisan à domicile',
@@ -42,10 +41,9 @@ export const traductions = {
     reservation_ligne: 'Réservation en ligne',
     paiement_securise: 'Paiement sécurisé',
     pro_question: 'Vous êtes un professionnel ?',
-    pro_texte: 'Rejoignez At Home Service et développez votre clientèle. Créez votre profil gratuitement et commencez à recevoir des réservations dès aujourd\'hui.',
+    pro_texte: "Rejoignez At Home Service et développez votre clientèle. Créez votre profil gratuitement et commencez à recevoir des réservations dès aujourd'hui.",
     rejoindre: 'Rejoindre la plateforme',
 
-    // Footer
     footer_slogan: 'Plus besoin de chercher,\nun clic et trouvez votre\nartisan à domicile',
     footer_services: 'Services',
     footer_liens: 'Liens utiles',
@@ -57,7 +55,6 @@ export const traductions = {
     footer_contact: 'Contact',
     footer_droits: '© 2026 At Home Service — Tous droits réservés',
 
-    // Catégories
     coiffure: 'Coiffure',
     barber: 'Barber',
     esthetique: 'Esthétique',
@@ -70,7 +67,6 @@ export const traductions = {
     photographe: 'Photographe',
     tous: 'Tous',
 
-    // Page Auth
     auth_slogan: 'Plus besoin de chercher, un clic et trouvez votre artisan à domicile',
     nom: 'Nom',
     prenom: 'Prénom',
@@ -85,7 +81,61 @@ export const traductions = {
     sinscrire: "S'inscrire",
     telecharger_app: "📱 Télécharger l'application",
     mentions_legales_cgu: 'Mentions légales et CGU',
-    parraine_titre: '🎉 Vous avez été parrainé ! Code :'
+    parraine_titre: '🎉 Vous avez été parrainé ! Code :',
+
+    services_disponibles: 'Services disponibles',
+    mes_reservations: 'Mes réservations',
+    liste_attente: "⏳ Liste d'attente",
+    favoris: '❤️ Favoris',
+    messages: '💬 Messages',
+
+    reserver_titre: 'Réserver —',
+    disponible_label: 'Disponible :',
+    de_a: 'de',
+    choisir_date_heure: 'Choisissez une date et heure :',
+    creneau_pris_attente: "⏳ Ce créneau est déjà pris. Vous pouvez vous inscrire en liste d'attente pour être notifié s'il se libère.",
+    votre_adresse: 'Votre adresse :',
+    placeholder_adresse: 'Ex: 12 rue de la Paix, Nice',
+    consentement_texte: "J'accepte que le prestataire conserve mes coordonnées (nom, contact) dans son répertoire client pour faciliter une future prise de contact. Vous pouvez retirer ce consentement à tout moment depuis votre profil ou en nous contactant.",
+    en_savoir_plus: 'En savoir plus',
+    annulation_gratuite_info: "💡 Annulation gratuite avec remboursement automatique jusqu'à 24h avant le rendez-vous.",
+    rejoindre_liste_attente: "⏳ Rejoindre la liste d'attente",
+    payer_reserver: 'Payer et réserver',
+    annuler: 'Annuler',
+
+    modifier_reservation: 'Modifier la réservation',
+    nouvelle_date_heure: 'Nouvelle date et heure :',
+    adresse_label: 'Adresse :',
+    confirmer_modification: 'Confirmer la modification',
+
+    laisser_avis: 'Laisser un avis',
+    votre_note: 'Votre note :',
+    placeholder_commentaire: 'Votre commentaire...',
+    publier_avis: "Publier l'avis",
+
+    placeholder_recherche_presta: 'Rechercher un prestataire ou un service...',
+    aucun_prestataire_trouve: 'Aucun prestataire trouvé.',
+    reserver: 'Réserver',
+
+    aucune_reservation: 'Aucune réservation pour le moment.',
+    date_label: 'Date :',
+    adresse_intervention_label: 'Adresse :',
+    rembourse_auto: '✅ Remboursé automatiquement',
+    modifier: '✏️ Modifier',
+    quitter_attente: "✗ Quitter la liste d'attente",
+    laisser_avis_btn: '⭐ Laisser un avis',
+    telechargement_facture: 'Génération...',
+    telecharger_facture: '📄 Télécharger la facture',
+
+    aucune_liste_attente: "Vous n'êtes inscrit sur aucune liste d'attente pour le moment.",
+    creneau_libere: '✅ Créneau libéré !',
+    en_attente_statut: '⏳ En attente',
+    prestataire_label: 'Prestataire :',
+    date_souhaitee_label: 'Date souhaitée :',
+
+    aucun_favori: "Aucun favori pour le moment. Cliquez sur le ❤️ sur un profil prestataire pour l'ajouter !",
+
+    aucune_conversation: 'Aucune conversation pour le moment. Envoyez un message depuis une réservation !'
   },
   en: {
     connexion: 'Login',
@@ -96,6 +146,7 @@ export const traductions = {
     mon_espace: '← My space',
     accueil: '← Home',
     retour: 'Back',
+    bonjour: 'Hello',
 
     hero_titre: 'Professionals at home,',
     hero_titre_2: 'whenever you need them',
@@ -168,7 +219,61 @@ export const traductions = {
     sinscrire: 'Sign up',
     telecharger_app: '📱 Download the app',
     mentions_legales_cgu: 'Legal notice and Terms',
-    parraine_titre: "🎉 You've been referred! Code:"
+    parraine_titre: "🎉 You've been referred! Code:",
+
+    services_disponibles: 'Available services',
+    mes_reservations: 'My bookings',
+    liste_attente: '⏳ Waitlist',
+    favoris: '❤️ Favorites',
+    messages: '💬 Messages',
+
+    reserver_titre: 'Book —',
+    disponible_label: 'Available:',
+    de_a: 'from',
+    choisir_date_heure: 'Choose a date and time:',
+    creneau_pris_attente: '⏳ This slot is already taken. You can join the waitlist to be notified if it becomes available.',
+    votre_adresse: 'Your address:',
+    placeholder_adresse: 'E.g.: 12 Peace Street, Nice',
+    consentement_texte: 'I agree that the provider may keep my contact details (name, contact) in their client directory to facilitate future contact. You can withdraw this consent at any time from your profile or by contacting us.',
+    en_savoir_plus: 'Learn more',
+    annulation_gratuite_info: '💡 Free cancellation with automatic refund up to 24h before the appointment.',
+    rejoindre_liste_attente: '⏳ Join the waitlist',
+    payer_reserver: 'Pay and book',
+    annuler: 'Cancel',
+
+    modifier_reservation: 'Edit booking',
+    nouvelle_date_heure: 'New date and time:',
+    adresse_label: 'Address:',
+    confirmer_modification: 'Confirm change',
+
+    laisser_avis: 'Leave a review',
+    votre_note: 'Your rating:',
+    placeholder_commentaire: 'Your comment...',
+    publier_avis: 'Post review',
+
+    placeholder_recherche_presta: 'Search for a provider or service...',
+    aucun_prestataire_trouve: 'No provider found.',
+    reserver: 'Book',
+
+    aucune_reservation: 'No bookings yet.',
+    date_label: 'Date:',
+    adresse_intervention_label: 'Address:',
+    rembourse_auto: '✅ Automatically refunded',
+    modifier: '✏️ Edit',
+    quitter_attente: '✗ Leave the waitlist',
+    laisser_avis_btn: '⭐ Leave a review',
+    telechargement_facture: 'Generating...',
+    telecharger_facture: '📄 Download invoice',
+
+    aucune_liste_attente: "You're not on any waitlist at the moment.",
+    creneau_libere: '✅ Slot available!',
+    en_attente_statut: '⏳ Waiting',
+    prestataire_label: 'Provider:',
+    date_souhaitee_label: 'Desired date:',
+
+    aucun_favori: 'No favorites yet. Click the ❤️ on a provider profile to add it!',
+
+    aucune_conversation: 'No conversation yet. Send a message from a booking!'
   },
   it: {
     connexion: 'Accesso',
@@ -179,6 +284,7 @@ export const traductions = {
     mon_espace: '← Il mio spazio',
     accueil: '← Home',
     retour: 'Indietro',
+    bonjour: 'Ciao',
 
     hero_titre: 'Professionisti a domicilio,',
     hero_titre_2: 'quando ne hai bisogno',
@@ -251,7 +357,61 @@ export const traductions = {
     sinscrire: 'Iscriviti',
     telecharger_app: "📱 Scarica l'app",
     mentions_legales_cgu: 'Note legali e Termini',
-    parraine_titre: '🎉 Sei stato invitato! Codice:'
+    parraine_titre: '🎉 Sei stato invitato! Codice:',
+
+    services_disponibles: 'Servizi disponibili',
+    mes_reservations: 'Le mie prenotazioni',
+    liste_attente: "⏳ Lista d'attesa",
+    favoris: '❤️ Preferiti',
+    messages: '💬 Messaggi',
+
+    reserver_titre: 'Prenota —',
+    disponible_label: 'Disponibile:',
+    de_a: 'dalle',
+    choisir_date_heure: 'Scegli una data e ora:',
+    creneau_pris_attente: "⏳ Questo orario è già occupato. Puoi iscriverti alla lista d'attesa per essere avvisato se si libera.",
+    votre_adresse: 'Il tuo indirizzo:',
+    placeholder_adresse: 'Es: Via della Pace 12, Nizza',
+    consentement_texte: 'Accetto che il fornitore conservi i miei dati di contatto (nome, contatto) nella sua rubrica clienti per facilitare un futuro contatto. Puoi revocare questo consenso in qualsiasi momento dal tuo profilo o contattandoci.',
+    en_savoir_plus: 'Scopri di più',
+    annulation_gratuite_info: "💡 Cancellazione gratuita con rimborso automatico fino a 24h prima dell'appuntamento.",
+    rejoindre_liste_attente: "⏳ Iscriviti alla lista d'attesa",
+    payer_reserver: 'Paga e prenota',
+    annuler: 'Annulla',
+
+    modifier_reservation: 'Modifica prenotazione',
+    nouvelle_date_heure: 'Nuova data e ora:',
+    adresse_label: 'Indirizzo:',
+    confirmer_modification: 'Confirma modifica',
+
+    laisser_avis: 'Lascia una recensione',
+    votre_note: 'La tua valutazione:',
+    placeholder_commentaire: 'Il tuo commento...',
+    publier_avis: 'Pubblica recensione',
+
+    placeholder_recherche_presta: 'Cerca un fornitore o un servizio...',
+    aucun_prestataire_trouve: 'Nessun fornitore trovato.',
+    reserver: 'Prenota',
+
+    aucune_reservation: 'Nessuna prenotazione al momento.',
+    date_label: 'Data:',
+    adresse_intervention_label: 'Indirizzo:',
+    rembourse_auto: '✅ Rimborsato automaticamente',
+    modifier: '✏️ Modifica',
+    quitter_attente: "✗ Lascia la lista d'attesa",
+    laisser_avis_btn: '⭐ Lascia una recensione',
+    telechargement_facture: 'Generazione...',
+    telecharger_facture: '📄 Scarica fattura',
+
+    aucune_liste_attente: "Non sei in nessuna lista d'attesa al momento.",
+    creneau_libere: '✅ Orario disponibile!',
+    en_attente_statut: '⏳ In attesa',
+    prestataire_label: 'Fornitore:',
+    date_souhaitee_label: 'Data desiderata:',
+
+    aucun_favori: 'Nessun preferito al momento. Clicca sul ❤️ su un profilo fornitore per aggiungerlo!',
+
+    aucune_conversation: 'Nessuna conversazione al momento. Invia un messaggio da una prenotazione!'
   },
   ru: {
     connexion: 'Вход',
@@ -262,6 +422,7 @@ export const traductions = {
     mon_espace: '← Мой кабинет',
     accueil: '← Главная',
     retour: 'Назад',
+    bonjour: 'Привет',
 
     hero_titre: 'Профессионалы на дом,',
     hero_titre_2: 'когда вам это нужно',
@@ -334,6 +495,60 @@ export const traductions = {
     sinscrire: 'Зарегистрироваться',
     telecharger_app: '📱 Скачать приложение',
     mentions_legales_cgu: 'Юридическая информация',
-    parraine_titre: '🎉 Вас пригласили! Код:'
+    parraine_titre: '🎉 Вас пригласили! Код:',
+
+    services_disponibles: 'Доступные услуги',
+    mes_reservations: 'Мои бронирования',
+    liste_attente: '⏳ Список ожидания',
+    favoris: '❤️ Избранное',
+    messages: '💬 Сообщения',
+
+    reserver_titre: 'Забронировать —',
+    disponible_label: 'Доступно:',
+    de_a: 'с',
+    choisir_date_heure: 'Выберите дату и время:',
+    creneau_pris_attente: '⏳ Это время уже занято. Вы можете встать в список ожидания, чтобы получить уведомление, если оно освободится.',
+    votre_adresse: 'Ваш адрес:',
+    placeholder_adresse: 'Напр.: ул. Мира 12, Ницца',
+    consentement_texte: 'Я согласен, что специалист может хранить мои контактные данные (имя, контакт) в своей клиентской базе для облегчения будущего контакта. Вы можете отозвать это согласие в любое время в своем профиле или связавшись с нами.',
+    en_savoir_plus: 'Узнать больше',
+    annulation_gratuite_info: '💡 Бесплатная отмена с автоматическим возвратом средств до 24 часов до встречи.',
+    rejoindre_liste_attente: '⏳ Встать в список ожидания',
+    payer_reserver: 'Оплатить и забронировать',
+    annuler: 'Отменить',
+
+    modifier_reservation: 'Изменить бронирование',
+    nouvelle_date_heure: 'Новая дата и время:',
+    adresse_label: 'Адрес:',
+    confirmer_modification: 'Подтвердить изменение',
+
+    laisser_avis: 'Оставить отзыв',
+    votre_note: 'Ваша оценка:',
+    placeholder_commentaire: 'Ваш комментарий...',
+    publier_avis: 'Опубликовать отзыв',
+
+    placeholder_recherche_presta: 'Поиск специалиста или услуги...',
+    aucun_prestataire_trouve: 'Специалист не найден.',
+    reserver: 'Забронировать',
+
+    aucune_reservation: 'Пока нет бронирований.',
+    date_label: 'Дата:',
+    adresse_intervention_label: 'Адрес:',
+    rembourse_auto: '✅ Автоматически возвращено',
+    modifier: '✏️ Изменить',
+    quitter_attente: '✗ Покинуть список ожидания',
+    laisser_avis_btn: '⭐ Оставить отзыв',
+    telechargement_facture: 'Генерация...',
+    telecharger_facture: '📄 Скачать счет',
+
+    aucune_liste_attente: 'Вы пока не в списке ожидания.',
+    creneau_libere: '✅ Время свободно!',
+    en_attente_statut: '⏳ В ожидании',
+    prestataire_label: 'Специалист:',
+    date_souhaitee_label: 'Желаемая дата:',
+
+    aucun_favori: 'Пока нет избранного. Нажмите ❤️ на профиле специалиста, чтобы добавить его!',
+
+    aucune_conversation: 'Пока нет переписок. Отправьте сообщение из бронирования!'
   }
 }
