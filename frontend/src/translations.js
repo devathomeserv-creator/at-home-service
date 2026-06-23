@@ -68,7 +68,24 @@ export const traductions = {
     renovation: 'Rénovation',
     coach_sportif: 'Coach sportif',
     photographe: 'Photographe',
-    tous: 'Tous'
+    tous: 'Tous',
+
+    // Page Auth
+    auth_slogan: 'Plus besoin de chercher, un clic et trouvez votre artisan à domicile',
+    nom: 'Nom',
+    prenom: 'Prénom',
+    telephone: 'Téléphone',
+    je_suis_client: 'Je suis un client',
+    je_suis_prestataire: 'Je suis un prestataire',
+    code_parrainage_optionnel: 'Code de parrainage (optionnel)',
+    email: 'Email',
+    mot_de_passe: 'Mot de passe',
+    chargement: 'Chargement...',
+    se_connecter: 'Se connecter',
+    sinscrire: "S'inscrire",
+    telecharger_app: "📱 Télécharger l'application",
+    mentions_legales_cgu: 'Mentions légales et CGU',
+    parraine_titre: '🎉 Vous avez été parrainé ! Code :'
   },
   en: {
     connexion: 'Login',
@@ -135,7 +152,23 @@ export const traductions = {
     renovation: 'Renovation',
     coach_sportif: 'Sports coach',
     photographe: 'Photographer',
-    tous: 'All'
+    tous: 'All',
+
+    auth_slogan: 'No more searching, one click to find your home craftsman',
+    nom: 'Last name',
+    prenom: 'First name',
+    telephone: 'Phone',
+    je_suis_client: 'I am a client',
+    je_suis_prestataire: 'I am a provider',
+    code_parrainage_optionnel: 'Referral code (optional)',
+    email: 'Email',
+    mot_de_passe: 'Password',
+    chargement: 'Loading...',
+    se_connecter: 'Log in',
+    sinscrire: 'Sign up',
+    telecharger_app: '📱 Download the app',
+    mentions_legales_cgu: 'Legal notice and Terms',
+    parraine_titre: "🎉 You've been referred! Code:"
   },
   it: {
     connexion: 'Accesso',
@@ -202,7 +235,23 @@ export const traductions = {
     renovation: 'Ristrutturazione',
     coach_sportif: 'Personal trainer',
     photographe: 'Fotografo',
-    tous: 'Tutti'
+    tous: 'Tutti',
+
+    auth_slogan: 'Basta cercare, un clic per trovare il tuo artigiano a domicilio',
+    nom: 'Cognome',
+    prenom: 'Nome',
+    telephone: 'Telefono',
+    je_suis_client: 'Sono un cliente',
+    je_suis_prestataire: 'Sono un fornitore',
+    code_parrainage_optionnel: 'Codice di invito (opzionale)',
+    email: 'Email',
+    mot_de_passe: 'Password',
+    chargement: 'Caricamento...',
+    se_connecter: 'Accedi',
+    sinscrire: 'Iscriviti',
+    telecharger_app: "📱 Scarica l'app",
+    mentions_legales_cgu: 'Note legali e Termini',
+    parraine_titre: '🎉 Sei stato invitato! Codice:'
   },
   ru: {
     connexion: 'Вход',
@@ -269,6 +318,22 @@ export const traductions = {
     renovation: 'Ремонт',
     coach_sportif: 'Спортивный тренер',
     photographe: 'Фотограф',
-    tous: 'Все'
+    tous: 'Все',
+
+    auth_slogan: 'Больше не нужно искать, один клик — и ваш мастер на дом найден',
+    nom: 'Фамилия',
+    prenom: 'Имя',
+    telephone: 'Телефон',
+    je_suis_client: 'Я клиент',
+    je_suis_prestataire: 'Я специалист',
+    code_parrainage_optionnel: 'Реферальный код (необязательно)',
+    email: 'Email',
+    mot_de_passe: 'Пароль',
+    chargement: 'Загрузка...',
+    se_connecter: 'Войти',
+    sinscrire: 'Зарегистрироваться',
+    telecharger_app: '📱 Скачать приложение',
+    mentions_legales_cgu: 'Юридическая информация',
+    parraine_titre: '🎉 Вас пригласили! Код:'
   }
 }

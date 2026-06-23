@@ -3,6 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { inscription, connexion } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
+
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
 const Auth = () => {
   const [searchParams] = useSearchParams()
@@ -15,8 +18,10 @@ const Auth = () => {
   const [chargement, setChargement] = useState(false)
   const [installPrompt, setInstallPrompt] = useState(null)
   const [appInstallable, setAppInstallable] = useState(false)
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
   const { login } = useAuth()
   const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -68,9 +73,25 @@ const Auth = () => {
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', position: 'relative' }}>
 
-      <button onClick={toggleTheme} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }} title={themeMode === 'clair' ? 'Mode sombre' : 'Mode clair'}>
-        {themeMode === 'clair' ? '🌙' : '☀️'}
-      </button>
+      <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', display: 'flex', gap: '8px' }}>
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button onClick={toggleTheme} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }} title={themeMode === 'clair' ? 'Mode sombre' : 'Mode clair'}>
+          {themeMode === 'clair' ? '🌙' : '☀️'}
+        </button>
+      </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
         <div style={{ width: '48px', height: '48px', background: c.bleu, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -86,55 +107,55 @@ const Auth = () => {
 
       {codeParrainUrl && (
         <div style={{ background: '#d1fae5', color: '#065f46', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', fontSize: '13px', maxWidth: '420px', textAlign: 'center' }}>
-          🎉 Vous avez été parrainé ! Code : <strong>{codeParrainUrl}</strong>
+          {t('parraine_titre')} <strong>{codeParrainUrl}</strong>
         </div>
       )}
 
       <div style={{ background: c.fondClair, borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '420px', border: `1px solid ${c.bordure}` }}>
         <p style={{ textAlign: 'center', color: c.texte, fontSize: '14px', fontStyle: 'italic', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-          Plus besoin de chercher, un clic et trouvez votre artisan à domicile
+          {t('auth_slogan')}
         </p>
 
         <div style={{ display: 'flex', marginBottom: '1.5rem', borderRadius: '8px', overflow: 'hidden', border: `1.5px solid ${c.bleuClair}` }}>
-          <button onClick={() => setMode('connexion')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'connexion' ? c.bleu : c.blanc, color: mode === 'connexion' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Connexion</button>
-          <button onClick={() => setMode('inscription')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'inscription' ? c.bleu : c.blanc, color: mode === 'inscription' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Inscription</button>
+          <button onClick={() => setMode('connexion')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'connexion' ? c.bleu : c.blanc, color: mode === 'connexion' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('connexion')}</button>
+          <button onClick={() => setMode('inscription')} style={{ flex: 1, padding: '10px', border: 'none', cursor: 'pointer', background: mode === 'inscription' ? c.bleu : c.blanc, color: mode === 'inscription' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('inscription')}</button>
         </div>
 
         <form onSubmit={handleSubmit}>
           {mode === 'inscription' && (
             <>
-              <input name="nom" placeholder="Nom" value={form.nom} onChange={handleChange} required style={inputStyle} />
-              <input name="prenom" placeholder="Prénom" value={form.prenom} onChange={handleChange} required style={inputStyle} />
-              <input name="telephone" placeholder="Téléphone" value={form.telephone} onChange={handleChange} style={inputStyle} />
+              <input name="nom" placeholder={t('nom')} value={form.nom} onChange={handleChange} required style={inputStyle} />
+              <input name="prenom" placeholder={t('prenom')} value={form.prenom} onChange={handleChange} required style={inputStyle} />
+              <input name="telephone" placeholder={t('telephone')} value={form.telephone} onChange={handleChange} style={inputStyle} />
               <select name="role" value={form.role} onChange={handleChange} style={inputStyle}>
-                <option value="client">Je suis un client</option>
-                <option value="prestataire">Je suis un prestataire</option>
+                <option value="client">{t('je_suis_client')}</option>
+                <option value="prestataire">{t('je_suis_prestataire')}</option>
               </select>
-              <input name="code_parrain" placeholder="Code de parrainage (optionnel)" value={form.code_parrain} onChange={handleChange} style={inputStyle} />
+              <input name="code_parrain" placeholder={t('code_parrainage_optionnel')} value={form.code_parrain} onChange={handleChange} style={inputStyle} />
             </>
           )}
-          <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required style={inputStyle} />
-          <input name="mot_de_passe" type="password" placeholder="Mot de passe" value={form.mot_de_passe} onChange={handleChange} required style={inputStyle} />
+          <input name="email" type="email" placeholder={t('email')} value={form.email} onChange={handleChange} required style={inputStyle} />
+          <input name="mot_de_passe" type="password" placeholder={t('mot_de_passe')} value={form.mot_de_passe} onChange={handleChange} required style={inputStyle} />
 
           {erreur && <p style={{ color: c.rouge, fontSize: '14px', marginBottom: '10px', textAlign: 'center' }}>{erreur}</p>}
 
           <button type="submit" disabled={chargement} style={{ width: '100%', padding: '12px', background: c.rouge, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', marginTop: '4px', fontFamily: 'Georgia, serif' }}>
-            {chargement ? 'Chargement...' : mode === 'connexion' ? 'Se connecter' : "S'inscrire"}
+            {chargement ? t('chargement') : mode === 'connexion' ? t('se_connecter') : t('sinscrire')}
           </button>
         </form>
 
         {appInstallable && (
           <button onClick={installerApp} style={{ width: '100%', padding: '12px', background: c.texteFonce, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', marginTop: '12px', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            📱 Télécharger l'application
+            {t('telecharger_app')}
           </button>
         )}
       </div>
 
       <p style={{ color: c.texte, fontSize: '12px', marginTop: '1rem' }}>
-        <span onClick={() => navigate('/mentions-legales')} style={{ cursor: 'pointer', textDecoration: 'underline', color: c.texteFonce }}>Mentions légales et CGU</span>
+        <span onClick={() => navigate('/mentions-legales')} style={{ cursor: 'pointer', textDecoration: 'underline', color: c.texteFonce }}>{t('mentions_legales_cgu')}</span>
       </p>
 
-      <p style={{ color: c.texte, fontSize: '12px', marginTop: '0.5rem' }}>© 2026 At Home Service — Tous droits réservés</p>
+      <p style={{ color: c.texte, fontSize: '12px', marginTop: '0.5rem' }}>{t('footer_droits')}</p>
     </div>
   )
 }
