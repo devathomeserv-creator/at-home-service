@@ -22,6 +22,7 @@ const factureRoutes = require('./routes/factureRoutes')
 const signalementsRoutes = require('./routes/signalementsRoutes')
 const clientsRoutes = require('./routes/clientsRoutes')
 const listeAttenteRoutes = require('./routes/listeAttenteRoutes')
+const topPrestataireRoutes = require('./routes/topPrestataireRoutes')
 
 const app = express()
 app.use(cors())
@@ -47,6 +48,7 @@ app.use('/api/facture', factureRoutes)
 app.use('/api/signalements', signalementsRoutes)
 app.use('/api/clients', clientsRoutes)
 app.use('/api/liste-attente', listeAttenteRoutes)
+app.use('/api/top-prestataires', topPrestataireRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Serveur marketplace en ligne !' })

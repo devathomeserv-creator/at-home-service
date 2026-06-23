@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPrestatairesListe } from '../services/api'
+import { getPrestatairesListe, getTopPrestataires } from '../services/api'
 import { ajouterRecherche, getHistorique, retirerRecherche } from '../services/historiqueRecherche'
 import { useTheme } from '../context/ThemeContext'
 
@@ -35,6 +35,7 @@ const Accueil = () => {
   const [prestatairesFiltres, setPrestatairesFiltres] = useState([])
   const [menuOuvert, setMenuOuvert] = useState(false)
   const [historique, setHistorique] = useState([])
+  const [topPrestataires, setTopPrestataires] = useState({})
 
   const categories = [
     { nom: 'coiffure', image: imagesParCategorie.coiffure },
@@ -51,6 +52,7 @@ const Accueil = () => {
 
   useEffect(() => {
     chargerPrestataires()
+    chargerTopPrestataires()
     setHistorique(getHistorique())
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ville, categorie])
@@ -65,6 +67,15 @@ const Accueil = () => {
       const res = await getPrestatairesListe(categorie, ville)
       setPrestataires(res.data.prestataires)
       setPrestatairesFiltres(res.data.prestataires)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const chargerTopPrestataires = async () => {
+    try {
+      const res = await getTopPrestataires()
+      setTopPrestataires(res.data.topPrestataires)
     } catch (err) {
       console.error(err)
     }
@@ -210,8 +221,14 @@ const Accueil = () => {
           {prestatairesFiltres.map(p => {
             const categoriePrincipale = p.services[0]?.categorie || 'coiffure'
             const prixMin = Math.min(...p.services.map(s => s.prix))
+            const estTop = topPrestataires[p.id]
             return (
-              <div key={p.id} className="presta-card" onClick={() => navigate(`/prestataire/${p.id}`)} style={{ background: c.fondClair, borderRadius: '12px', border: `1px solid ${c.bordure}`, display: 'flex', overflow: 'hidden', cursor: 'pointer' }}>
+              <div key={p.id} className="presta-card" onClick={() => navigate(`/prestataire/${p.id}`)} style={{ background: c.fondClair, borderRadius: '12px', border: estTop ? '2px solid #F6AD55' : `1px solid ${c.bordure}`, display: 'flex', overflow: 'hidden', cursor: 'pointer', position: 'relative' }}>
+                {estTop && (
+                  <div style={{ position: 'absolute', top: '8px', left: '8px', background: '#F6AD55', color: '#1A365D', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', zIndex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    🏆 Top prestataire
+                  </div>
+                )}
                 <div className="presta-image" style={{ width: '180px', height: '160px', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
                   {p.photo_url
                     ? <img src={p.photo_url} alt={p.prenom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
