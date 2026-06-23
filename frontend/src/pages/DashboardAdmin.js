@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useNavigate } from 'react-router-dom'
-import { getRevenusPlateforme, getModeMaintenance, modifierModeMaintenance } from '../services/api'
+import { getRevenusPlateforme, getModeMaintenance, modifierModeMaintenance, telechargerExportComptable } from '../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import axios from 'axios'
 
@@ -19,6 +19,9 @@ const DashboardAdmin = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalClients: 0, totalPrestataires: 0, totalReservations: 0 })
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
+  const [dateDebut, setDateDebut] = useState('')
+  const [dateFin, setDateFin] = useState('')
+  const [exportEnCours, setExportEnCours] = useState(false)
 
   const API = axios.create({
     baseURL: 'https://loving-nature-production-145d.up.railway.app/api',
@@ -88,6 +91,11 @@ const DashboardAdmin = () => {
     chargerSignalements()
     chargerRevenus()
     chargerMaintenance()
+
+    const maintenant = new Date()
+    const debutMois = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1)
+    setDateDebut(debutMois.toISOString().split('T')[0])
+    setDateFin(maintenant.toISOString().split('T')[0])
   }, [chargerUsers, chargerReservations, chargerSignalements, chargerRevenus, chargerMaintenance])
 
   const supprimerUser = async (id) => {
@@ -123,6 +131,22 @@ const DashboardAdmin = () => {
     }
   }
 
+  const handleExportComptable = async () => {
+    if (!dateDebut || !dateFin) {
+      setMessage('Veuillez sélectionner une période')
+      return
+    }
+    setExportEnCours(true)
+    try {
+      await telechargerExportComptable(dateDebut, dateFin)
+      setMessage('Export comptable téléchargé avec succès !')
+    } catch (err) {
+      setMessage('Erreur lors de la génération de l\'export')
+    } finally {
+      setExportEnCours(false)
+    }
+  }
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -153,6 +177,8 @@ const DashboardAdmin = () => {
     mois: formaterMois(item.mois),
     revenus: item.montant
   })) || []
+
+  const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }
 
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
@@ -331,16 +357,36 @@ const DashboardAdmin = () => {
         )}
 
         {vue === 'parametres' && (
-          <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>Paramètres de la plateforme</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: c.blanc, borderRadius: '8px', border: `1px solid ${c.bordure}` }}>
-              <div>
-                <p style={{ color: c.texteFonce, fontWeight: 'bold', margin: '0 0 4px', fontSize: '14px' }}>🚧 Mode maintenance</p>
-                <p style={{ color: c.texte, fontSize: '12px', margin: 0, maxWidth: '400px' }}>Quand activé, tous les visiteurs (sauf vous en tant qu'admin) voient une page "On revient bientôt" au lieu du site.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
+              <h3 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>Paramètres de la plateforme</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: c.blanc, borderRadius: '8px', border: `1px solid ${c.bordure}` }}>
+                <div>
+                  <p style={{ color: c.texteFonce, fontWeight: 'bold', margin: '0 0 4px', fontSize: '14px' }}>🚧 Mode maintenance</p>
+                  <p style={{ color: c.texte, fontSize: '12px', margin: 0, maxWidth: '400px' }}>Quand activé, tous les visiteurs (sauf vous en tant qu'admin) voient une page "On revient bientôt" au lieu du site.</p>
+                </div>
+                <div onClick={toggleMaintenance} style={{ width: '48px', height: '26px', borderRadius: '13px', cursor: 'pointer', flexShrink: 0, marginLeft: '1rem', background: maintenanceActive ? c.rouge : '#CBD5E0', position: 'relative', transition: 'background 0.3s' }}>
+                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.3s', left: maintenanceActive ? '25px' : '3px' }} />
+                </div>
               </div>
-              <div onClick={toggleMaintenance} style={{ width: '48px', height: '26px', borderRadius: '13px', cursor: 'pointer', flexShrink: 0, marginLeft: '1rem', background: maintenanceActive ? c.rouge : '#CBD5E0', position: 'relative', transition: 'background 0.3s' }}>
-                <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.3s', left: maintenanceActive ? '25px' : '3px' }} />
+            </div>
+
+            <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
+              <h3 style={{ color: c.texteFonce, marginBottom: '0.5rem', fontFamily: 'Georgia, serif' }}>📊 Export comptable</h3>
+              <p style={{ color: c.texte, fontSize: '13px', marginBottom: '1.5rem' }}>Générez un récapitulatif PDF des commissions perçues sur une période donnée, prêt pour votre comptabilité.</p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                <div style={{ flex: 1, minWidth: '140px' }}>
+                  <p style={{ color: c.texte, fontSize: '12px', marginBottom: '4px' }}>Date de début</p>
+                  <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} style={inputStyle} />
+                </div>
+                <div style={{ flex: 1, minWidth: '140px' }}>
+                  <p style={{ color: c.texte, fontSize: '12px', marginBottom: '4px' }}>Date de fin</p>
+                  <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} style={inputStyle} />
+                </div>
               </div>
+              <button onClick={handleExportComptable} disabled={exportEnCours} style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>
+                {exportEnCours ? 'Génération en cours...' : '📄 Télécharger l\'export comptable'}
+              </button>
             </div>
           </div>
         )}

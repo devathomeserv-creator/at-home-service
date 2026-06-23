@@ -24,6 +24,7 @@ const clientsRoutes = require('./routes/clientsRoutes')
 const listeAttenteRoutes = require('./routes/listeAttenteRoutes')
 const topPrestataireRoutes = require('./routes/topPrestataireRoutes')
 const parametresRoutes = require('./routes/parametresRoutes')
+const exportComptableRoutes = require('./routes/exportComptableRoutes')
 
 const app = express()
 app.use(cors())
@@ -51,6 +52,7 @@ app.use('/api/clients', clientsRoutes)
 app.use('/api/liste-attente', listeAttenteRoutes)
 app.use('/api/top-prestataires', topPrestataireRoutes)
 app.use('/api/parametres', parametresRoutes)
+app.use('/api/export-comptable', exportComptableRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Serveur marketplace en ligne !' })

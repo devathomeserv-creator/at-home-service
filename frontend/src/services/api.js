@@ -83,3 +83,19 @@ export const telechargerFacture = async (booking_id) => {
   a.remove()
   window.URL.revokeObjectURL(url)
 }
+export const telechargerExportComptable = async (date_debut, date_fin) => {
+  const token = localStorage.getItem('token')
+  const response = await fetch(`https://loving-nature-production-145d.up.railway.app/api/export-comptable?date_debut=${date_debut}&date_fin=${date_fin}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  if (!response.ok) throw new Error('Erreur lors du téléchargement')
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `export-comptable-${date_debut}-${date_fin}.pdf`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.URL.revokeObjectURL(url)
+}
