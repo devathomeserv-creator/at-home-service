@@ -1,26 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 import { useNavigate } from 'react-router-dom'
 import { getRevenusPlateforme } from '../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import axios from 'axios'
 
-const Logo = ({ onClick }) => (
-  <div onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-    <div style={{ width: '36px', height: '36px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
-        <path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V10.5Z" fill="#2B6CB0"/>
-      </svg>
-    </div>
-    <div>
-      <div style={{ fontSize: '16px', fontWeight: 'bold', color: 'white', lineHeight: 1.1 }}>At Home Service</div>
-      <div style={{ fontSize: '9px', color: '#FEB2B2', letterSpacing: '2px', textTransform: 'uppercase' }}>panneau administration</div>
-    </div>
-  </div>
-)
-
 const DashboardAdmin = () => {
   const { user, logout, token } = useAuth()
+  const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
   const navigate = useNavigate()
   const [vue, setVue] = useState('stats')
   const [users, setUsers] = useState([])
@@ -143,7 +131,7 @@ const DashboardAdmin = () => {
   })) || []
 
   return (
-    <div style={{ minHeight: '100vh', background: '#C8A97A', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
       <style>{`
         @media (max-width: 600px) {
           .nav-desktop { display: none !important; }
@@ -154,12 +142,25 @@ const DashboardAdmin = () => {
         }
       `}</style>
 
-      <nav style={{ background: '#2B6CB0', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-        <Logo onClick={() => navigate('/')} />
+      <nav style={{ background: c.bleu, padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+        <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+          <div style={{ width: '36px', height: '36px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+              <path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V10.5Z" fill={c.bleu}/>
+            </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: 'white', lineHeight: 1.1 }}>At Home Service</div>
+            <div style={{ fontSize: '9px', color: '#FEB2B2', letterSpacing: '2px', textTransform: 'uppercase' }}>panneau administration</div>
+          </div>
+        </div>
         <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {themeMode === 'clair' ? '🌙' : '☀️'}
+          </button>
           <span style={{ color: '#BEE3F8', fontSize: '14px' }}>Bonjour {user?.prenom} !</span>
-          <button onClick={() => navigate('/profil')} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
-          <button onClick={handleLogout} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
+          <button onClick={() => navigate('/profil')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
+          <button onClick={handleLogout} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
         </div>
         <button onClick={() => setMenuOuvert(!menuOuvert)} className="nav-mobile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'none' }}>
           <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
@@ -167,32 +168,33 @@ const DashboardAdmin = () => {
           <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
         </button>
         {menuOuvert && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#2B6CB0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: c.bleu, padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
             <p style={{ color: '#BEE3F8', fontSize: '14px', margin: 0 }}>Bonjour {user?.prenom} !</p>
-            <button onClick={() => { navigate('/profil'); setMenuOuvert(false) }} style={{ background: 'white', color: '#2B6CB0', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
-            <button onClick={handleLogout} style={{ background: '#C53030', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
+            <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{themeMode === 'clair' ? '🌙 Mode sombre' : '☀️ Mode clair'}</button>
+            <button onClick={() => { navigate('/profil'); setMenuOuvert(false) }} style={{ background: 'white', color: c.bleu, border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Mon profil</button>
+            <button onClick={handleLogout} style={{ background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
           </div>
         )}
       </nav>
 
-      <div className="tabs" style={{ background: '#B8926A', padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div className="tabs" style={{ background: c.fondMoyen, padding: '16px 2rem', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {['stats', 'revenus', 'users', 'reservations', 'signalements'].map(v => (
-          <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? '#2B6CB0' : '#F5ECD8', color: vue === v ? 'white' : '#1A365D', fontFamily: 'Georgia, serif', position: 'relative' }}>
+          <button key={v} onClick={() => setVue(v)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? c.bleu : c.fondClair, color: vue === v ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif', position: 'relative' }}>
             {v === 'stats' ? 'Statistiques' : v === 'revenus' ? '💰 Revenus' : v === 'users' ? 'Utilisateurs' : v === 'reservations' ? 'Réservations' : '🚩 Signalements'}
-            {v === 'signalements' && signalementsEnAttente > 0 && <span style={{ background: '#C53030', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{signalementsEnAttente}</span>}
+            {v === 'signalements' && signalementsEnAttente > 0 && <span style={{ background: c.rouge, color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', marginLeft: '6px' }}>{signalementsEnAttente}</span>}
           </button>
         ))}
       </div>
 
       <div style={{ flex: 1, maxWidth: '1100px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
-        {message && <p style={{ background: '#F5ECD8', color: '#1A365D', padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #A07840' }}>{message}</p>}
+        {message && <p style={{ background: c.fondClair, color: c.texteFonce, padding: '10px 16px', borderRadius: '8px', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>{message}</p>}
 
         {vue === 'stats' && (
           <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
             {statCards.map(stat => (
-              <div key={stat.label} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
-                <p style={{ color: '#3D2B0F', fontSize: '14px', margin: '0 0 0.5rem' }}>{stat.label}</p>
-                <p style={{ fontSize: '40px', fontWeight: 'bold', color: '#2B6CB0', margin: 0 }}>{stat.value}</p>
+              <div key={stat.label} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
+                <p style={{ color: c.texte, fontSize: '14px', margin: '0 0 0.5rem' }}>{stat.label}</p>
+                <p style={{ fontSize: '40px', fontWeight: 'bold', color: c.bleu, margin: 0 }}>{stat.value}</p>
               </div>
             ))}
           </div>
@@ -201,39 +203,39 @@ const DashboardAdmin = () => {
         {vue === 'revenus' && revenus && (
           <div>
             <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
-                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Commission ce mois</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#C53030', margin: 0 }}>{revenus.commissionMois}€</p>
+              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
+                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>Commission ce mois</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: c.rouge, margin: 0 }}>{revenus.commissionMois}€</p>
               </div>
-              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
-                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Commission totale</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#2B6CB0', margin: 0 }}>{revenus.commissionTotale}€</p>
+              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
+                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>Commission totale</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: c.bleu, margin: 0 }}>{revenus.commissionTotale}€</p>
               </div>
-              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
-                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Volume total traité</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#1A365D', margin: 0 }}>{revenus.volumeTotal}€</p>
+              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
+                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>Volume total traité</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: c.texteFonce, margin: 0 }}>{revenus.volumeTotal}€</p>
               </div>
-              <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840', textAlign: 'center' }}>
-                <p style={{ color: '#3D2B0F', fontSize: '13px', margin: '0 0 0.5rem' }}>Taux de commission</p>
+              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
+                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>Taux de commission</p>
                 <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#059669', margin: 0 }}>{revenus.tauxCommission}%</p>
               </div>
             </div>
 
-            <div style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', border: '1px solid #A07840' }}>
-              <h3 style={{ color: '#1A365D', marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Évolution de la commission (6 derniers mois)</h3>
+            <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
+              <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Évolution de la commission (6 derniers mois)</h3>
               {donneesGraphique.length === 0 ? (
-                <p style={{ color: '#3D2B0F', fontSize: '14px' }}>Pas encore assez de données pour afficher un graphique.</p>
+                <p style={{ color: c.texte, fontSize: '14px' }}>Pas encore assez de données pour afficher un graphique.</p>
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={donneesGraphique}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2D9C8" />
-                    <XAxis dataKey="mois" stroke="#3D2B0F" fontSize={12} />
-                    <YAxis stroke="#3D2B0F" fontSize={12} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={c.bordure} />
+                    <XAxis dataKey="mois" stroke={c.texte} fontSize={12} />
+                    <YAxis stroke={c.texte} fontSize={12} />
                     <Tooltip
-                      contentStyle={{ background: 'white', border: '1px solid #A07840', borderRadius: '8px', fontFamily: 'Georgia, serif' }}
+                      contentStyle={{ background: c.blanc, border: `1px solid ${c.bordure}`, borderRadius: '8px', fontFamily: 'Georgia, serif' }}
                       formatter={(value) => [`${value}€`, 'Commission']}
                     />
-                    <Bar dataKey="revenus" fill="#2B6CB0" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="revenus" fill={c.bleu} radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -244,14 +246,14 @@ const DashboardAdmin = () => {
         {vue === 'users' && (
           <div>
             {users.map(u => (
-              <div key={u.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div key={u.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                 <div>
-                  <h3 style={{ margin: '0 0 0.3rem', color: '#1A365D' }}>{u.prenom} {u.nom}</h3>
-                  <p style={{ color: '#3D2B0F', margin: '0 0 0.5rem', fontSize: '14px' }}>{u.email}</p>
-                  <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', background: u.role === 'client' ? '#EBF8FF' : u.role === 'prestataire' ? '#F5ECD8' : '#FEF3C7', color: u.role === 'client' ? '#2B6CB0' : u.role === 'prestataire' ? '#A07840' : '#92400e', border: '1px solid currentColor' }}>{u.role}</span>
+                  <h3 style={{ margin: '0 0 0.3rem', color: c.texteFonce }}>{u.prenom} {u.nom}</h3>
+                  <p style={{ color: c.texte, margin: '0 0 0.5rem', fontSize: '14px' }}>{u.email}</p>
+                  <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', background: u.role === 'client' ? c.bleuFond : u.role === 'prestataire' ? c.fondClair : '#FEF3C7', color: u.role === 'client' ? c.bleu : u.role === 'prestataire' ? c.bordure : '#92400e', border: '1px solid currentColor' }}>{u.role}</span>
                 </div>
                 {u.role !== 'admin' && (
-                  <button onClick={() => supprimerUser(u.id)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Supprimer</button>
+                  <button onClick={() => supprimerUser(u.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Supprimer</button>
                 )}
               </div>
             ))}
@@ -260,15 +262,15 @@ const DashboardAdmin = () => {
 
         {vue === 'reservations' && (
           <div>
-            {reservations.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucune réservation pour le moment.</p>}
+            {reservations.length === 0 && <p style={{ color: c.texte }}>Aucune réservation pour le moment.</p>}
             {reservations.map(res => (
-              <div key={res.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
+              <div key={res.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <h3 style={{ margin: 0, color: '#1A365D' }}>{res.services?.titre}</h3>
+                  <h3 style={{ margin: 0, color: c.texteFonce }}>{res.services?.titre}</h3>
                   <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: res.statut === 'confirme' ? '#d1fae5' : res.statut === 'annule' ? '#fee2e2' : '#fef3c7', color: res.statut === 'confirme' ? '#065f46' : res.statut === 'annule' ? '#991b1b' : '#92400e' }}>{res.statut}</span>
                 </div>
-                <p style={{ color: '#3D2B0F', marginTop: '0.5rem', fontSize: '14px' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
-                <p style={{ color: '#3D2B0F', fontSize: '14px' }}>Adresse : {res.adresse_intervention}</p>
+                <p style={{ color: c.texte, marginTop: '0.5rem', fontSize: '14px' }}>Date : {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
+                <p style={{ color: c.texte, fontSize: '14px' }}>Adresse : {res.adresse_intervention}</p>
               </div>
             ))}
           </div>
@@ -276,23 +278,23 @@ const DashboardAdmin = () => {
 
         {vue === 'signalements' && (
           <div>
-            {signalements.length === 0 && <p style={{ color: '#3D2B0F' }}>Aucun signalement pour le moment.</p>}
+            {signalements.length === 0 && <p style={{ color: c.texte }}>Aucun signalement pour le moment.</p>}
             {signalements.map(s => {
               const sc = statutColorSignalement(s.statut)
               return (
-                <div key={s.id} style={{ background: '#F5ECD8', borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: '1px solid #A07840' }}>
+                <div key={s.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                    <h3 style={{ margin: 0, color: '#1A365D' }}>{s.motif}</h3>
+                    <h3 style={{ margin: 0, color: c.texteFonce }}>{s.motif}</h3>
                     <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: sc.bg, color: sc.color }}>{s.statut}</span>
                   </div>
-                  <p style={{ color: '#3D2B0F', marginTop: '0.5rem', fontSize: '14px' }}>Signalé par : {s.client?.prenom} {s.client?.nom} ({s.client?.email})</p>
-                  <p style={{ color: '#3D2B0F', fontSize: '14px' }}>Prestataire concerné : {s.prestataire?.prenom} {s.prestataire?.nom} ({s.prestataire?.email})</p>
-                  {s.description && <p style={{ color: '#3D2B0F', fontSize: '14px', fontStyle: 'italic', marginTop: '0.5rem' }}>"{s.description}"</p>}
-                  <p style={{ color: '#A07840', fontSize: '12px', marginTop: '0.5rem' }}>{new Date(s.created_at).toLocaleDateString('fr-FR')}</p>
+                  <p style={{ color: c.texte, marginTop: '0.5rem', fontSize: '14px' }}>Signalé par : {s.client?.prenom} {s.client?.nom} ({s.client?.email})</p>
+                  <p style={{ color: c.texte, fontSize: '14px' }}>Prestataire concerné : {s.prestataire?.prenom} {s.prestataire?.nom} ({s.prestataire?.email})</p>
+                  {s.description && <p style={{ color: c.texte, fontSize: '14px', fontStyle: 'italic', marginTop: '0.5rem' }}>"{s.description}"</p>}
+                  <p style={{ color: c.bordure, fontSize: '12px', marginTop: '0.5rem' }}>{new Date(s.created_at).toLocaleDateString('fr-FR')}</p>
                   {s.statut === 'en_attente' && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
-                      <button onClick={() => changerStatutSignalement(s.id, 'traite')} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Marquer traité</button>
-                      <button onClick={() => changerStatutSignalement(s.id, 'rejete')} style={{ background: '#C53030', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Rejeter</button>
+                      <button onClick={() => changerStatutSignalement(s.id, 'traite')} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Marquer traité</button>
+                      <button onClick={() => changerStatutSignalement(s.id, 'rejete')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>Rejeter</button>
                     </div>
                   )}
                 </div>
@@ -302,7 +304,7 @@ const DashboardAdmin = () => {
         )}
       </div>
 
-      <footer style={{ background: '#1A365D', color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
+      <footer style={{ background: c.texteFonce, color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
         © 2026 At Home Service — Tous droits réservés
       </footer>
     </div>
