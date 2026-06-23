@@ -135,7 +135,72 @@ export const traductions = {
 
     aucun_favori: "Aucun favori pour le moment. Cliquez sur le ❤️ sur un profil prestataire pour l'ajouter !",
 
-    aucune_conversation: 'Aucune conversation pour le moment. Envoyez un message depuis une réservation !'
+    aucune_conversation: 'Aucune conversation pour le moment. Envoyez un message depuis une réservation !',
+
+    // Dashboard Prestataire
+    onglet_stats: '📊 Stats',
+    onglet_reservations: 'Réservations',
+    onglet_clients: '👥 Mes clients',
+    onglet_services: 'Services',
+    onglet_realisations: '📸 Réalisations',
+    onglet_ajouter: 'Ajouter',
+    onglet_avis: 'Avis',
+
+    info_commission: 'At Home Service prélève une commission de',
+    info_commission_2: 'sur chaque réservation. Les montants ci-dessous correspondent à ce que vous touchez réellement (net de commission).',
+    net_mois: 'Net à percevoir ce mois',
+    net_total: 'Net total perçu',
+    reservations_mois: 'Réservations ce mois',
+    taux_confirmation: 'Taux de confirmation',
+    note_moyenne: 'Note moyenne',
+    total_reservations: 'Total réservations',
+    services_demandes: 'Services les plus demandés',
+    pas_assez_donnees: 'Pas encore assez de données.',
+
+    client_label: 'Client :',
+    net_percevoir: 'Net à percevoir :',
+    sur_label: 'sur',
+    confirmer: 'Confirmer',
+    marquer_termine: 'Marquer terminé',
+    message_btn: '💬 Message',
+
+    info_repertoire: "Ce répertoire liste uniquement les clients ayant explicitement accepté que leurs coordonnées soient conservées par vous. Conformément au RGPD, ces données ne doivent être utilisées que pour votre activité professionnelle.",
+    aucun_client_consentement: "Aucun client n'a encore donné son consentement pour figurer dans ce répertoire.",
+    reservation_count: 'réservation(s)',
+    derniere_prestation: 'Dernière prestation :',
+
+    aucun_service: 'Aucun service créé pour le moment.',
+    modifier_btn: '✏️ Modifier',
+    titre_service: 'Titre du service',
+    description: 'Description',
+    prix_euros: 'Prix en euros',
+    duree_minutes: 'Durée en minutes',
+    photo_url_optionnel: 'URL de la photo (optionnel)',
+    photo_defaut_info: 'Si vide, une photo par défaut selon la catégorie sera utilisée.',
+    sauvegarder: 'Sauvegarder',
+    modifier_service_titre: 'Modifier le service',
+
+    ajouter_realisation: 'Ajouter une réalisation',
+    titre_optionnel: 'Titre (ex: Coupe avant/après)',
+    description_optionnelle: 'Description (optionnel)',
+    choisir_fichier_info: 'Sélectionnez une photo ou vidéo depuis votre appareil.',
+    envoi_en_cours: 'Envoi en cours...',
+    ajouter: 'Ajouter',
+    aucune_realisation: 'Aucune réalisation ajoutée pour le moment.',
+    supprimer: '🗑️ Supprimer',
+
+    aucune_conversation_presta: 'Aucune conversation pour le moment. Vous recevrez vos messages clients ici !',
+
+    avis_total: 'avis au total',
+    aucun_avis: 'Aucun avis pour le moment.',
+    votre_reponse: 'Votre réponse :',
+    repondre_placeholder: 'Répondre à cet avis...',
+    publier_reponse: 'Publier la réponse',
+    modifier_reponse: '✏️ Modifier ma réponse',
+    repondre: '💬 Répondre',
+
+    ajouter_nouveau_service: 'Ajouter un nouveau service',
+    creer_service: 'Créer le service'
   },
   en: {
     connexion: 'Login',
@@ -273,7 +338,71 @@ export const traductions = {
 
     aucun_favori: 'No favorites yet. Click the ❤️ on a provider profile to add it!',
 
-    aucune_conversation: 'No conversation yet. Send a message from a booking!'
+    aucune_conversation: 'No conversation yet. Send a message from a booking!',
+
+    onglet_stats: '📊 Stats',
+    onglet_reservations: 'Bookings',
+    onglet_clients: '👥 My clients',
+    onglet_services: 'Services',
+    onglet_realisations: '📸 Portfolio',
+    onglet_ajouter: 'Add',
+    onglet_avis: 'Reviews',
+
+    info_commission: 'At Home Service takes a commission of',
+    info_commission_2: 'on each booking. The amounts below correspond to what you actually receive (net of commission).',
+    net_mois: 'Net to receive this month',
+    net_total: 'Total net received',
+    reservations_mois: 'Bookings this month',
+    taux_confirmation: 'Confirmation rate',
+    note_moyenne: 'Average rating',
+    total_reservations: 'Total bookings',
+    services_demandes: 'Most requested services',
+    pas_assez_donnees: 'Not enough data yet.',
+
+    client_label: 'Client:',
+    net_percevoir: 'Net to receive:',
+    sur_label: 'out of',
+    confirmer: 'Confirm',
+    marquer_termine: 'Mark as completed',
+    message_btn: '💬 Message',
+
+    info_repertoire: 'This directory only lists clients who have explicitly agreed to have their contact details kept by you. In accordance with GDPR, this data must only be used for your professional activity.',
+    aucun_client_consentement: 'No client has consented to be listed in this directory yet.',
+    reservation_count: 'booking(s)',
+    derniere_prestation: 'Last service:',
+
+    aucun_service: 'No service created yet.',
+    modifier_btn: '✏️ Edit',
+    titre_service: 'Service title',
+    description: 'Description',
+    prix_euros: 'Price in euros',
+    duree_minutes: 'Duration in minutes',
+    photo_url_optionnel: 'Photo URL (optional)',
+    photo_defaut_info: 'If empty, a default photo based on the category will be used.',
+    sauvegarder: 'Save',
+    modifier_service_titre: 'Edit service',
+
+    ajouter_realisation: 'Add a portfolio item',
+    titre_optionnel: 'Title (e.g. Before/after haircut)',
+    description_optionnelle: 'Description (optional)',
+    choisir_fichier_info: 'Select a photo or video from your device.',
+    envoi_en_cours: 'Uploading...',
+    ajouter: 'Add',
+    aucune_realisation: 'No portfolio item added yet.',
+    supprimer: '🗑️ Delete',
+
+    aucune_conversation_presta: "No conversation yet. You'll receive your client messages here!",
+
+    avis_total: 'total reviews',
+    aucun_avis: 'No reviews yet.',
+    votre_reponse: 'Your response:',
+    repondre_placeholder: 'Reply to this review...',
+    publier_reponse: 'Post response',
+    modifier_reponse: '✏️ Edit my response',
+    repondre: '💬 Reply',
+
+    ajouter_nouveau_service: 'Add a new service',
+    creer_service: 'Create service'
   },
   it: {
     connexion: 'Accesso',
@@ -411,7 +540,71 @@ export const traductions = {
 
     aucun_favori: 'Nessun preferito al momento. Clicca sul ❤️ su un profilo fornitore per aggiungerlo!',
 
-    aucune_conversation: 'Nessuna conversazione al momento. Invia un messaggio da una prenotazione!'
+    aucune_conversation: 'Nessuna conversazione al momento. Invia un messaggio da una prenotazione!',
+
+    onglet_stats: '📊 Statistiche',
+    onglet_reservations: 'Prenotazioni',
+    onglet_clients: '👥 I miei clienti',
+    onglet_services: 'Servizi',
+    onglet_realisations: '📸 Galleria',
+    onglet_ajouter: 'Aggiungi',
+    onglet_avis: 'Recensioni',
+
+    info_commission: 'At Home Service applica una commissione del',
+    info_commission_2: 'su ogni prenotazione. Gli importi sottostanti corrispondono a quanto effettivamente ricevi (netto di commissione).',
+    net_mois: 'Netto da percepire questo mese',
+    net_total: 'Netto totale percepito',
+    reservations_mois: 'Prenotazioni questo mese',
+    taux_confirmation: 'Tasso di confirma',
+    note_moyenne: 'Valutazione media',
+    total_reservations: 'Totale prenotazioni',
+    services_demandes: 'Servizi più richiesti',
+    pas_assez_donnees: 'Non ci sono ancora abbastanza dati.',
+
+    client_label: 'Cliente:',
+    net_percevoir: 'Netto da percepire:',
+    sur_label: 'su',
+    confirmer: 'Confirma',
+    marquer_termine: 'Segna come completato',
+    message_btn: '💬 Messaggio',
+
+    info_repertoire: 'Questa rubrica elenca solo i clienti che hanno accettato espressamente che i loro dati di contatto siano conservati da te. In conformità al GDPR, questi dati devono essere utilizzati solo per la tua attività professionale.',
+    aucun_client_consentement: 'Nessun cliente ha ancora dato il consenso per figurare in questa rubrica.',
+    reservation_count: 'prenotazione(i)',
+    derniere_prestation: 'Ultimo servizio:',
+
+    aucun_service: 'Nessun servizio creato al momento.',
+    modifier_btn: '✏️ Modifica',
+    titre_service: 'Titolo del servizio',
+    description: 'Descrizione',
+    prix_euros: 'Prezzo in euro',
+    duree_minutes: 'Durata in minuti',
+    photo_url_optionnel: 'URL foto (opzionale)',
+    photo_defaut_info: 'Se vuoto, verrà utilizzata una foto predefinita in base alla categoria.',
+    sauvegarder: 'Salva',
+    modifier_service_titre: 'Modifica servizio',
+
+    ajouter_realisation: 'Aggiungi una realizzazione',
+    titre_optionnel: 'Titolo (es: Taglio prima/dopo)',
+    description_optionnelle: 'Descrizione (opzionale)',
+    choisir_fichier_info: 'Seleziona una foto o un video dal tuo dispositivo.',
+    envoi_en_cours: 'Invio in corso...',
+    ajouter: 'Aggiungi',
+    aucune_realisation: 'Nessuna realizzazione aggiunta al momento.',
+    supprimer: '🗑️ Elimina',
+
+    aucune_conversation_presta: 'Nessuna conversazione al momento. Riceverai qui i messaggi dei tuoi clienti!',
+
+    avis_total: 'recensioni totali',
+    aucun_avis: 'Nessuna recensione al momento.',
+    votre_reponse: 'La tua risposta:',
+    repondre_placeholder: 'Rispondi a questa recensione...',
+    publier_reponse: 'Pubblica risposta',
+    modifier_reponse: '✏️ Modifica la mia risposta',
+    repondre: '💬 Rispondi',
+
+    ajouter_nouveau_service: 'Aggiungi un nuovo servizio',
+    creer_service: 'Crea servizio'
   },
   ru: {
     connexion: 'Вход',
@@ -549,6 +742,70 @@ export const traductions = {
 
     aucun_favori: 'Пока нет избранного. Нажмите ❤️ на профиле специалиста, чтобы добавить его!',
 
-    aucune_conversation: 'Пока нет переписок. Отправьте сообщение из бронирования!'
+    aucune_conversation: 'Пока нет переписок. Отправьте сообщение из бронирования!',
+
+    onglet_stats: '📊 Статистика',
+    onglet_reservations: 'Бронирования',
+    onglet_clients: '👥 Мои клиенты',
+    onglet_services: 'Услуги',
+    onglet_realisations: '📸 Портфолио',
+    onglet_ajouter: 'Добавить',
+    onglet_avis: 'Отзывы',
+
+    info_commission: 'At Home Service берет комиссию',
+    info_commission_2: 'с каждого бронирования. Суммы ниже соответствуют тому, что вы реально получаете (за вычетом комиссии).',
+    net_mois: 'Чистая сумма к получению в этом месяце',
+    net_total: 'Общая чистая сумма получена',
+    reservations_mois: 'Бронирований в этом месяце',
+    taux_confirmation: 'Процент подтверждений',
+    note_moyenne: 'Средняя оценка',
+    total_reservations: 'Всего бронирований',
+    services_demandes: 'Самые востребованные услуги',
+    pas_assez_donnees: 'Пока недостаточно данных.',
+
+    client_label: 'Клиент:',
+    net_percevoir: 'Чистая сумма к получению:',
+    sur_label: 'из',
+    confirmer: 'Подтвердить',
+    marquer_termine: 'Отметить как завершенное',
+    message_btn: '💬 Сообщение',
+
+    info_repertoire: 'В этом справочнике перечислены только клиенты, явно согласившиеся на сохранение их контактных данных у вас. В соответствии с GDPR, эти данные должны использоваться только для вашей профессиональной деятельности.',
+    aucun_client_consentement: 'Пока ни один клиент не дал согласие на включение в этот справочник.',
+    reservation_count: 'бронирование(й)',
+    derniere_prestation: 'Последняя услуга:',
+
+    aucun_service: 'Пока нет созданных услуг.',
+    modifier_btn: '✏️ Изменить',
+    titre_service: 'Название услуги',
+    description: 'Описание',
+    prix_euros: 'Цена в евро',
+    duree_minutes: 'Продолжительность в минутах',
+    photo_url_optionnel: 'URL фото (необязательно)',
+    photo_defaut_info: 'Если пусто, будет использовано стандартное фото по категории.',
+    sauvegarder: 'Сохранить',
+    modifier_service_titre: 'Изменить услугу',
+
+    ajouter_realisation: 'Добавить работу в портфолио',
+    titre_optionnel: 'Название (напр.: Стрижка до/после)',
+    description_optionnelle: 'Описание (необязательно)',
+    choisir_fichier_info: 'Выберите фото или видео с вашего устройства.',
+    envoi_en_cours: 'Отправка...',
+    ajouter: 'Добавить',
+    aucune_realisation: 'Пока нет добавленных работ.',
+    supprimer: '🗑️ Удалить',
+
+    aucune_conversation_presta: 'Пока нет переписок. Здесь вы будете получать сообщения от клиентов!',
+
+    avis_total: 'отзывов всего',
+    aucun_avis: 'Пока нет отзывов.',
+    votre_reponse: 'Ваш ответ:',
+    repondre_placeholder: 'Ответить на этот отзыв...',
+    publier_reponse: 'Опубликовать ответ',
+    modifier_reponse: '✏️ Изменить мой ответ',
+    repondre: '💬 Ответить',
+
+    ajouter_nouveau_service: 'Добавить новую услугу',
+    creer_service: 'Создать услугу'
   }
 }
