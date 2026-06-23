@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getPrestatairesListe, getTopPrestataires } from '../services/api'
 import { ajouterRecherche, getHistorique, retirerRecherche } from '../services/historiqueRecherche'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 
 const imagesParCategorie = {
   coiffure: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&h=200&fit=crop',
@@ -25,9 +26,12 @@ const Etoiles = ({ note }) => (
   </div>
 )
 
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
+
 const Accueil = () => {
   const navigate = useNavigate()
   const { mode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
   const [prestataires, setPrestataires] = useState([])
   const [recherche, setRecherche] = useState('')
   const [ville, setVille] = useState('')
@@ -36,6 +40,7 @@ const Accueil = () => {
   const [menuOuvert, setMenuOuvert] = useState(false)
   const [historique, setHistorique] = useState([])
   const [topPrestataires, setTopPrestataires] = useState({})
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
 
   const categories = [
     { nom: 'coiffure', image: imagesParCategorie.coiffure },
@@ -113,6 +118,8 @@ const Accueil = () => {
     setHistorique(getHistorique())
   }
 
+  const categorieKey = (nom) => nom.replace(' ', '_')
+
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
 
@@ -128,13 +135,25 @@ const Accueil = () => {
             <div style={{ color: '#FEB2B2', fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
           </div>
         </div>
-        <div className="nav-desktop" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div className="nav-desktop" style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }} title={mode === 'clair' ? 'Mode sombre' : 'Mode clair'}>
             {mode === 'clair' ? '🌙' : '☀️'}
           </button>
-          <button onClick={() => navigate('/carte')} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>🗺️ Carte</button>
-          <button onClick={() => navigate('/auth')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Connexion</button>
-          <button onClick={() => navigate('/auth')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>S'inscrire</button>
+          <button onClick={() => navigate('/carte')} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>🗺️ {t('carte')}</button>
+          <button onClick={() => navigate('/auth')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('connexion')}</button>
+          <button onClick={() => navigate('/auth')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('inscription')}</button>
         </div>
         <button onClick={() => setMenuOuvert(!menuOuvert)} className="nav-mobile" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'none' }}>
           <div style={{ width: '24px', height: '2px', background: 'white', margin: '5px 0' }}></div>
@@ -143,10 +162,15 @@ const Accueil = () => {
         </button>
         {menuOuvert && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: c.bleu, padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 100, borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {Object.keys(drapeaux).map(l => (
+                <button key={l} onClick={() => changerLangue(l)} style={{ background: langue === l ? 'white' : 'rgba(255,255,255,0.2)', color: langue === l ? c.bleu : 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}>{drapeaux[l]}</button>
+              ))}
+            </div>
             <button onClick={() => { toggleTheme() }} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{mode === 'clair' ? '🌙 Mode sombre' : '☀️ Mode clair'}</button>
-            <button onClick={() => { navigate('/carte'); setMenuOuvert(false) }} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>🗺️ Carte</button>
-            <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: 'white', color: c.bleu, border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Connexion</button>
-            <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>S'inscrire</button>
+            <button onClick={() => { navigate('/carte'); setMenuOuvert(false) }} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>🗺️ {t('carte')}</button>
+            <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: 'white', color: c.bleu, border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('connexion')}</button>
+            <button onClick={() => { navigate('/auth'); setMenuOuvert(false) }} style={{ background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('inscription')}</button>
           </div>
         )}
       </nav>
@@ -164,16 +188,16 @@ const Accueil = () => {
       `}</style>
 
       <div style={{ background: c.fondMoyen, padding: '40px 16px', textAlign: 'center' }}>
-        <h1 className="hero-title" style={{ fontSize: '32px', color: c.texteFonce, marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>Des pros à domicile,<br />quand vous en avez besoin</h1>
-        <p style={{ color: c.texte, fontSize: '15px', fontStyle: 'italic', marginBottom: '32px', padding: '0 8px' }}>Plus besoin de chercher, un clic et trouvez votre artisan à domicile</p>
+        <h1 className="hero-title" style={{ fontSize: '32px', color: c.texteFonce, marginBottom: '8px', lineHeight: 1.3, fontFamily: 'Georgia, serif' }}>{t('hero_titre')}<br />{t('hero_titre_2')}</h1>
+        <p style={{ color: c.texte, fontSize: '15px', fontStyle: 'italic', marginBottom: '32px', padding: '0 8px' }}>{t('hero_sous_titre')}</p>
         <div className="search-box" style={{ background: c.fondClair, borderRadius: '12px', padding: '16px', maxWidth: '700px', margin: '0 auto', display: 'flex', gap: '8px', border: `1px solid ${c.bordure}` }}>
-          <input placeholder="Quel service ou prestataire ?" value={recherche} onChange={(e) => setRecherche(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleRecherche()} style={{ flex: 2, padding: '12px 16px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%', background: c.inputFond, color: c.inputTexte }} />
-          <input placeholder="📍 Ville (ex: Nice)" value={ville} onChange={(e) => setVille(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%', background: c.inputFond, color: c.inputTexte }} />
-          <button onClick={handleRecherche} style={{ background: c.rouge, color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>Rechercher</button>
+          <input placeholder={t('placeholder_recherche')} value={recherche} onChange={(e) => setRecherche(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleRecherche()} style={{ flex: 2, padding: '12px 16px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%', background: c.inputFond, color: c.inputTexte }} />
+          <input placeholder={t('placeholder_ville')} value={ville} onChange={(e) => setVille(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, fontSize: '14px', fontFamily: 'Georgia, serif', width: '100%', background: c.inputFond, color: c.inputTexte }} />
+          <button onClick={handleRecherche} style={{ background: c.rouge, color: 'white', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '14px', whiteSpace: 'nowrap' }}>{t('rechercher')}</button>
         </div>
         {historique.length > 0 && (
           <div style={{ maxWidth: '700px', margin: '12px auto 0', display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
-            <span style={{ color: c.texteFonce, fontSize: '12px', marginRight: '4px' }}>Récentes :</span>
+            <span style={{ color: c.texteFonce, fontSize: '12px', marginRight: '4px' }}>{t('recentes')}</span>
             {historique.map(terme => (
               <span key={terme} onClick={() => handleClicHistorique(terme)} style={{ background: c.fondClair, color: c.texteFonce, padding: '4px 10px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer', border: `1px solid ${c.bordure}`, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 🕐 {terme}
@@ -184,16 +208,16 @@ const Accueil = () => {
         )}
         {ville && (
           <p style={{ color: c.texteFonce, fontSize: '13px', marginTop: '12px' }}>
-            Résultats pour : <strong>{ville}</strong> <span onClick={() => setVille('')} style={{ cursor: 'pointer', textDecoration: 'underline', marginLeft: '8px' }}>✕ effacer</span>
+            {t('resultats_pour')} <strong>{ville}</strong> <span onClick={() => setVille('')} style={{ cursor: 'pointer', textDecoration: 'underline', marginLeft: '8px' }}>{t('effacer')}</span>
           </p>
         )}
         <p style={{ marginTop: '16px' }}>
-          <span onClick={() => navigate('/carte')} style={{ color: c.texteFonce, fontSize: '13px', textDecoration: 'underline', cursor: 'pointer' }}>🗺️ Voir tous les prestataires sur une carte</span>
+          <span onClick={() => navigate('/carte')} style={{ color: c.texteFonce, fontSize: '13px', textDecoration: 'underline', cursor: 'pointer' }}>{t('voir_carte')}</span>
         </p>
       </div>
 
       <div style={{ background: c.fond, padding: '32px 16px' }}>
-        <h2 style={{ color: c.texteFonce, textAlign: 'center', marginBottom: '24px', fontFamily: 'Georgia, serif', fontSize: '20px' }}>Nos services à domicile</h2>
+        <h2 style={{ color: c.texteFonce, textAlign: 'center', marginBottom: '24px', fontFamily: 'Georgia, serif', fontSize: '20px' }}>{t('nos_services')}</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', maxWidth: '1100px', margin: '0 auto' }}>
           {categories.map(cat => (
             <div key={cat.nom} onClick={() => filtrerCategorie(cat.nom)} style={{ borderRadius: '12px', overflow: 'hidden', border: categorie === cat.nom ? `3px solid ${c.bleu}` : `1px solid ${c.bordure}`, cursor: 'pointer', background: c.fondClair }}>
@@ -201,7 +225,7 @@ const Accueil = () => {
                 <img src={cat.image} alt={cat.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div style={{ padding: '8px', textAlign: 'center' }}>
-                <div style={{ fontSize: '12px', color: categorie === cat.nom ? c.bleu : c.texteFonce, fontWeight: '500', textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat.nom}</div>
+                <div style={{ fontSize: '12px', color: categorie === cat.nom ? c.bleu : c.texteFonce, fontWeight: '500', fontFamily: 'Georgia, serif' }}>{t(categorieKey(cat.nom))}</div>
               </div>
             </div>
           ))}
@@ -210,11 +234,11 @@ const Accueil = () => {
 
       <div style={{ flex: 1, maxWidth: '900px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         <h2 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>
-          {prestatairesFiltres.length} prestataire{prestatairesFiltres.length > 1 ? 's' : ''} disponible{prestatairesFiltres.length > 1 ? 's' : ''}
+          {prestatairesFiltres.length} {t('prestataires_disponibles')}
         </h2>
         {prestatairesFiltres.length === 0 && (
           <div style={{ textAlign: 'center', padding: '3rem', color: c.texte }}>
-            <p style={{ fontSize: '18px' }}>Aucun prestataire trouvé</p>
+            <p style={{ fontSize: '18px' }}>{t('aucun_prestataire')}</p>
           </div>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -226,7 +250,7 @@ const Accueil = () => {
               <div key={p.id} className="presta-card" onClick={() => navigate(`/prestataire/${p.id}`)} style={{ background: c.fondClair, borderRadius: '12px', border: estTop ? '2px solid #F6AD55' : `1px solid ${c.bordure}`, display: 'flex', overflow: 'hidden', cursor: 'pointer', position: 'relative' }}>
                 {estTop && (
                   <div style={{ position: 'absolute', top: '8px', left: '8px', background: '#F6AD55', color: '#1A365D', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', zIndex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    🏆 Top prestataire
+                    {t('top_prestataire')}
                   </div>
                 )}
                 <div className="presta-image" style={{ width: '180px', height: '160px', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
@@ -239,22 +263,22 @@ const Accueil = () => {
                   <div>
                     <h3 style={{ margin: '0 0 4px', color: c.texteFonce, fontFamily: 'Georgia, serif', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                       {p.prenom} {p.nom}
-                      {p.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>✅ Vérifié</span>}
+                      {p.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '10px', padding: '2px 8px', borderRadius: '20px' }}>{t('verifie')}</span>}
                     </h3>
                     {(p.ville || p.code_postal) && <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 6px' }}>📍 {p.ville} {p.code_postal}</p>}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                       <Etoiles note={p.moyenne} />
-                      <span style={{ color: c.texte, fontSize: '12px' }}>{p.moyenne} ({p.totalAvis} avis)</span>
+                      <span style={{ color: c.texte, fontSize: '12px' }}>{p.moyenne} ({p.totalAvis} {t('avis')})</span>
                     </div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {[...new Set(p.services.map(s => s.categorie))].map(cat => (
-                        <span key={cat} style={{ background: c.bleuFond, color: c.bleu, padding: '2px 8px', borderRadius: '20px', fontSize: '11px', textTransform: 'capitalize' }}>{cat}</span>
+                        <span key={cat} style={{ background: c.bleuFond, color: c.bleu, padding: '2px 8px', borderRadius: '20px', fontSize: '11px' }}>{t(categorieKey(cat))}</span>
                       ))}
                     </div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                    <span style={{ color: c.texte, fontSize: '13px' }}>À partir de <strong style={{ color: c.rouge, fontSize: '16px' }}>{prixMin}€</strong></span>
-                    <button onClick={(e) => { e.stopPropagation(); navigate(`/prestataire/${p.id}`) }} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Voir le profil</button>
+                    <span style={{ color: c.texte, fontSize: '13px' }}>{t('a_partir_de')} <strong style={{ color: c.rouge, fontSize: '16px' }}>{prixMin}€</strong></span>
+                    <button onClick={(e) => { e.stopPropagation(); navigate(`/prestataire/${p.id}`) }} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('voir_profil')}</button>
                   </div>
                 </div>
               </div>
@@ -264,12 +288,12 @@ const Accueil = () => {
       </div>
 
       <div style={{ background: c.fondClair, padding: '40px 16px', textAlign: 'center' }}>
-        <h2 style={{ color: c.texteFonce, fontSize: '22px', marginBottom: '32px', fontFamily: 'Georgia, serif' }}>Comment ça marche ?</h2>
+        <h2 style={{ color: c.texteFonce, fontSize: '22px', marginBottom: '32px', fontFamily: 'Georgia, serif' }}>{t('comment_ca_marche')}</h2>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto' }}>
           {[
-            { num: '1', titre: 'Cherchez un service', desc: 'Tapez le service et la ville dont vous avez besoin et trouvez les pros disponibles près de chez vous' },
-            { num: '2', titre: 'Choisissez et réservez', desc: 'Consultez les avis, les tarifs et réservez en quelques clics avec notre calendrier' },
-            { num: '3', titre: 'Le pro vient chez vous', desc: "Votre artisan se déplace à domicile à l'heure convenue. Profitez !" }
+            { num: '1', titre: t('etape1_titre'), desc: t('etape1_desc') },
+            { num: '2', titre: t('etape2_titre'), desc: t('etape2_desc') },
+            { num: '3', titre: t('etape3_titre'), desc: t('etape3_desc') }
           ].map(step => (
             <div key={step.num} style={{ flex: 1, minWidth: '200px', background: c.blanc, borderRadius: '12px', padding: '20px', border: `1px solid ${c.bordure}` }}>
               <div style={{ width: '36px', height: '36px', background: c.bleu, borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', margin: '0 auto 12px' }}>{step.num}</div>
@@ -281,13 +305,13 @@ const Accueil = () => {
       </div>
 
       <div style={{ background: c.bleu, padding: '40px 16px', textAlign: 'center' }}>
-        <h2 style={{ color: 'white', fontSize: '20px', marginBottom: '28px', fontFamily: 'Georgia, serif' }}>At Home Service en chiffres</h2>
+        <h2 style={{ color: 'white', fontSize: '20px', marginBottom: '28px', fontFamily: 'Georgia, serif' }}>{t('en_chiffres')}</h2>
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '700px', margin: '0 auto' }}>
           {[
-            { num: '10', label: 'Corps de métiers' },
-            { num: '100%', label: 'Pros vérifiés' },
-            { num: '24/7', label: 'Réservation en ligne' },
-            { num: '🔒', label: 'Paiement sécurisé' }
+            { num: '10', label: t('metiers') },
+            { num: '100%', label: t('pros_verifies') },
+            { num: '24/7', label: t('reservation_ligne') },
+            { num: '🔒', label: t('paiement_securise') }
           ].map(stat => (
             <div key={stat.label} style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px 24px', border: '1px solid rgba(255,255,255,0.2)' }}>
               <div style={{ color: 'white', fontSize: '28px', fontWeight: '500' }}>{stat.num}</div>
@@ -299,41 +323,41 @@ const Accueil = () => {
 
       <div style={{ background: c.fond, padding: '40px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', flexWrap: 'wrap', textAlign: 'center' }}>
         <div>
-          <h2 style={{ color: c.texteFonce, fontSize: '20px', marginBottom: '8px', fontFamily: 'Georgia, serif' }}>Vous êtes un professionnel ?</h2>
-          <p style={{ color: c.texte, fontSize: '13px', maxWidth: '300px', lineHeight: 1.6, margin: '0 auto' }}>Rejoignez At Home Service et développez votre clientèle. Créez votre profil gratuitement et commencez à recevoir des réservations dès aujourd'hui.</p>
+          <h2 style={{ color: c.texteFonce, fontSize: '20px', marginBottom: '8px', fontFamily: 'Georgia, serif' }}>{t('pro_question')}</h2>
+          <p style={{ color: c.texte, fontSize: '13px', maxWidth: '300px', lineHeight: 1.6, margin: '0 auto' }}>{t('pro_texte')}</p>
         </div>
-        <button onClick={() => navigate('/auth')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '14px 28px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Rejoindre la plateforme</button>
+        <button onClick={() => navigate('/auth')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '14px 28px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('rejoindre')}</button>
       </div>
 
       <footer style={{ background: c.texteFonce, padding: '28px 16px' }}>
         <div className="footer-grid" style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', gap: '24px', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: '20px' }}>
           <div>
             <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>At Home Service</div>
-            <p style={{ color: '#90CDF4', fontSize: '12px', fontStyle: 'italic', lineHeight: 1.6 }}>Plus besoin de chercher,<br />un clic et trouvez votre<br />artisan à domicile</p>
+            <p style={{ color: '#90CDF4', fontSize: '12px', fontStyle: 'italic', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{t('footer_slogan')}</p>
           </div>
           <div>
-            <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>Services</div>
-            <div style={{ color: '#90CDF4', fontSize: '12px', lineHeight: 1.8 }}>Coiffure · Barber<br />Massage · Esthétique<br />Plomberie · Électricité<br />Maçonnerie · Rénovation<br />Coach sportif · Photographe</div>
+            <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>{t('footer_services')}</div>
+            <div style={{ color: '#90CDF4', fontSize: '12px', lineHeight: 1.8 }}>{t('coiffure')} · {t('barber')}<br />{t('massage')} · {t('esthetique')}<br />{t('plomberie')} · {t('electricite')}<br />{t('maconnerie')} · {t('renovation')}<br />{t('coach_sportif')} · {t('photographe')}</div>
           </div>
           <div>
-            <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>Liens utiles</div>
+            <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>{t('footer_liens')}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span onClick={() => navigate('/carte')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Carte des prestataires</span>
-              <span onClick={() => navigate('/mentions-legales')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Mentions légales et CGU</span>
-              <span onClick={() => navigate('/confidentialite')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Politique de confidentialité</span>
-              <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Connexion</span>
-              <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Créer un compte</span>
-              <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>Devenir prestataire</span>
+              <span onClick={() => navigate('/carte')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>{t('footer_carte')}</span>
+              <span onClick={() => navigate('/mentions-legales')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>{t('footer_mentions')}</span>
+              <span onClick={() => navigate('/confidentialite')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>{t('footer_confidentialite')}</span>
+              <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>{t('connexion')}</span>
+              <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>{t('footer_creer_compte')}</span>
+              <span onClick={() => navigate('/auth')} style={{ color: '#90CDF4', fontSize: '12px', cursor: 'pointer' }}>{t('footer_devenir_prestataire')}</span>
             </div>
           </div>
           <div>
-            <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>Contact</div>
+            <div style={{ color: 'white', fontSize: '14px', fontWeight: '500', marginBottom: '10px' }}>{t('footer_contact')}</div>
             <p style={{ color: '#90CDF4', fontSize: '12px' }}>devathomeserv@gmail.com</p>
             <p style={{ color: '#90CDF4', fontSize: '12px', marginTop: '4px' }}>France</p>
           </div>
         </div>
         <div style={{ borderTop: `1px solid ${c.bleu}`, paddingTop: '14px', textAlign: 'center', color: '#90CDF4', fontSize: '12px' }}>
-          © 2026 At Home Service — Tous droits réservés
+          {t('footer_droits')}
         </div>
       </footer>
     </div>
