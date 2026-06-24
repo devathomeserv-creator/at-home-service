@@ -3,30 +3,29 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getProfilPublicPrestataire, ajouterFavori, retirerFavori, verifierFavori, getRealisationsPrestataire, creerSignalement } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 
-const motifsSignalement = [
-  'Comportement inapproprié',
-  'Service non conforme à la description',
-  'Tentative de fraude',
-  'Profil suspect ou faux',
-  'Autre'
-]
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
 const ProfilPrestataire = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
   const [data, setData] = useState(null)
   const [chargement, setChargement] = useState(true)
   const [estFavori, setEstFavori] = useState(false)
   const [lienCopie, setLienCopie] = useState(false)
   const [realisations, setRealisations] = useState([])
   const [showSignalement, setShowSignalement] = useState(false)
-  const [motifSignalement, setMotifSignalement] = useState(motifsSignalement[0])
+  const [motifSignalement, setMotifSignalement] = useState('')
   const [descriptionSignalement, setDescriptionSignalement] = useState('')
   const [signalementEnvoye, setSignalementEnvoye] = useState(false)
   const [erreurSignalement, setErreurSignalement] = useState('')
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
+
+  const motifsSignalement = [t('motif_comportement'), t('motif_service'), t('motif_fraude'), t('motif_profil'), t('motif_autre')]
 
   useEffect(() => {
     chargerProfil()
@@ -36,6 +35,13 @@ const ProfilPrestataire = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
+
+  useEffect(() => {
+    if (motifsSignalement.length > 0 && !motifSignalement) {
+      setMotifSignalement(motifsSignalement[0])
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [langue])
 
   const chargerProfil = async () => {
     try {
@@ -140,13 +146,13 @@ const ProfilPrestataire = () => {
 
   if (chargement) return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: c.texteFonce, fontSize: '18px' }}>Chargement...</p>
+      <p style={{ color: c.texteFonce, fontSize: '18px' }}>{t('chargement_profil')}</p>
     </div>
   )
 
   if (!data) return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: c.rouge, fontSize: '18px' }}>Prestataire introuvable</p>
+      <p style={{ color: c.rouge, fontSize: '18px' }}>{t('prestataire_introuvable')}</p>
     </div>
   )
 
@@ -166,12 +172,24 @@ const ProfilPrestataire = () => {
             <div style={{ fontSize: '9px', color: '#FEB2B2', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: themeMode ? '7rem' : '7rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
             {themeMode === 'clair' ? '🌙' : '☀️'}
           </button>
-          <button onClick={() => navigate('/')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>← Accueil</button>
-          {!user && <button onClick={() => navigate('/auth')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Connexion</button>}
+          <button onClick={() => navigate('/')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('accueil')}</button>
+          {!user && <button onClick={() => navigate('/auth')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('connexion')}</button>}
         </div>
       </nav>
 
@@ -182,22 +200,22 @@ const ProfilPrestataire = () => {
             <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '420px', border: `1px solid ${c.bordure}` }}>
               {signalementEnvoye ? (
                 <>
-                  <h3 style={{ color: c.texteFonce, marginBottom: '1rem' }}>Signalement envoyé</h3>
-                  <p style={{ color: c.texte, fontSize: '14px', marginBottom: '1.5rem' }}>Merci, notre équipe va examiner votre signalement dans les plus brefs délais.</p>
-                  <button onClick={() => setShowSignalement(false)} style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Fermer</button>
+                  <h3 style={{ color: c.texteFonce, marginBottom: '1rem' }}>{t('signalement_envoye')}</h3>
+                  <p style={{ color: c.texte, fontSize: '14px', marginBottom: '1.5rem' }}>{t('signalement_merci')}</p>
+                  <button onClick={() => setShowSignalement(false)} style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('fermer')}</button>
                 </>
               ) : (
                 <>
-                  <h3 style={{ color: c.texteFonce, marginBottom: '1rem' }}>Signaler ce prestataire</h3>
+                  <h3 style={{ color: c.texteFonce, marginBottom: '1rem' }}>{t('signaler_prestataire')}</h3>
                   <form onSubmit={handleEnvoyerSignalement}>
                     <select value={motifSignalement} onChange={(e) => setMotifSignalement(e.target.value)} style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px' }}>
                       {motifsSignalement.map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
-                    <textarea placeholder="Décrivez la situation (optionnel)" value={descriptionSignalement} onChange={(e) => setDescriptionSignalement(e.target.value)} rows={4} style={{ width: '100%', padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', fontFamily: 'Georgia, serif', boxSizing: 'border-box' }} />
+                    <textarea placeholder={t('decrire_situation')} value={descriptionSignalement} onChange={(e) => setDescriptionSignalement(e.target.value)} rows={4} style={{ width: '100%', padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', fontFamily: 'Georgia, serif', boxSizing: 'border-box' }} />
                     {erreurSignalement && <p style={{ color: c.rouge, fontSize: '13px', marginBottom: '10px' }}>{erreurSignalement}</p>}
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button type="submit" style={{ flex: 1, padding: '12px', background: c.rouge, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Envoyer le signalement</button>
-                      <button type="button" onClick={() => setShowSignalement(false)} style={{ background: c.blanc, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Annuler</button>
+                      <button type="submit" style={{ flex: 1, padding: '12px', background: c.rouge, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('envoyer_signalement')}</button>
+                      <button type="button" onClick={() => setShowSignalement(false)} style={{ background: c.blanc, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
                     </div>
                   </form>
                 </>
@@ -219,7 +237,7 @@ const ProfilPrestataire = () => {
           </div>
           {lienCopie && (
             <div style={{ position: 'absolute', top: '4.5rem', right: '1.5rem', background: c.texteFonce, color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}>
-              Lien copié !
+              {t('lien_copie')}
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
@@ -232,7 +250,7 @@ const ProfilPrestataire = () => {
             <div style={{ flex: 1 }}>
               <h1 style={{ color: c.texteFonce, margin: '0 0 4px', fontFamily: 'Georgia, serif', fontSize: '24px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 {prestataire.prenom} {prestataire.nom}
-                {prestataire.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '12px', padding: '3px 10px', borderRadius: '20px' }}>✅ Vérifié</span>}
+                {prestataire.verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '12px', padding: '3px 10px', borderRadius: '20px' }}>{t('verifie')}</span>}
               </h1>
               {(prestataire.ville || prestataire.code_postal) && (
                 <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 8px' }}>📍 {prestataire.ville} {prestataire.code_postal}</p>
@@ -243,10 +261,10 @@ const ProfilPrestataire = () => {
                     <span key={i} style={{ fontSize: '18px', color: i <= Math.round(moyenne) ? '#F6AD55' : '#CBD5E0' }}>★</span>
                   ))}
                 </div>
-                <span style={{ color: c.texte, fontSize: '14px' }}>{moyenne} ({totalAvis} avis)</span>
+                <span style={{ color: c.texte, fontSize: '14px' }}>{moyenne} ({totalAvis} {t('avis')})</span>
                 {prestataire.lien_google && (
                   <a href={prestataire.lien_google} target="_blank" rel="noopener noreferrer" style={{ background: c.blanc, color: c.bleu, border: `1px solid ${c.bleu}`, padding: '3px 10px', borderRadius: '20px', fontSize: '12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    🔵 Voir les avis Google
+                    {t('voir_avis_google')}
                   </a>
                 )}
               </div>
@@ -256,13 +274,13 @@ const ProfilPrestataire = () => {
             </div>
           </div>
           <div style={{ marginTop: '1rem', textAlign: 'right' }}>
-            <span onClick={ouvrirSignalement} style={{ color: c.bordure, fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>🚩 Signaler ce prestataire</span>
+            <span onClick={ouvrirSignalement} style={{ color: c.bordure, fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>{t('signaler_btn')}</span>
           </div>
         </div>
 
         {realisations.length > 0 && (
           <>
-            <h2 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>📸 Réalisations</h2>
+            <h2 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>📸 {t('onglet_realisations').replace('📸 ', '')}</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
               {realisations.map(r => (
                 <div key={r.id} style={{ background: c.fondClair, borderRadius: '12px', border: `1px solid ${c.bordure}`, overflow: 'hidden' }}>
@@ -285,8 +303,8 @@ const ProfilPrestataire = () => {
           </>
         )}
 
-        <h2 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>Services proposés</h2>
-        {services.length === 0 && <p style={{ color: c.texte }}>Aucun service disponible pour le moment.</p>}
+        <h2 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', marginBottom: '1rem' }}>{t('services_proposes')}</h2>
+        {services.length === 0 && <p style={{ color: c.texte }}>{t('aucun_service_dispo')}</p>}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
           {services.map(service => (
             <div key={service.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
@@ -298,21 +316,21 @@ const ProfilPrestataire = () => {
                   <span style={{ fontWeight: 'bold', fontSize: '18px', color: c.rouge }}>{service.prix}€</span>
                   <span style={{ color: c.texte, fontSize: '13px', marginLeft: '6px' }}>{service.duree} min</span>
                 </div>
-                <button onClick={() => handleReserver(service.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Réserver</button>
+                <button onClick={() => handleReserver(service.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('reserver')}</button>
               </div>
             </div>
           ))}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
-          <h2 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', margin: 0 }}>Avis clients ({totalAvis})</h2>
+          <h2 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', margin: 0 }}>{t('avis_clients')} ({totalAvis})</h2>
           {prestataire.lien_google && (
             <a href={prestataire.lien_google} target="_blank" rel="noopener noreferrer" style={{ background: c.bleu, color: 'white', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontFamily: 'Georgia, serif' }}>
-              ⭐ Laisser un avis sur Google
+              {t('laisser_avis_google')}
             </a>
           )}
         </div>
-        {avis.length === 0 && <p style={{ color: c.texte, marginBottom: '2rem' }}>Aucun avis pour le moment.</p>}
+        {avis.length === 0 && <p style={{ color: c.texte, marginBottom: '2rem' }}>{t('aucun_avis_pour_instant')}</p>}
         {avis.map(a => (
           <div key={a.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
@@ -331,7 +349,7 @@ const ProfilPrestataire = () => {
 
             {a.reponse_prestataire && (
               <div style={{ background: c.blanc, borderRadius: '8px', padding: '12px', marginTop: '12px', borderLeft: `3px solid ${c.bleu}` }}>
-                <p style={{ color: c.bleu, fontSize: '12px', fontWeight: 'bold', margin: '0 0 4px' }}>Réponse de {prestataire.prenom} :</p>
+                <p style={{ color: c.bleu, fontSize: '12px', fontWeight: 'bold', margin: '0 0 4px' }}>{t('reponse_de')} {prestataire.prenom} :</p>
                 <p style={{ color: c.texte, fontSize: '13px', margin: 0 }}>{a.reponse_prestataire}</p>
               </div>
             )}
@@ -340,7 +358,7 @@ const ProfilPrestataire = () => {
       </div>
 
       <footer style={{ background: c.texteFonce, color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
-        © 2026 At Home Service — Tous droits réservés
+        {t('footer_droits')}
       </footer>
     </div>
   )
