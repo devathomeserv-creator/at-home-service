@@ -6,7 +6,7 @@ const getProfilPublic = async (req, res) => {
 
     const { data: prestataire, error } = await supabase
       .from('users')
-      .select('id, nom, prenom, photo_url, description, telephone, role, jours_travail, heure_debut, heure_fin, ville, code_postal, verifie, lien_google')
+      .select('id, nom, prenom, photo_url, description, telephone, role, jours_travail, heure_debut, heure_fin, ville, code_postal, verifie, lien_google, langues_parlees')
       .eq('id', id)
       .eq('role', 'prestataire')
       .single()

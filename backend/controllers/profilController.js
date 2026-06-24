@@ -6,7 +6,7 @@ const getProfil = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, description, jours_travail, heure_debut, heure_fin, ville, code_postal, siret, verifie, latitude, longitude, lien_google, created_at')
+      .select('id, nom, prenom, email, role, telephone, adresse, photo_url, confirmation_auto, description, jours_travail, heure_debut, heure_fin, ville, code_postal, siret, verifie, latitude, longitude, lien_google, langues_parlees, created_at')
       .eq('id', req.user.id)
       .single()
 
@@ -19,7 +19,7 @@ const getProfil = async (req, res) => {
 
 const modifierProfil = async (req, res) => {
   try {
-    const { nom, prenom, telephone, adresse, description, ville, code_postal, lien_google } = req.body
+    const { nom, prenom, telephone, adresse, description, ville, code_postal, lien_google, langues_parlees } = req.body
 
     let latitude = null
     let longitude = null
@@ -38,7 +38,7 @@ const modifierProfil = async (req, res) => {
       }
     }
 
-    const updateData = { nom, prenom, telephone, adresse, description, ville, code_postal, lien_google }
+    const updateData = { nom, prenom, telephone, adresse, description, ville, code_postal, lien_google, langues_parlees }
     if (latitude && longitude) {
       updateData.latitude = latitude
       updateData.longitude = longitude
