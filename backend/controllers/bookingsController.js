@@ -7,7 +7,7 @@ const TAUX_COMMISSION = 0.10
 
 const creerReservation = async (req, res) => {
   try {
-    const { service_id, date_rdv, adresse_intervention, note, payment_intent_id, consentement_donnees } = req.body
+    const { service_id, date_rdv, adresse_intervention, note, payment_intent_id, consentement_donnees, nom_beneficiaire, telephone_beneficiaire } = req.body
     const client_id = req.user.id
 
     const { data: service } = await supabase
@@ -37,7 +37,7 @@ const creerReservation = async (req, res) => {
 
     const { data, error } = await supabase
       .from('bookings')
-      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut, payment_intent_id, commission, montant_net, consentement_donnees: !!consentement_donnees }])
+      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut, payment_intent_id, commission, montant_net, consentement_donnees: !!consentement_donnees, nom_beneficiaire: nom_beneficiaire || null, telephone_beneficiaire: telephone_beneficiaire || null }])
       .select()
 
     if (error) throw error
@@ -47,7 +47,7 @@ const creerReservation = async (req, res) => {
       service.users.email,
       {
         service: service.titre,
-        clientNom: `${client.prenom} ${client.nom}`,
+        clientNom: nom_beneficiaire ? `${nom_beneficiaire} (réservé par ${client.prenom} ${client.nom})` : `${client.prenom} ${client.nom}`,
         date: new Date(date_rdv).toLocaleString('fr-FR'),
         adresse: adresse_intervention
       },
