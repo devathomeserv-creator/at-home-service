@@ -3,13 +3,23 @@ const PDFDocument = require('pdfkit')
 
 const TAUX_COMMISSION = 0.10
 
+const traductionsExport = {
+  fr: { titre: 'EXPORT COMPTABLE', periode: 'Période :', au: 'au', genere_le: 'Document généré le', resume: 'Résumé', nb_reservations: 'Nombre de réservations terminées :', volume: 'Volume total des transactions (TTC) :', commission: 'Commission perçue (taux', net_reverse: 'Montant net reversé aux prestataires :', nb_remboursements: 'Nombre de remboursements :', detail: 'Détail des transactions', date_col: 'Date', prestataire_col: 'Prestataire', service_col: 'Service', statut_col: 'Statut', prix_col: 'Prix', commission_col: 'Commission', footer: '© 2026 At Home Service — Document généré automatiquement, à conserver pour votre comptabilité.' },
+  en: { titre: 'ACCOUNTING EXPORT', periode: 'Period:', au: 'to', genere_le: 'Document generated on', resume: 'Summary', nb_reservations: 'Number of completed bookings:', volume: 'Total transaction volume (incl. tax):', commission: 'Commission earned (rate', net_reverse: 'Net amount paid to providers:', nb_remboursements: 'Number of refunds:', detail: 'Transaction details', date_col: 'Date', prestataire_col: 'Provider', service_col: 'Service', statut_col: 'Status', prix_col: 'Price', commission_col: 'Commission', footer: '© 2026 At Home Service — This document is generated automatically, keep it for your accounting records.' },
+  it: { titre: 'EXPORT CONTABILE', periode: 'Periodo:', au: 'al', genere_le: 'Documento generato il', resume: 'Riepilogo', nb_reservations: 'Numero di prenotazioni completate:', volume: 'Volume totale delle transazioni (IVA incl.):', commission: 'Commissione percepita (tasso', net_reverse: 'Importo netto versato ai fornitori:', nb_remboursements: 'Numero di rimborsi:', detail: 'Dettaglio delle transazioni', date_col: 'Data', prestataire_col: 'Fornitore', service_col: 'Servizio', statut_col: 'Stato', prix_col: 'Prezzo', commission_col: 'Commissione', footer: '© 2026 At Home Service — Documento generato automaticamente, conservalo per la tua contabilità.' }
+}
+
+const tE = (langue, cle) => traductionsExport[langue]?.[cle] || traductionsExport['fr']?.[cle] || cle
+
 const genererExportComptable = async (req, res) => {
   try {
-    const { date_debut, date_fin } = req.query
+    const { date_debut, date_fin, langue } = req.query
 
     if (!date_debut || !date_fin) {
       return res.status(400).json({ message: 'Veuillez fournir une date de début et de fin' })
     }
+
+    const langueFinale = ['fr', 'en', 'it'].includes(langue) ? langue : 'fr'
 
     const { data: bookings, error } = await supabase
       .from('bookings')
@@ -40,34 +50,34 @@ const genererExportComptable = async (req, res) => {
     doc.pipe(res)
 
     doc.fillColor('#2B6CB0').fontSize(22).text('At Home Service', 50, 50)
-    doc.fillColor('#3D2B0F').fontSize(10).text('EXPORT COMPTABLE', 50, 76)
+    doc.fillColor('#3D2B0F').fontSize(10).text(tE(langueFinale, 'titre'), 50, 76)
 
-    doc.fillColor('#1A365D').fontSize(14).text(`Période : du ${new Date(date_debut).toLocaleDateString('fr-FR')} au ${new Date(date_fin).toLocaleDateString('fr-FR')}`, 50, 110)
-    doc.fillColor('#3D2B0F').fontSize(9).text(`Document généré le ${new Date().toLocaleDateString('fr-FR')}`, 50, 130)
+    doc.fillColor('#1A365D').fontSize(14).text(`${tE(langueFinale, 'periode')} ${new Date(date_debut).toLocaleDateString('fr-FR')} ${tE(langueFinale, 'au')} ${new Date(date_fin).toLocaleDateString('fr-FR')}`, 50, 110)
+    doc.fillColor('#3D2B0F').fontSize(9).text(`${tE(langueFinale, 'genere_le')} ${new Date().toLocaleDateString('fr-FR')}`, 50, 130)
 
     doc.moveTo(50, 155).lineTo(550, 155).strokeColor('#A07840').stroke()
 
-    doc.fillColor('#1A365D').fontSize(12).text('Résumé', 50, 175)
+    doc.fillColor('#1A365D').fontSize(12).text(tE(langueFinale, 'resume'), 50, 175)
     doc.fillColor('#3D2B0F').fontSize(10)
-      .text(`Nombre de réservations terminées : ${reservationsTerminees.length}`, 50, 200)
-      .text(`Volume total des transactions (TTC) : ${volumeTotal.toFixed(2)} €`, 50, 218)
-      .text(`Commission perçue (taux ${TAUX_COMMISSION * 100}%) : ${commissionTotale.toFixed(2)} €`, 50, 236)
-      .text(`Montant net reversé aux prestataires : ${(volumeTotal - commissionTotale).toFixed(2)} €`, 50, 254)
-      .text(`Nombre de remboursements : ${totalRembourse}`, 50, 272)
+      .text(`${tE(langueFinale, 'nb_reservations')} ${reservationsTerminees.length}`, 50, 200)
+      .text(`${tE(langueFinale, 'volume')} ${volumeTotal.toFixed(2)} €`, 50, 218)
+      .text(`${tE(langueFinale, 'commission')} ${TAUX_COMMISSION * 100}%) : ${commissionTotale.toFixed(2)} €`, 50, 236)
+      .text(`${tE(langueFinale, 'net_reverse')} ${(volumeTotal - commissionTotale).toFixed(2)} €`, 50, 254)
+      .text(`${tE(langueFinale, 'nb_remboursements')} ${totalRembourse}`, 50, 272)
 
     doc.moveTo(50, 300).lineTo(550, 300).strokeColor('#A07840').stroke()
 
-    doc.fillColor('#1A365D').fontSize(12).text('Détail des transactions', 50, 320)
+    doc.fillColor('#1A365D').fontSize(12).text(tE(langueFinale, 'detail'), 50, 320)
 
     let y = 350
     doc.fillColor('white').rect(50, y - 5, 500, 20).fill('#2B6CB0')
     doc.fillColor('white').fontSize(8)
-      .text('Date', 55, y)
-      .text('Prestataire', 130, y)
-      .text('Service', 250, y)
-      .text('Statut', 360, y)
-      .text('Prix', 420, y)
-      .text('Commission', 470, y)
+      .text(tE(langueFinale, 'date_col'), 55, y)
+      .text(tE(langueFinale, 'prestataire_col'), 130, y)
+      .text(tE(langueFinale, 'service_col'), 250, y)
+      .text(tE(langueFinale, 'statut_col'), 360, y)
+      .text(tE(langueFinale, 'prix_col'), 420, y)
+      .text(tE(langueFinale, 'commission_col'), 470, y)
 
     y += 25
 
@@ -87,7 +97,7 @@ const genererExportComptable = async (req, res) => {
     })
 
     doc.fillColor('#A07840').fontSize(8).text(
-      '© 2026 At Home Service — Document généré automatiquement, à conserver pour votre comptabilité.',
+      tE(langueFinale, 'footer'),
       50, 780, { align: 'center', width: 500 }
     )
 

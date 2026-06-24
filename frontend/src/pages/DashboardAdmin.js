@@ -143,7 +143,7 @@ const DashboardAdmin = () => {
     }
     setExportEnCours(true)
     try {
-      await telechargerExportComptable(dateDebut, dateFin)
+      await telechargerExportComptable(dateDebut, dateFin, langue)
       setMessage('Export comptable téléchargé avec succès !')
     } catch (err) {
       setMessage('Erreur lors de la génération de l\'export')
