@@ -27,6 +27,18 @@ export const LanguageProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('langue', langue)
+
+    const token = localStorage.getItem('token')
+    if (token) {
+      fetch('https://loving-nature-production-145d.up.railway.app/api/profil/langue', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ langue_preferee: langue })
+      }).catch(err => console.error('Erreur synchro langue:', err))
+    }
   }, [langue])
 
   const changerLangue = (nouvelleLangue) => {
