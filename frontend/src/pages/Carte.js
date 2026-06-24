@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { getPrestatairesCarte } from '../services/api'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -14,14 +15,19 @@ L.Icon.Default.mergeOptions({
 })
 
 const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
 const Carte = () => {
   const navigate = useNavigate()
   const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
   const [prestataires, setPrestataires] = useState([])
   const [chargement, setChargement] = useState(true)
   const [recherche, setRecherche] = useState('')
   const [categorie, setCategorie] = useState('')
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
+
+  const categorieKey = (nom) => nom.replace(' ', '_')
 
   useEffect(() => {
     chargerPrestataires()
@@ -69,29 +75,41 @@ const Carte = () => {
           </div>
           <div style={{ color: 'white', fontSize: '16px', fontWeight: '500' }}>At Home Service</div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: '7rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
             {themeMode === 'clair' ? '🌙' : '☀️'}
           </button>
-          <button onClick={() => navigate('/')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>← Accueil</button>
+          <button onClick={() => navigate('/')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('accueil')}</button>
         </div>
       </nav>
 
       <div style={{ padding: '1rem 1.5rem', background: c.fondMoyen }}>
-        <h1 style={{ color: c.texteFonce, fontSize: '20px', margin: '0 0 8px', fontFamily: 'Georgia, serif' }}>🗺️ Trouvez un prestataire près de chez vous</h1>
-        <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 12px' }}>{prestatairesFiltres.length} prestataire{prestatairesFiltres.length > 1 ? 's' : ''} localisé{prestatairesFiltres.length > 1 ? 's' : ''}</p>
+        <h1 style={{ color: c.texteFonce, fontSize: '20px', margin: '0 0 8px', fontFamily: 'Georgia, serif' }}>{t('carte_titre')}</h1>
+        <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 12px' }}>{prestatairesFiltres.length} {t('prestataires_disponibles')}</p>
 
         <input
-          placeholder="Rechercher un prestataire ou un service..."
+          placeholder={t('placeholder_recherche_presta')}
           value={recherche}
           onChange={(e) => setRecherche(e.target.value)}
           style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif', maxWidth: '500px' }}
         />
 
         <div className="filtres-carte" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={() => filtrerCategorie('')} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === '' ? c.bleu : c.fondClair, color: categorie === '' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>Tous</button>
+          <button onClick={() => filtrerCategorie('')} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === '' ? c.bleu : c.fondClair, color: categorie === '' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t('tous')}</button>
           {categories.map(cat => (
-            <button key={cat} onClick={() => filtrerCategorie(cat)} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === cat ? c.bleu : c.fondClair, color: categorie === cat ? 'white' : c.texteFonce, textTransform: 'capitalize', fontFamily: 'Georgia, serif' }}>{cat}</button>
+            <button key={cat} onClick={() => filtrerCategorie(cat)} style={{ padding: '6px 16px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: categorie === cat ? c.bleu : c.fondClair, color: categorie === cat ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>{t(categorieKey(cat))}</button>
           ))}
         </div>
       </div>
@@ -99,7 +117,7 @@ const Carte = () => {
       <div style={{ flex: 1, minHeight: '500px' }}>
         {chargement && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '500px' }}>
-            <p style={{ color: c.texteFonce }}>Chargement de la carte...</p>
+            <p style={{ color: c.texteFonce }}>{t('chargement_carte')}</p>
           </div>
         )}
         {!chargement && (
@@ -119,7 +137,7 @@ const Carte = () => {
                         {p.services.map(s => s.categorie).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
                       </p>
                     )}
-                    <button onClick={() => navigate(`/prestataire/${p.id}`)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', marginTop: '6px', width: '100%' }}>Voir le profil</button>
+                    <button onClick={() => navigate(`/prestataire/${p.id}`)} style={{ background: '#C53030', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', marginTop: '6px', width: '100%' }}>{t('voir_profil')}</button>
                   </div>
                 </Popup>
               </Marker>
@@ -129,7 +147,7 @@ const Carte = () => {
       </div>
 
       <footer style={{ background: c.texteFonce, color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
-        © 2026 At Home Service — Tous droits réservés
+        {t('footer_droits')}
       </footer>
     </div>
   )
