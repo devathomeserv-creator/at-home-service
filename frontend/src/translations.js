@@ -77,7 +77,10 @@ export const traductions = {
 
     langues_parlees_label: 'Langues parlées', langues_parlees_info: 'Sélectionnez les langues que vous parlez. Cela aide les clients étrangers à vous trouver.',
     fr_label: 'Français', en_label: 'Anglais', it_label: 'Italien', ru_label: 'Russe', langues_parlees_profil_public: 'Langues parlées'
-  },
+  fr_label: 'Français', en_label: 'Anglais', it_label: 'Italien', ru_label: 'Russe', langues_parlees_profil_public: 'Langues parlées',
+    reserver_pour_proche: 'Réserver pour un proche', nom_beneficiaire_placeholder: 'Nom du bénéficiaire', telephone_beneficiaire_placeholder: 'Téléphone du bénéficiaire (optionnel)',
+    beneficiaire_info: 'Cette réservation sera à votre nom, mais la prestation sera réalisée pour la personne indiquée.', reserve_par: 'Réservé par'
+  }
   en: {
     connexion: 'Login', inscription: 'Sign up', carte: 'Map', mon_profil: 'My profile', deconnexion: 'Logout', mon_espace: '← My space', accueil: '← Home', retour: 'Back', bonjour: 'Hello',
     hero_titre: 'Professionals at home,', hero_titre_2: 'whenever you need them', hero_sous_titre: 'No more searching, one click to find your home craftsman',
@@ -156,6 +159,9 @@ export const traductions = {
 
     langues_parlees_label: 'Languages spoken', langues_parlees_info: 'Select the languages you speak. This helps foreign clients find you.',
     fr_label: 'French', en_label: 'English', it_label: 'Italian', ru_label: 'Russian', langues_parlees_profil_public: 'Languages spoken'
+  fr_label: 'French', en_label: 'English', it_label: 'Italian', ru_label: 'Russian', langues_parlees_profil_public: 'Languages spoken',
+    reserver_pour_proche: 'Book for someone else', nom_beneficiaire_placeholder: 'Beneficiary name', telephone_beneficiaire_placeholder: 'Beneficiary phone (optional)',
+    beneficiaire_info: 'This booking will be under your name, but the service will be provided for the person indicated.', reserve_par: 'Booked by'
   },
   it: {
     connexion: 'Accesso', inscription: 'Iscriviti', carte: 'Mappa', mon_profil: 'Il mio profilo', deconnexion: 'Disconnessione', mon_espace: '← Il mio spazio', accueil: '← Home', retour: 'Indietro', bonjour: 'Ciao',
@@ -235,7 +241,10 @@ export const traductions = {
 
     langues_parlees_label: 'Lingue parlate', langues_parlees_info: 'Seleziona le lingue che parli. Questo aiuta i clienti stranieri a trovarti.',
     fr_label: 'Francese', en_label: 'Inglese', it_label: 'Italiano', ru_label: 'Russo', langues_parlees_profil_public: 'Lingue parlate'
-  },
+  fr_label: 'Francese', en_label: 'Inglese', it_label: 'Italiano', ru_label: 'Russo', langues_parlees_profil_public: 'Lingue parlate',
+    reserver_pour_proche: 'Prenota per qualcun altro', nom_beneficiaire_placeholder: 'Nome del beneficiario', telephone_beneficiaire_placeholder: 'Telefono del beneficiario (opzionale)',
+    beneficiaire_info: 'Questa prenotazione sarà a tuo nome, ma il servizio sarà fornito per la persona indicata.', reserve_par: 'Prenotato da'
+  },,
   ru: {
     connexion: 'Вход', inscription: 'Регистрация', carte: 'Карта', mon_profil: 'Мой профиль', deconnexion: 'Выход', mon_espace: '← Мой кабинет', accueil: '← Главная', retour: 'Назад', bonjour: 'Привет',
     hero_titre: 'Профессионалы на дом,', hero_titre_2: 'когда вам это нужно', hero_sous_titre: 'Больше не нужно искать, один клик — и ваш мастер на дом найден',
@@ -314,5 +323,8 @@ export const traductions = {
 
     langues_parlees_label: 'Языки, на которых вы говорите', langues_parlees_info: 'Выберите языки, на которых вы говорите. Это поможет иностранным клиентам найти вас.',
     fr_label: 'Французский', en_label: 'Английский', it_label: 'Итальянский', ru_label: 'Русский', langues_parlees_profil_public: 'Языки'
+  fr_label: 'Французский', en_label: 'Английский', it_label: 'Итальянский', ru_label: 'Русский', langues_parlees_profil_public: 'Языки',
+    reserver_pour_proche: 'Забронировать для другого человека', nom_beneficiaire_placeholder: 'Имя получателя', telephone_beneficiaire_placeholder: 'Телефон получателя (необязательно)',
+    beneficiaire_info: 'Это бронирование будет на ваше имя, но услуга будет оказана указанному человеку.', reserve_par: 'Забронировано'
   }
 }

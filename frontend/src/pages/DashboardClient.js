@@ -69,6 +69,9 @@ const DashboardClient = () => {
   const [creneauxOccupes, setCreneauxOccupes] = useState([])
   const [telechargementEnCours, setTelechargementEnCours] = useState(null)
   const [consentementDonnees, setConsentementDonnees] = useState(false)
+  const [reservationPourProche, setReservationPourProche] = useState(false)
+  const [nomBeneficiaire, setNomBeneficiaire] = useState('')
+  const [telephoneBeneficiaire, setTelephoneBeneficiaire] = useState('')
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
   const categorieKey = (nom) => nom.replace(' ', '_')
@@ -89,6 +92,8 @@ const DashboardClient = () => {
     const adresseParam = params.get('adresse')
     const session_id = params.get('session_id')
     const consentementParam = params.get('consentement')
+    const nomBeneficiaireParam = params.get('nom_beneficiaire')
+    const telBeneficiaireParam = params.get('telephone_beneficiaire')
 
     if (paiement === 'succes' && service_id && date_rdv && adresseParam) {
       const finaliserReservation = async () => {
@@ -108,7 +113,9 @@ const DashboardClient = () => {
             date_rdv,
             adresse_intervention: decodeURIComponent(adresseParam),
             payment_intent_id,
-            consentement_donnees: consentementParam === 'true'
+            consentement_donnees: consentementParam === 'true',
+            nom_beneficiaire: nomBeneficiaireParam ? decodeURIComponent(nomBeneficiaireParam) : null,
+            telephone_beneficiaire: telBeneficiaireParam ? decodeURIComponent(telBeneficiaireParam) : null
           })
           setMessage('Paiement réussi ! Votre réservation est confirmée !')
           setVue('reservations')
@@ -188,6 +195,9 @@ const DashboardClient = () => {
     setDateSelectionnee(null)
     setAdresse('')
     setConsentementDonnees(false)
+    setReservationPourProche(false)
+    setNomBeneficiaire('')
+    setTelephoneBeneficiaire('')
     setShowReservationModal(true)
 
     try {
@@ -245,7 +255,9 @@ const DashboardClient = () => {
         service_id: serviceSelectionne.id,
         date_rdv: dateSelectionnee.toISOString(),
         adresse_intervention: adresse,
-        consentement_donnees: consentementDonnees
+        consentement_donnees: consentementDonnees,
+        nom_beneficiaire: reservationPourProche ? nomBeneficiaire : null,
+        telephone_beneficiaire: reservationPourProche ? telephoneBeneficiaire : null
       })
       window.location.href = res.data.url
     } catch (err) {
@@ -493,6 +505,27 @@ const DashboardClient = () => {
               <input placeholder={t('placeholder_adresse')} value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', marginBottom: '1rem', boxSizing: 'border-box' }} />
 
               <div style={{ background: c.blanc, borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: `1px solid ${c.bleuClair}` }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', marginBottom: reservationPourProche ? '10px' : 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={reservationPourProche}
+                    onChange={(e) => setReservationPourProche(e.target.checked)}
+                    style={{ marginTop: '3px', flexShrink: 0 }}
+                  />
+                  <span style={{ color: c.texteFonce, fontSize: '13px', fontWeight: 'bold' }}>
+                    {t('reserver_pour_proche')}
+                  </span>
+                </label>
+                {reservationPourProche && (
+                  <>
+                    <p style={{ color: c.texte, fontSize: '11px', marginBottom: '8px', fontStyle: 'italic' }}>{t('beneficiaire_info')}</p>
+                    <input placeholder={t('nom_beneficiaire_placeholder')} value={nomBeneficiaire} onChange={(e) => setNomBeneficiaire(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '13px', marginBottom: '8px', boxSizing: 'border-box' }} />
+                    <input placeholder={t('telephone_beneficiaire_placeholder')} value={telephoneBeneficiaire} onChange={(e) => setTelephoneBeneficiaire(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '13px', boxSizing: 'border-box' }} />
+                  </>
+                )}
+              </div>
+
+              <div style={{ background: c.blanc, borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: `1px solid ${c.bleuClair}` }}>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
@@ -618,6 +651,9 @@ const DashboardClient = () => {
                   </div>
                   <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('date_label')} {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                   <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
+                  {res.nom_beneficiaire && (
+                    <p style={{ color: c.texte, fontSize: '13px', marginTop: '4px' }}>👤 {res.nom_beneficiaire}</p>
+                  )}
                   {res.statut === 'annule' && res.rembourse && (
                     <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>{t('rembourse_auto')}</p>
                   )}
