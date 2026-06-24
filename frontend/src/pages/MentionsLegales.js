@@ -1,10 +1,15 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
+
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
 const MentionsLegales = () => {
   const navigate = useNavigate()
   const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = React.useState(false)
 
   return (
     <div style={{ minHeight: '100vh', background: c.fond }}>
@@ -20,20 +25,32 @@ const MentionsLegales = () => {
             <div style={{ fontSize: '9px', color: '#FEB2B2', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: '5rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
             {themeMode === 'clair' ? '🌙' : '☀️'}
           </button>
-          <button onClick={() => navigate('/')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Retour</button>
+          <button onClick={() => navigate('/')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('retour')}</button>
         </div>
       </nav>
 
       <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
 
         <div style={{ background: c.fondClair, borderRadius: '12px', padding: '2rem', border: `1px solid ${c.bordure}`, marginBottom: '1.5rem' }}>
-          <h1 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontSize: '24px' }}>Mentions Légales</h1>
+          <h1 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontSize: '24px' }}>{t('mentions_legales_titre')}</h1>
 
-          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>Éditeur du site</h2>
+          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>{t('editeur_site')}</h2>
           <p style={{ color: c.texte, fontSize: '14px', lineHeight: 1.8, marginBottom: '1.5rem' }}>
             <strong>Nom :</strong> Vincent Tumbarello<br />
             <strong>Adresse :</strong> Nice, France<br />
@@ -42,24 +59,24 @@ const MentionsLegales = () => {
             <strong>SIRET :</strong> En cours d'immatriculation
           </p>
 
-          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>Hébergement</h2>
+          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>{t('hebergement')}</h2>
           <p style={{ color: c.texte, fontSize: '14px', lineHeight: 1.8, marginBottom: '1.5rem' }}>
             Le site At Home Service est hébergé par des prestataires techniques professionnels situés en Europe, conformément à la réglementation RGPD.
           </p>
 
-          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>Propriété intellectuelle</h2>
+          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>{t('propriete_intellectuelle')}</h2>
           <p style={{ color: c.texte, fontSize: '14px', lineHeight: 1.8, marginBottom: '1.5rem' }}>
             L'ensemble du contenu du site At Home Service (textes, images, logos, design) est la propriété exclusive de Vincent Tumbarello. Toute reproduction, même partielle, est strictement interdite sans autorisation préalable.
           </p>
 
-          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>Responsabilité</h2>
+          <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>{t('responsabilite')}</h2>
           <p style={{ color: c.texte, fontSize: '14px', lineHeight: 1.8 }}>
             At Home Service est une plateforme de mise en relation entre clients et prestataires de services à domicile. At Home Service ne peut être tenu responsable des prestations effectuées par les prestataires référencés sur la plateforme.
           </p>
         </div>
 
         <div style={{ background: c.fondClair, borderRadius: '12px', padding: '2rem', border: `1px solid ${c.bordure}`, marginBottom: '1.5rem' }}>
-          <h1 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontSize: '24px' }}>Conditions Générales d'Utilisation</h1>
+          <h1 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontSize: '24px' }}>{t('cgu_titre')}</h1>
 
           <h2 style={{ color: c.bleu, fontSize: '16px', marginBottom: '8px' }}>1. Objet</h2>
           <p style={{ color: c.texte, fontSize: '14px', lineHeight: 1.8, marginBottom: '1.5rem' }}>
@@ -98,12 +115,12 @@ const MentionsLegales = () => {
         </div>
 
         <p style={{ color: c.texte, fontSize: '12px', textAlign: 'center', marginBottom: '2rem' }}>
-          Dernière mise à jour : Juin 2026
+          {t('derniere_maj')}
         </p>
       </div>
 
       <footer style={{ background: c.texteFonce, color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
-        © 2026 At Home Service — Tous droits réservés
+        {t('footer_droits')}
       </footer>
     </div>
   )

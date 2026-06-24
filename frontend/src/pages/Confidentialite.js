@@ -1,10 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
+
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
 const Confidentialite = () => {
   const navigate = useNavigate()
   const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
 
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
@@ -17,18 +22,30 @@ const Confidentialite = () => {
           </div>
           <div style={{ color: 'white', fontSize: '16px', fontWeight: '500' }}>At Home Service</div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: '5rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
             {themeMode === 'clair' ? '🌙' : '☀️'}
           </button>
-          <button onClick={() => navigate('/')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>← Accueil</button>
+          <button onClick={() => navigate('/')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('accueil')}</button>
         </div>
       </nav>
 
       <div style={{ flex: 1, maxWidth: '800px', margin: '2rem auto', padding: '0 1rem', width: '100%' }}>
         <div style={{ background: c.fondClair, borderRadius: '16px', padding: '2rem', border: `1px solid ${c.bordure}` }}>
-          <h1 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', marginBottom: '0.5rem' }}>Politique de confidentialité</h1>
-          <p style={{ color: c.bordure, fontSize: '13px', marginBottom: '2rem' }}>Dernière mise à jour : 21 juin 2026</p>
+          <h1 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', marginBottom: '0.5rem' }}>{t('politique_confidentialite')}</h1>
+          <p style={{ color: c.bordure, fontSize: '13px', marginBottom: '2rem' }}>{t('derniere_maj')}</p>
 
           <h2 style={{ color: c.texteFonce, fontFamily: 'Georgia, serif', fontSize: '18px', marginTop: '1.5rem', marginBottom: '0.8rem' }}>1. Qui sommes-nous ?</h2>
           <p style={{ color: c.texte, fontSize: '14px', lineHeight: 1.7, marginBottom: '1rem' }}>
@@ -115,7 +132,7 @@ const Confidentialite = () => {
       </div>
 
       <footer style={{ background: c.texteFonce, color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
-        © 2026 At Home Service — Tous droits réservés
+        {t('footer_droits')}
       </footer>
     </div>
   )
