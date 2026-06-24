@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { getProfil, modifierProfil, changerMotDePasse, supprimerCompte, modifierConfirmationAuto, modifierDisponibilites, verifierSiret, getMonParrainage } from '../services/api'
+
+const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
 const Profil = () => {
   const { user, login, logout } = useAuth()
   const { mode: themeMode, toggleTheme, couleurs: c } = useTheme()
+  const { langue, changerLangue, t } = useLanguage()
   const navigate = useNavigate()
   const [vue, setVue] = useState('infos')
   const [message, setMessage] = useState('')
@@ -20,6 +24,7 @@ const Profil = () => {
   const [chargementSiret, setChargementSiret] = useState(false)
   const [parrainage, setParrainage] = useState(null)
   const [lienParrainCopie, setLienParrainCopie] = useState(false)
+  const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
   const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '', code_postal: '', lien_google: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
@@ -187,9 +192,11 @@ const Profil = () => {
     ? ['infos', 'verification', 'parametres', 'disponibilites', 'parrainage', 'mot-de-passe', 'supprimer']
     : ['infos', 'parrainage', 'mot-de-passe', 'supprimer']
 
+  const jourKey = (j) => t(j)
+
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
-      <nav style={{ background: c.bleu, padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <nav style={{ background: c.bleu, padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '36px', height: '36px', background: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
@@ -201,12 +208,24 @@ const Profil = () => {
             <div style={{ fontSize: '9px', color: '#FEB2B2', letterSpacing: '2px', textTransform: 'uppercase' }}>services à domicile</div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
+            {drapeaux[langue]}
+          </button>
+          {selecteurLangueOuvert && (
+            <div style={{ position: 'absolute', top: '100%', right: '6rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+              {Object.keys(drapeaux).map(l => (
+                <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
+                  {drapeaux[l]} {l.toUpperCase()}
+                </div>
+              ))}
+            </div>
+          )}
           <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
             {themeMode === 'clair' ? '🌙' : '☀️'}
           </button>
-          <button onClick={retourDashboard} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>← Mon espace</button>
-          <button onClick={() => { logout(); navigate('/') }} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>Déconnexion</button>
+          <button onClick={retourDashboard} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('mon_espace')}</button>
+          <button onClick={() => { logout(); navigate('/') }} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('deconnexion')}</button>
         </div>
       </nav>
 
@@ -219,7 +238,7 @@ const Profil = () => {
           <div>
             <h2 style={{ color: c.texteFonce, margin: 0, fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', gap: '6px' }}>
               {user?.prenom} {user?.nom}
-              {user?.role === 'prestataire' && verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '11px', padding: '2px 8px', borderRadius: '20px' }}>✅ Vérifié</span>}
+              {user?.role === 'prestataire' && verifie && <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '11px', padding: '2px 8px', borderRadius: '20px' }}>{t('verifie')}</span>}
             </h2>
             <p style={{ color: c.texte, fontSize: '13px', margin: '4px 0 0' }}>{user?.email}</p>
             <span style={{ background: c.bleuFond, color: c.bleu, padding: '2px 10px', borderRadius: '20px', fontSize: '11px', textTransform: 'capitalize' }}>{user?.role}</span>
@@ -229,7 +248,7 @@ const Profil = () => {
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
           {tabs.map(v => (
             <button key={v} onClick={() => setVue(v)} style={{ flex: '1 1 auto', padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vue === v ? c.bleu : c.fondClair, color: vue === v ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif', fontSize: '12px' }}>
-              {v === 'infos' ? 'Mes infos' : v === 'verification' ? 'Vérification' : v === 'parametres' ? 'Paramètres' : v === 'disponibilites' ? 'Disponibilités' : v === 'parrainage' ? '🎁 Parrainage' : v === 'mot-de-passe' ? 'Mot de passe' : 'Supprimer'}
+              {v === 'infos' ? t('mes_infos') : v === 'verification' ? t('verification') : v === 'parametres' ? t('parametres') : v === 'disponibilites' ? t('disponibilites') : v === 'parrainage' ? t('parrainage_onglet') : v === 'mot-de-passe' ? t('mdp_onglet') : t('supprimer_onglet')}
             </button>
           ))}
         </div>
@@ -239,53 +258,53 @@ const Profil = () => {
 
         {vue === 'infos' && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Mes informations</h3>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>{t('mes_informations')}</h3>
             <form onSubmit={handleModifier}>
-              <input name="prenom" placeholder="Prénom" value={form.prenom} onChange={handleChange} style={inputStyle} />
-              <input name="nom" placeholder="Nom" value={form.nom} onChange={handleChange} style={inputStyle} />
-              <input name="telephone" placeholder="Téléphone" value={form.telephone} onChange={handleChange} style={inputStyle} />
-              <input name="adresse" placeholder="Adresse" value={form.adresse} onChange={handleChange} style={inputStyle} />
+              <input name="prenom" placeholder={t('prenom')} value={form.prenom} onChange={handleChange} style={inputStyle} />
+              <input name="nom" placeholder={t('nom')} value={form.nom} onChange={handleChange} style={inputStyle} />
+              <input name="telephone" placeholder={t('telephone')} value={form.telephone} onChange={handleChange} style={inputStyle} />
+              <input name="adresse" placeholder={t('adresse')} value={form.adresse} onChange={handleChange} style={inputStyle} />
               {user?.role === 'prestataire' && (
                 <>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <input name="ville" placeholder="Ville (ex: Nice)" value={form.ville} onChange={handleChange} style={{ ...inputStyle, flex: 2 }} />
-                    <input name="code_postal" placeholder="Code postal" value={form.code_postal} onChange={handleChange} style={{ ...inputStyle, flex: 1 }} />
+                    <input name="ville" placeholder={t('ville')} value={form.ville} onChange={handleChange} style={{ ...inputStyle, flex: 2 }} />
+                    <input name="code_postal" placeholder={t('code_postal')} value={form.code_postal} onChange={handleChange} style={{ ...inputStyle, flex: 1 }} />
                   </div>
-                  <textarea name="description" placeholder="Description de votre activité..." value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
-                  <input name="lien_google" placeholder="Lien vers votre fiche Google (optionnel)" value={form.lien_google} onChange={handleChange} style={inputStyle} />
-                  <p style={{ color: c.texte, fontSize: '12px', marginBottom: '12px' }}>Ce lien apparaîtra sur votre profil public pour permettre aux clients de consulter ou laisser un avis sur votre fiche Google.</p>
+                  <textarea name="description" placeholder={t('description_activite')} value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
+                  <input name="lien_google" placeholder={t('lien_google_placeholder')} value={form.lien_google} onChange={handleChange} style={inputStyle} />
+                  <p style={{ color: c.texte, fontSize: '12px', marginBottom: '12px' }}>{t('lien_google_info')}</p>
                 </>
               )}
-              <button type="submit" style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Sauvegarder</button>
+              <button type="submit" style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('sauvegarder')}</button>
             </form>
           </div>
         )}
 
         {vue === 'verification' && user?.role === 'prestataire' && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Vérification de votre entreprise</h3>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>{t('verification_entreprise')}</h3>
 
             {verifie ? (
               <div style={{ background: '#d1fae5', borderRadius: '8px', padding: '1rem', marginBottom: '1rem' }}>
-                <p style={{ color: '#065f46', margin: 0, fontWeight: 'bold' }}>✅ Votre profil est vérifié !</p>
-                <p style={{ color: '#065f46', margin: '4px 0 0', fontSize: '13px' }}>SIRET : {siretInput}</p>
+                <p style={{ color: '#065f46', margin: 0, fontWeight: 'bold' }}>{t('profil_verifie')}</p>
+                <p style={{ color: '#065f46', margin: '4px 0 0', fontSize: '13px' }}>{t('siret_label')} {siretInput}</p>
               </div>
             ) : (
               <p style={{ color: c.texte, fontSize: '13px', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-                Entrez votre numéro SIRET (14 chiffres). Nous vérifions automatiquement auprès du registre officiel des entreprises françaises que votre activité est bien déclarée et active.
+                {t('siret_info')}
               </p>
             )}
 
             <form onSubmit={handleVerifierSiret}>
               <input
-                placeholder="Numéro SIRET (14 chiffres)"
+                placeholder={t('siret_placeholder')}
                 value={siretInput}
                 onChange={(e) => setSiretInput(e.target.value)}
                 maxLength={14}
                 style={inputStyle}
               />
               <button type="submit" disabled={chargementSiret} style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>
-                {chargementSiret ? 'Vérification en cours...' : verifie ? 'Mettre à jour mon SIRET' : 'Vérifier mon SIRET'}
+                {chargementSiret ? t('verification_en_cours') : verifie ? t('mettre_a_jour_siret') : t('verifier_siret')}
               </button>
             </form>
           </div>
@@ -293,11 +312,11 @@ const Profil = () => {
 
         {vue === 'parametres' && user?.role === 'prestataire' && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>Paramètres prestataire</h3>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1.5rem', fontFamily: 'Georgia, serif' }}>{t('parametres_prestataire')}</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: c.blanc, borderRadius: '8px', border: `1px solid ${c.bordure}` }}>
               <div>
-                <p style={{ color: c.texteFonce, fontWeight: 'bold', margin: '0 0 4px', fontSize: '14px' }}>Confirmation automatique</p>
-                <p style={{ color: c.texte, fontSize: '12px', margin: 0 }}>Les réservations sont confirmées automatiquement</p>
+                <p style={{ color: c.texteFonce, fontWeight: 'bold', margin: '0 0 4px', fontSize: '14px' }}>{t('confirmation_auto_titre')}</p>
+                <p style={{ color: c.texte, fontSize: '12px', margin: 0 }}>{t('confirmation_auto_desc')}</p>
               </div>
               <div onClick={() => handleConfirmationAuto(!confirmationAuto)} style={{ width: '48px', height: '26px', borderRadius: '13px', cursor: 'pointer', flexShrink: 0, marginLeft: '1rem', background: confirmationAuto ? c.bleu : '#CBD5E0', position: 'relative', transition: 'background 0.3s' }}>
                 <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'white', position: 'absolute', top: '3px', transition: 'left 0.3s', left: confirmationAuto ? '25px' : '3px' }} />
@@ -308,43 +327,43 @@ const Profil = () => {
 
         {vue === 'disponibilites' && user?.role === 'prestataire' && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Mes disponibilités</h3>
-            <p style={{ color: c.texte, fontSize: '13px', marginBottom: '1rem' }}>Sélectionnez vos jours de travail :</p>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>{t('mes_disponibilites')}</h3>
+            <p style={{ color: c.texte, fontSize: '13px', marginBottom: '1rem' }}>{t('jours_travail_info')}</p>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
               {joursDisponibles.map(jour => (
-                <button key={jour} onClick={() => toggleJour(jour)} style={{ padding: '8px 14px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: joursTravail.includes(jour) ? c.bleu : c.blanc, color: joursTravail.includes(jour) ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif', fontSize: '13px', textTransform: 'capitalize' }}>{jour}</button>
+                <button key={jour} onClick={() => toggleJour(jour)} style={{ padding: '8px 14px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: joursTravail.includes(jour) ? c.bleu : c.blanc, color: joursTravail.includes(jour) ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif', fontSize: '13px' }}>{jourKey(jour)}</button>
               ))}
             </div>
-            <p style={{ color: c.texte, fontSize: '13px', marginBottom: '8px' }}>Heure de début :</p>
+            <p style={{ color: c.texte, fontSize: '13px', marginBottom: '8px' }}>{t('heure_debut')}</p>
             <input type="time" value={heureDebut} onChange={(e) => setHeureDebut(e.target.value)} style={inputStyle} />
-            <p style={{ color: c.texte, fontSize: '13px', marginBottom: '8px' }}>Heure de fin :</p>
+            <p style={{ color: c.texte, fontSize: '13px', marginBottom: '8px' }}>{t('heure_fin')}</p>
             <input type="time" value={heureFin} onChange={(e) => setHeureFin(e.target.value)} style={inputStyle} />
-            <button onClick={handleDisponibilites} style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', marginTop: '8px' }}>Sauvegarder mes disponibilités</button>
+            <button onClick={handleDisponibilites} style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', marginTop: '8px' }}>{t('sauvegarder_disponibilites')}</button>
           </div>
         )}
 
         {vue === 'parrainage' && parrainage && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>🎁 Parrainez vos amis</h3>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>{t('parrainez_amis')}</h3>
             <p style={{ color: c.texte, fontSize: '13px', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-              Partagez votre code unique avec vos amis. Quand ils s'inscrivent avec, vous êtes lié à leur compte !
+              {t('parrainage_info')}
             </p>
 
             <div style={{ background: c.blanc, borderRadius: '12px', padding: '1.5rem', textAlign: 'center', marginBottom: '1.5rem', border: `2px dashed ${c.bleu}` }}>
-              <p style={{ color: c.texte, fontSize: '12px', margin: '0 0 8px' }}>Votre code de parrainage</p>
+              <p style={{ color: c.texte, fontSize: '12px', margin: '0 0 8px' }}>{t('code_parrainage_titre')}</p>
               <p style={{ color: c.bleu, fontSize: '28px', fontWeight: 'bold', margin: 0, letterSpacing: '2px' }}>{parrainage.code_parrainage}</p>
             </div>
 
             <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              <button onClick={handlePartagerParrainage} style={{ flex: 1, background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>📤 Partager mon lien</button>
+              <button onClick={handlePartagerParrainage} style={{ flex: 1, background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('partager_lien')}</button>
               <button onClick={handleCopierLienParrainage} style={{ background: c.blanc, color: c.texteFonce, border: `1.5px solid ${c.texteFonce}`, padding: '12px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>
-                {lienParrainCopie ? '✅ Copié !' : '🔗 Copier'}
+                {lienParrainCopie ? t('copie') : t('copier')}
               </button>
             </div>
 
             <div style={{ borderTop: `1px solid ${c.bordure}`, paddingTop: '1rem' }}>
-              <p style={{ color: c.texteFonce, fontWeight: 'bold', marginBottom: '0.8rem' }}>Vos filleuls ({parrainage.totalFilleuls})</p>
-              {parrainage.filleuls.length === 0 && <p style={{ color: c.texte, fontSize: '13px' }}>Aucun filleul pour le moment. Partagez votre code !</p>}
+              <p style={{ color: c.texteFonce, fontWeight: 'bold', marginBottom: '0.8rem' }}>{t('vos_filleuls')} ({parrainage.totalFilleuls})</p>
+              {parrainage.filleuls.length === 0 && <p style={{ color: c.texte, fontSize: '13px' }}>{t('aucun_filleul')}</p>}
               {parrainage.filleuls.map(f => (
                 <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${c.bordure}` }}>
                   <span style={{ color: c.texteFonce, fontSize: '14px' }}>{f.prenom} {f.nom}</span>
@@ -357,29 +376,29 @@ const Profil = () => {
 
         {vue === 'mot-de-passe' && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
-            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Changer mon mot de passe</h3>
+            <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>{t('changer_mdp')}</h3>
             <form onSubmit={handleMdp}>
-              <input name="ancien_mot_de_passe" type="password" placeholder="Ancien mot de passe" value={mdpForm.ancien_mot_de_passe} onChange={handleMdpChange} style={inputStyle} />
-              <input name="nouveau_mot_de_passe" type="password" placeholder="Nouveau mot de passe" value={mdpForm.nouveau_mot_de_passe} onChange={handleMdpChange} style={inputStyle} />
-              <input name="confirmer" type="password" placeholder="Confirmer le nouveau mot de passe" value={mdpForm.confirmer} onChange={handleMdpChange} style={inputStyle} />
-              <button type="submit" style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Changer le mot de passe</button>
+              <input name="ancien_mot_de_passe" type="password" placeholder={t('ancien_mdp')} value={mdpForm.ancien_mot_de_passe} onChange={handleMdpChange} style={inputStyle} />
+              <input name="nouveau_mot_de_passe" type="password" placeholder={t('nouveau_mdp')} value={mdpForm.nouveau_mot_de_passe} onChange={handleMdpChange} style={inputStyle} />
+              <input name="confirmer" type="password" placeholder={t('confirmer_mdp')} value={mdpForm.confirmer} onChange={handleMdpChange} style={inputStyle} />
+              <button type="submit" style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('changer_mdp_btn')}</button>
             </form>
           </div>
         )}
 
         {vue === 'supprimer' && (
           <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.rouge}` }}>
-            <h3 style={{ color: c.rouge, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>Supprimer mon compte</h3>
+            <h3 style={{ color: c.rouge, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>{t('supprimer_compte_titre')}</h3>
             <p style={{ color: c.texte, fontSize: '14px', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-              ⚠️ Cette action est <strong>irréversible</strong>. Toutes vos données seront supprimées définitivement.
+              ⚠️ {t('supprimer_compte_avertissement')}
             </p>
-            <button onClick={handleSupprimer} style={{ width: '100%', padding: '12px', background: c.rouge, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>Supprimer définitivement mon compte</button>
+            <button onClick={handleSupprimer} style={{ width: '100%', padding: '12px', background: c.rouge, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('supprimer_definitivement')}</button>
           </div>
         )}
       </div>
 
       <footer style={{ background: c.texteFonce, color: '#BEE3F8', textAlign: 'center', padding: '1rem', fontSize: '13px' }}>
-        © 2026 At Home Service — Tous droits réservés
+        {t('footer_droits')}
       </footer>
     </div>
   )
