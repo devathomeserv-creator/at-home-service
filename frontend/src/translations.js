@@ -50,8 +50,6 @@ export const traductions = {
     parametres_plateforme: 'Paramètres de la plateforme', mode_maintenance_titre: '🚧 Mode maintenance', mode_maintenance_desc: "Quand activé, tous les visiteurs (sauf vous en tant qu'admin) voient une page \"On revient bientôt\" au lieu du site.",
     export_comptable_titre: '📊 Export comptable', export_comptable_desc: 'Générez un récapitulatif PDF des commissions perçues sur une période donnée, prêt pour votre comptabilité.',
     date_debut: 'Date de début', date_fin: 'Date de fin', generation_en_cours: 'Génération en cours...', telecharger_export: "📄 Télécharger l'export comptable", maintenance_active_badge: '🚧 Maintenance active',
-
-    // Page Profil
     mes_infos: 'Mes infos', verification: 'Vérification', parametres: 'Paramètres', disponibilites: 'Disponibilités', parrainage_onglet: '🎁 Parrainage', mdp_onglet: 'Mot de passe', supprimer_onglet: 'Supprimer',
     mes_informations: 'Mes informations', adresse: 'Adresse', ville: 'Ville (ex: Nice)', code_postal: 'Code postal', description_activite: 'Description de votre activité...',
     lien_google_placeholder: 'Lien vers votre fiche Google (optionnel)', lien_google_info: 'Ce lien apparaîtra sur votre profil public pour permettre aux clients de consulter ou laisser un avis sur votre fiche Google.',
@@ -67,24 +65,18 @@ export const traductions = {
     supprimer_compte_titre: 'Supprimer mon compte', supprimer_compte_avertissement: 'Cette action est irréversible. Toutes vos données seront supprimées définitivement.',
     supprimer_definitivement: 'Supprimer définitivement mon compte',
     lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi', jeudi: 'Jeudi', vendredi: 'Vendredi', samedi: 'Samedi', dimanche: 'Dimanche',
-
-    // ProfilPrestataire
     chargement_profil: 'Chargement...', prestataire_introuvable: 'Prestataire introuvable', signalement_envoye: 'Signalement envoyé',
     signalement_merci: "Merci, notre équipe va examiner votre signalement dans les plus brefs délais.", fermer: 'Fermer', signaler_prestataire: 'Signaler ce prestataire',
     decrire_situation: 'Décrivez la situation (optionnel)', envoyer_signalement: 'Envoyer le signalement', lien_copie: 'Lien copié !',
     signaler_btn: '🚩 Signaler ce prestataire', services_proposes: 'Services proposés', aucun_service_dispo: 'Aucun service disponible pour le moment.',
     avis_clients: 'Avis clients', aucun_avis_pour_instant: 'Aucun avis pour le moment.', reponse_de: 'Réponse de', voir_avis_google: '🔵 Voir les avis Google', laisser_avis_google: '⭐ Laisser un avis sur Google',
     motif_comportement: 'Comportement inapproprié', motif_service: 'Service non conforme à la description', motif_fraude: 'Tentative de fraude', motif_profil: 'Profil suspect ou faux', motif_autre: 'Autre',
-
-    // Carte
     carte_titre: '🗺️ Trouvez un prestataire près de chez vous', chargement_carte: 'Chargement de la carte...',
-
-    // Mentions légales
     mentions_legales_titre: 'Mentions Légales', editeur_site: 'Éditeur du site', hebergement: 'Hébergement', propriete_intellectuelle: 'Propriété intellectuelle', responsabilite: 'Responsabilité',
-    cgu_titre: "Conditions Générales d'Utilisation",
+    cgu_titre: "Conditions Générales d'Utilisation", politique_confidentialite: 'Politique de confidentialité', derniere_maj: 'Dernière mise à jour : 21 juin 2026',
 
-    // Confidentialité
-    politique_confidentialite: 'Politique de confidentialité', derniere_maj: 'Dernière mise à jour : 21 juin 2026'
+    langues_parlees_label: 'Langues parlées', langues_parlees_info: 'Sélectionnez les langues que vous parlez. Cela aide les clients étrangers à vous trouver.',
+    fr_label: 'Français', en_label: 'Anglais', it_label: 'Italien', ru_label: 'Russe', langues_parlees_profil_public: 'Langues parlées'
   },
   en: {
     connexion: 'Login', inscription: 'Sign up', carte: 'Map', mon_profil: 'My profile', deconnexion: 'Logout', mon_espace: '← My space', accueil: '← Home', retour: 'Back', bonjour: 'Hello',
@@ -137,7 +129,6 @@ export const traductions = {
     parametres_plateforme: 'Platform settings', mode_maintenance_titre: '🚧 Maintenance mode', mode_maintenance_desc: 'When enabled, all visitors (except you as admin) see a "Back soon" page instead of the site.',
     export_comptable_titre: '📊 Accounting export', export_comptable_desc: 'Generate a PDF summary of commissions earned over a given period, ready for your accounting.',
     date_debut: 'Start date', date_fin: 'End date', generation_en_cours: 'Generating...', telecharger_export: '📄 Download accounting export', maintenance_active_badge: '🚧 Maintenance active',
-
     mes_infos: 'My info', verification: 'Verification', parametres: 'Settings', disponibilites: 'Availability', parrainage_onglet: '🎁 Referral', mdp_onglet: 'Password', supprimer_onglet: 'Delete',
     mes_informations: 'My information', adresse: 'Address', ville: 'City (e.g. Nice)', code_postal: 'Postal code', description_activite: 'Description of your activity...',
     lien_google_placeholder: 'Link to your Google listing (optional)', lien_google_info: 'This link will appear on your public profile to let clients view or leave a review on your Google listing.',
@@ -153,20 +144,18 @@ export const traductions = {
     supprimer_compte_titre: 'Delete my account', supprimer_compte_avertissement: 'This action is irreversible. All your data will be permanently deleted.',
     supprimer_definitivement: 'Permanently delete my account',
     lundi: 'Monday', mardi: 'Tuesday', mercredi: 'Wednesday', jeudi: 'Thursday', vendredi: 'Friday', samedi: 'Saturday', dimanche: 'Sunday',
-
     chargement_profil: 'Loading...', prestataire_introuvable: 'Provider not found', signalement_envoye: 'Report sent',
     signalement_merci: 'Thank you, our team will review your report as soon as possible.', fermer: 'Close', signaler_prestataire: 'Report this provider',
     decrire_situation: 'Describe the situation (optional)', envoyer_signalement: 'Send report', lien_copie: 'Link copied!',
     signaler_btn: '🚩 Report this provider', services_proposes: 'Services offered', aucun_service_dispo: 'No service available at the moment.',
     avis_clients: 'Client reviews', aucun_avis_pour_instant: 'No reviews yet.', reponse_de: 'Response from', voir_avis_google: '🔵 View Google reviews', laisser_avis_google: '⭐ Leave a Google review',
     motif_comportement: 'Inappropriate behavior', motif_service: 'Service not as described', motif_fraude: 'Attempted fraud', motif_profil: 'Suspicious or fake profile', motif_autre: 'Other',
-
     carte_titre: '🗺️ Find a provider near you', chargement_carte: 'Loading map...',
-
     mentions_legales_titre: 'Legal Notice', editeur_site: 'Site publisher', hebergement: 'Hosting', propriete_intellectuelle: 'Intellectual property', responsabilite: 'Liability',
-    cgu_titre: 'Terms of Service',
+    cgu_titre: 'Terms of Service', politique_confidentialite: 'Privacy Policy', derniere_maj: 'Last updated: June 21, 2026',
 
-    politique_confidentialite: 'Privacy Policy', derniere_maj: 'Last updated: June 21, 2026'
+    langues_parlees_label: 'Languages spoken', langues_parlees_info: 'Select the languages you speak. This helps foreign clients find you.',
+    fr_label: 'French', en_label: 'English', it_label: 'Italian', ru_label: 'Russian', langues_parlees_profil_public: 'Languages spoken'
   },
   it: {
     connexion: 'Accesso', inscription: 'Iscriviti', carte: 'Mappa', mon_profil: 'Il mio profilo', deconnexion: 'Disconnessione', mon_espace: '← Il mio spazio', accueil: '← Home', retour: 'Indietro', bonjour: 'Ciao',
@@ -219,7 +208,6 @@ export const traductions = {
     parametres_plateforme: 'Impostazioni della piattaforma', mode_maintenance_titre: '🚧 Modalità manutenzione', mode_maintenance_desc: 'Quando attivata, tutti i visitatori (tranne tu come admin) vedono una pagina "Torniamo presto" invece del sito.',
     export_comptable_titre: '📊 Export contabile', export_comptable_desc: 'Genera un riepilogo PDF delle commissioni percepite in un determinato periodo, pronto per la tua contabilità.',
     date_debut: 'Data di inizio', date_fin: 'Data di fine', generation_en_cours: 'Generazione in corso...', telecharger_export: "📄 Scarica l'export contabile", maintenance_active_badge: '🚧 Manutenzione attiva',
-
     mes_infos: 'Le mie info', verification: 'Verifica', parametres: 'Impostazioni', disponibilites: 'Disponibilità', parrainage_onglet: '🎁 Invito', mdp_onglet: 'Password', supprimer_onglet: 'Elimina',
     mes_informations: 'Le mie informazioni', adresse: 'Indirizzo', ville: 'Città (es. Nizza)', code_postal: 'Codice postale', description_activite: 'Descrizione della tua attività...',
     lien_google_placeholder: 'Link alla tua scheda Google (opzionale)', lien_google_info: 'Questo link apparirà sul tuo profilo pubblico per permettere ai clienti di consultare o lasciare una recensione sulla tua scheda Google.',
@@ -235,20 +223,18 @@ export const traductions = {
     supprimer_compte_titre: 'Elimina il mio account', supprimer_compte_avertissement: 'Questa azione è irreversibile. Tutti i tuoi dati saranno eliminati definitivamente.',
     supprimer_definitivement: 'Elimina definitivamente il mio account',
     lundi: 'Lunedì', mardi: 'Martedì', mercredi: 'Mercoledì', jeudi: 'Giovedì', vendredi: 'Venerdì', samedi: 'Sabato', dimanche: 'Domenica',
-
     chargement_profil: 'Caricamento...', prestataire_introuvable: 'Fornitore non trovato', signalement_envoye: 'Segnalazione inviata',
     signalement_merci: 'Grazie, il nostro team esaminerà la tua segnalazione il prima possibile.', fermer: 'Chiudi', signaler_prestataire: 'Segnala questo fornitore',
     decrire_situation: 'Descrivi la situazione (opzionale)', envoyer_signalement: 'Invia segnalazione', lien_copie: 'Link copiato!',
     signaler_btn: '🚩 Segnala questo fornitore', services_proposes: 'Servizi offerti', aucun_service_dispo: 'Nessun servizio disponibile al momento.',
     avis_clients: 'Recensioni clienti', aucun_avis_pour_instant: 'Nessuna recensione al momento.', reponse_de: 'Risposta di', voir_avis_google: '🔵 Vedi recensioni Google', laisser_avis_google: '⭐ Lascia una recensione su Google',
     motif_comportement: 'Comportamento inappropriato', motif_service: 'Servizio non conforme alla descrizione', motif_fraude: 'Tentativo di frode', motif_profil: 'Profilo sospetto o falso', motif_autre: 'Altro',
-
     carte_titre: '🗺️ Trova un fornitore vicino a te', chargement_carte: 'Caricamento mappa...',
-
     mentions_legales_titre: 'Note Legali', editeur_site: 'Editore del sito', hebergement: 'Hosting', propriete_intellectuelle: 'Proprietà intellettuale', responsabilite: 'Responsabilità',
-    cgu_titre: 'Termini di Servizio',
+    cgu_titre: 'Termini di Servizio', politique_confidentialite: 'Informativa sulla Privacy', derniere_maj: 'Ultimo aggiornamento: 21 giugno 2026',
 
-    politique_confidentialite: 'Informativa sulla Privacy', derniere_maj: 'Ultimo aggiornamento: 21 giugno 2026'
+    langues_parlees_label: 'Lingue parlate', langues_parlees_info: 'Seleziona le lingue che parli. Questo aiuta i clienti stranieri a trovarti.',
+    fr_label: 'Francese', en_label: 'Inglese', it_label: 'Italiano', ru_label: 'Russo', langues_parlees_profil_public: 'Lingue parlate'
   },
   ru: {
     connexion: 'Вход', inscription: 'Регистрация', carte: 'Карта', mon_profil: 'Мой профиль', deconnexion: 'Выход', mon_espace: '← Мой кабинет', accueil: '← Главная', retour: 'Назад', bonjour: 'Привет',
@@ -301,7 +287,6 @@ export const traductions = {
     parametres_plateforme: 'Настройки платформы', mode_maintenance_titre: '🚧 Режим обслуживания', mode_maintenance_desc: 'Когда включено, все посетители (кроме вас как администратора) видят страницу "Скоро вернемся" вместо сайта.',
     export_comptable_titre: '📊 Бухгалтерский экспорт', export_comptable_desc: 'Создайте PDF-сводку полученных комиссий за определенный период, готовую для вашей бухгалтерии.',
     date_debut: 'Дата начала', date_fin: 'Дата окончания', generation_en_cours: 'Генерация...', telecharger_export: '📄 Скачать бухгалтерский экспорт', maintenance_active_badge: '🚧 Обслуживание активно',
-
     mes_infos: 'Моя информация', verification: 'Верификация', parametres: 'Настройки', disponibilites: 'Доступность', parrainage_onglet: '🎁 Приглашение', mdp_onglet: 'Пароль', supprimer_onglet: 'Удалить',
     mes_informations: 'Моя информация', adresse: 'Адрес', ville: 'Город (напр. Ницца)', code_postal: 'Почтовый индекс', description_activite: 'Описание вашей деятельности...',
     lien_google_placeholder: 'Ссылка на ваш профиль Google (необязательно)', lien_google_info: 'Эта ссылка появится в вашем публичном профиле, чтобы клиенты могли посмотреть или оставить отзыв в вашем профиле Google.',
@@ -317,19 +302,17 @@ export const traductions = {
     supprimer_compte_titre: 'Удалить мой аккаунт', supprimer_compte_avertissement: 'Это действие необратимо. Все ваши данные будут безвозвратно удалены.',
     supprimer_definitivement: 'Безвозвратно удалить мой аккаунт',
     lundi: 'Понедельник', mardi: 'Вторник', mercredi: 'Среда', jeudi: 'Четверг', vendredi: 'Пятница', samedi: 'Субота', dimanche: 'Воскресенье',
-
     chargement_profil: 'Загрузка...', prestataire_introuvable: 'Специалист не найден', signalement_envoye: 'Жалоба отправлена',
     signalement_merci: 'Спасибо, наша команда рассмотрит вашу жалобу в кратчайшие сроки.', fermer: 'Закрыть', signaler_prestataire: 'Пожаловаться на этого специалиста',
     decrire_situation: 'Опишите ситуацию (необязательно)', envoyer_signalement: 'Отправить жалобу', lien_copie: 'Ссылка скопирована!',
     signaler_btn: '🚩 Пожаловаться на этого специалиста', services_proposes: 'Предлагаемые услуги', aucun_service_dispo: 'Пока нет доступных услуг.',
     avis_clients: 'Отзывы клиентов', aucun_avis_pour_instant: 'Пока нет отзывов.', reponse_de: 'Ответ от', voir_avis_google: '🔵 Посмотреть отзывы Google', laisser_avis_google: '⭐ Оставить отзыв в Google',
     motif_comportement: 'Неподобающее поведение', motif_service: 'Услуга не соответствует описанию', motif_fraude: 'Попытка мошенничества', motif_profil: 'Подозрительный или фальшивый профиль', motif_autre: 'Другое',
-
     carte_titre: '🗺️ Найдите специалиста рядом с вами', chargement_carte: 'Загрузка карты...',
-
     mentions_legales_titre: 'Юридическая информация', editeur_site: 'Издатель сайта', hebergement: 'Хостинг', propriete_intellectuelle: 'Интеллектуальная собственность', responsabilite: 'Ответственность',
-    cgu_titre: 'Условия использования',
+    cgu_titre: 'Условия использования', politique_confidentialite: 'Политика конфиденциальности', derniere_maj: 'Последнее обновление: 21 июня 2026',
 
-    politique_confidentialite: 'Политика конфиденциальности', derniere_maj: 'Последнее обновление: 21 июня 2026'
+    langues_parlees_label: 'Языки, на которых вы говорите', langues_parlees_info: 'Выберите языки, на которых вы говорите. Это поможет иностранным клиентам найти вас.',
+    fr_label: 'Французский', en_label: 'Английский', it_label: 'Итальянский', ru_label: 'Русский', langues_parlees_profil_public: 'Языки'
   }
 }

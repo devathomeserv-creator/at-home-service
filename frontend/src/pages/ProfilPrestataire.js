@@ -177,7 +177,7 @@ const ProfilPrestataire = () => {
             {drapeaux[langue]}
           </button>
           {selecteurLangueOuvert && (
-            <div style={{ position: 'absolute', top: '100%', right: themeMode ? '7rem' : '7rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
+            <div style={{ position: 'absolute', top: '100%', right: '7rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
               {Object.keys(drapeaux).map(l => (
                 <div key={l} onClick={() => { changerLangue(l); setSelecteurLangueOuvert(false) }} style={{ padding: '10px 16px', cursor: 'pointer', color: c.texteFonce, fontSize: '14px', background: langue === l ? c.bleuFond : 'transparent', whiteSpace: 'nowrap' }}>
                   {drapeaux[l]} {l.toUpperCase()}
@@ -268,6 +268,14 @@ const ProfilPrestataire = () => {
                   </a>
                 )}
               </div>
+              {prestataire.langues_parlees && prestataire.langues_parlees.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ color: c.texte, fontSize: '12px' }}>{t('langues_parlees_profil_public')}:</span>
+                  {prestataire.langues_parlees.map(l => (
+                    <span key={l} title={t(`${l}_label`)} style={{ fontSize: '16px' }}>{drapeaux[l]}</span>
+                  ))}
+                </div>
+              )}
               {prestataire.description && (
                 <p style={{ color: c.texte, fontSize: '14px', lineHeight: 1.6, margin: 0 }}>{prestataire.description}</p>
               )}

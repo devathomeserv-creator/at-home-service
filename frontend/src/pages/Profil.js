@@ -25,10 +25,12 @@ const Profil = () => {
   const [parrainage, setParrainage] = useState(null)
   const [lienParrainCopie, setLienParrainCopie] = useState(false)
   const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
+  const [languesParlees, setLanguesParlees] = useState([])
   const [form, setForm] = useState({ nom: '', prenom: '', telephone: '', adresse: '', description: '', ville: '', code_postal: '', lien_google: '' })
   const [mdpForm, setMdpForm] = useState({ ancien_mot_de_passe: '', nouveau_mot_de_passe: '', confirmer: '' })
 
   const joursDisponibles = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
+  const languesDisponibles = ['fr', 'en', 'it', 'ru']
 
   useEffect(() => {
     chargerProfil()
@@ -46,6 +48,7 @@ const Profil = () => {
       setHeureFin(u.heure_fin || '18:00')
       setVerifie(u.verifie || false)
       setSiretInput(u.siret || '')
+      setLanguesParlees(u.langues_parlees || [])
     } catch (err) {
       console.error(err)
     }
@@ -68,12 +71,20 @@ const Profil = () => {
     setMdpForm({ ...mdpForm, [e.target.name]: e.target.value })
   }
 
+  const toggleLangueParlee = (l) => {
+    if (languesParlees.includes(l)) {
+      setLanguesParlees(languesParlees.filter(x => x !== l))
+    } else {
+      setLanguesParlees([...languesParlees, l])
+    }
+  }
+
   const handleModifier = async (e) => {
     e.preventDefault()
     setMessage('')
     setErreur('')
     try {
-      const res = await modifierProfil(form)
+      const res = await modifierProfil({ ...form, langues_parlees: languesParlees })
       login(res.data.user, localStorage.getItem('token'))
       setMessage('Profil mis à jour avec succès !')
     } catch (err) {
@@ -193,6 +204,7 @@ const Profil = () => {
     : ['infos', 'parrainage', 'mot-de-passe', 'supprimer']
 
   const jourKey = (j) => t(j)
+  const langueLabelKey = (l) => t(`${l}_label`)
 
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
@@ -273,6 +285,16 @@ const Profil = () => {
                   <textarea name="description" placeholder={t('description_activite')} value={form.description} onChange={handleChange} rows={3} style={inputStyle} />
                   <input name="lien_google" placeholder={t('lien_google_placeholder')} value={form.lien_google} onChange={handleChange} style={inputStyle} />
                   <p style={{ color: c.texte, fontSize: '12px', marginBottom: '12px' }}>{t('lien_google_info')}</p>
+
+                  <p style={{ color: c.texteFonce, fontWeight: 'bold', fontSize: '14px', marginBottom: '8px' }}>{t('langues_parlees_label')}</p>
+                  <p style={{ color: c.texte, fontSize: '12px', marginBottom: '10px' }}>{t('langues_parlees_info')}</p>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                    {languesDisponibles.map(l => (
+                      <button key={l} type="button" onClick={() => toggleLangueParlee(l)} style={{ padding: '8px 14px', borderRadius: '20px', border: `1.5px solid ${c.bleuClair}`, cursor: 'pointer', background: languesParlees.includes(l) ? c.bleu : c.blanc, color: languesParlees.includes(l) ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {drapeaux[l]} {langueLabelKey(l)}
+                      </button>
+                    ))}
+                  </div>
                 </>
               )}
               <button type="submit" style={{ width: '100%', padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('sauvegarder')}</button>
