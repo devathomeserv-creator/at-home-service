@@ -40,7 +40,7 @@ const envoyerMessage = async (req, res) => {
 
     const { data: destinataire } = await supabase
       .from('users')
-      .select('email')
+      .select('email, langue_preferee')
       .eq('id', destinataire_id)
       .single()
 
@@ -48,7 +48,7 @@ const envoyerMessage = async (req, res) => {
       await envoyerEmailNouveauMessage(destinataire.email, {
         expediteurNom: `${expediteur.prenom} ${expediteur.nom}`,
         contenu
-      })
+      }, destinataire.langue_preferee || 'fr')
     }
 
     res.status(201).json({ message: 'Message envoyé', data: data[0] })

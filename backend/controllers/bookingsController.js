@@ -50,7 +50,9 @@ const creerReservation = async (req, res) => {
         clientNom: `${client.prenom} ${client.nom}`,
         date: new Date(date_rdv).toLocaleString('fr-FR'),
         adresse: adresse_intervention
-      }
+      },
+      service.users.langue_preferee || 'fr',
+      client.langue_preferee || 'fr'
     )
 
     if (statut === 'confirme') {
@@ -60,7 +62,8 @@ const creerReservation = async (req, res) => {
           service: service.titre,
           date: new Date(date_rdv).toLocaleString('fr-FR'),
           adresse: adresse_intervention
-        }
+        },
+        client.langue_preferee || 'fr'
       )
     }
 
@@ -139,7 +142,8 @@ const modifierStatut = async (req, res) => {
           service: booking.services.titre,
           date: new Date(booking.date_rdv).toLocaleString('fr-FR'),
           adresse: booking.adresse_intervention
-        }
+        },
+        booking.users.langue_preferee || 'fr'
       )
     }
 

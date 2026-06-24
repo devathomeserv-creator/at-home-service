@@ -37,7 +37,7 @@ const laisserAvis = async (req, res) => {
 
     const { data: service } = await supabase
       .from('services')
-      .select('titre, users(email)')
+      .select('titre, users(email, langue_preferee)')
       .eq('id', service_id)
       .single()
 
@@ -53,7 +53,7 @@ const laisserAvis = async (req, res) => {
         service: service.titre,
         note,
         commentaire
-      })
+      }, service.users.langue_preferee || 'fr')
     }
 
     res.status(201).json({ message: 'Avis publié avec succès !', avis: data[0] })
