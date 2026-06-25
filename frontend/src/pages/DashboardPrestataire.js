@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useLanguage } from '../context/LanguageContext'
-import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis, ajouterRealisation, getMesRealisations, supprimerRealisation, getMesClients } from '../services/api'
+import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, getMesAvis, getMesConversations, getStatsPrestataire, modifierService, supprimerService, repondreAvis, ajouterRealisation, getMesRealisations, supprimerRealisation, getMesClients, creerPaiementSolde } from '../services/api'
 import { uploadRealisation } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
@@ -35,11 +35,12 @@ const DashboardPrestataire = () => {
   const [formRealisation, setFormRealisation] = useState({ titre: '', description: '', type_media: 'photo' })
   const [fichierSelectionne, setFichierSelectionne] = useState(null)
   const [uploadEnCours, setUploadEnCours] = useState(false)
+  const [envoiSoldeEnCours, setEnvoiSoldeEnCours] = useState(null)
   const [form, setForm] = useState({
-    categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: ''
+    categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: ''
   })
   const [formModif, setFormModif] = useState({
-    categorie: '', titre: '', description: '', prix: '', duree: '', photo_url: ''
+    categorie: '', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: ''
   })
 
   const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
@@ -126,9 +127,9 @@ const DashboardPrestataire = () => {
   const handleCreerService = async (e) => {
     e.preventDefault()
     try {
-      await creerService({ ...form, prix: parseFloat(form.prix), duree: parseInt(form.duree) })
+      await creerService({ ...form, prix: parseFloat(form.prix), duree: parseInt(form.duree), pourcentage_acompte: form.pourcentage_acompte ? parseInt(form.pourcentage_acompte) : 0 })
       setMessage('Service créé avec succès !')
-      setForm({ categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: '' })
+      setForm({ categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: '' })
       chargerServices()
       setVue('services')
     } catch (err) {
@@ -144,7 +145,8 @@ const DashboardPrestataire = () => {
       description: service.description || '',
       prix: service.prix,
       duree: service.duree,
-      photo_url: service.photo_url || ''
+      photo_url: service.photo_url || '',
+      pourcentage_acompte: service.pourcentage_acompte || ''
     })
     setShowModifierService(true)
   }
@@ -156,7 +158,7 @@ const DashboardPrestataire = () => {
   const handleModifierService = async (e) => {
     e.preventDefault()
     try {
-      await modifierService(serviceAModifier.id, { ...formModif, prix: parseFloat(formModif.prix), duree: parseInt(formModif.duree) })
+      await modifierService(serviceAModifier.id, { ...formModif, prix: parseFloat(formModif.prix), duree: parseInt(formModif.duree), pourcentage_acompte: formModif.pourcentage_acompte ? parseInt(formModif.pourcentage_acompte) : 0 })
       setMessage('Service modifié avec succès !')
       setShowModifierService(false)
       chargerServices()
@@ -184,6 +186,19 @@ const DashboardPrestataire = () => {
       chargerStats()
     } catch (err) {
       setMessage('Erreur lors de la mise à jour')
+    }
+  }
+
+  const handleEnvoyerLienSolde = async (booking_id) => {
+    setEnvoiSoldeEnCours(booking_id)
+    try {
+      const res = await creerPaiementSolde(booking_id)
+      await navigator.clipboard.writeText(res.data.url)
+      setMessage(`${t('lien_solde_envoye')} (${res.data.montant}€) — Lien copié, vous pouvez le partager au client.`)
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Erreur lors de la génération du lien')
+    } finally {
+      setEnvoiSoldeEnCours(null)
     }
   }
 
@@ -357,6 +372,8 @@ const DashboardPrestataire = () => {
                 <input name="duree" type="number" placeholder={t('duree_minutes')} value={formModif.duree} onChange={handleModifChange} required style={inputStyle} />
                 <input name="photo_url" placeholder={t('photo_url_optionnel')} value={formModif.photo_url} onChange={handleModifChange} style={inputStyle} />
                 <p style={{ color: c.texte, fontSize: '12px', marginBottom: '12px' }}>{t('photo_defaut_info')}</p>
+                <input name="pourcentage_acompte" type="number" min="0" max="100" placeholder={t('pourcentage_acompte_label')} value={formModif.pourcentage_acompte} onChange={handleModifChange} style={inputStyle} />
+                <p style={{ color: c.texte, fontSize: '12px', marginBottom: '12px' }}>{t('pourcentage_acompte_info')}</p>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button type="submit" style={{ flex: 1, padding: '12px', background: c.bleu, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('sauvegarder')}</button>
                   <button type="button" onClick={() => setShowModifierService(false)} style={{ background: c.blanc, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
@@ -423,8 +440,27 @@ const DashboardPrestataire = () => {
                 <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('client_label')} {res.users?.prenom} {res.users?.nom}</p>
                 <p style={{ color: c.texte }}>{t('date_label')} {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
                 <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
+                {res.nom_beneficiaire && (
+                  <p style={{ color: c.texte, fontSize: '13px', marginTop: '4px' }}>👤 {res.nom_beneficiaire} {res.telephone_beneficiaire && `— ${res.telephone_beneficiaire}`}</p>
+                )}
                 {res.montant_net > 0 && (
                   <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>{t('net_percevoir')} <strong>{res.montant_net}€</strong> ({t('sur_label')} {res.services?.prix}€)</p>
+                )}
+                {res.montant_acompte && (
+                  <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '10px 12px', marginTop: '8px', border: '1px solid #F6AD55' }}>
+                    <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>
+                      {t('acompte_a_payer')} : <strong>{res.montant_acompte}€</strong> — {t('solde_a_payer_label')} : <strong>{Math.round((res.services?.prix - res.montant_acompte) * 100) / 100}€</strong>
+                    </p>
+                    {res.solde_paye ? (
+                      <p style={{ color: '#065f46', fontSize: '13px', margin: '6px 0 0', fontWeight: 'bold' }}>{t('solde_deja_paye')}</p>
+                    ) : (
+                      res.statut !== 'annule' && (
+                        <button onClick={() => handleEnvoyerLienSolde(res.id)} disabled={envoiSoldeEnCours === res.id} style={{ marginTop: '8px', background: '#92400e', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '12px' }}>
+                          {envoiSoldeEnCours === res.id ? '...' : `💳 ${t('envoyer_lien_solde')}`}
+                        </button>
+                      )
+                    )}
+                  </div>
                 )}
                 <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
                   {res.statut === 'en_attente' && (
@@ -479,6 +515,9 @@ const DashboardPrestataire = () => {
                 <h3 style={{ margin: '0.8rem 0 0.5rem', color: c.texteFonce }}>{service.titre}</h3>
                 <p style={{ color: c.texte, fontSize: '14px' }}>{service.description}</p>
                 <p style={{ fontWeight: 'bold', color: c.rouge, marginTop: '0.5rem' }}>{service.prix}€ — {service.duree} min</p>
+                {service.pourcentage_acompte > 0 && (
+                  <p style={{ color: '#92400e', fontSize: '12px', marginTop: '4px' }}>💳 Acompte {service.pourcentage_acompte}% ({Math.round(service.prix * service.pourcentage_acompte / 100 * 100) / 100}€)</p>
+                )}
                 <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
                   <button onClick={() => ouvrirModifierService(service)} style={{ flex: 1, background: c.bleu, color: 'white', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>{t('modifier_btn')}</button>
                   <button onClick={() => handleSupprimerService(service.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>🗑️</button>
@@ -620,6 +659,8 @@ const DashboardPrestataire = () => {
               <input name="duree" type="number" placeholder={t('duree_minutes')} value={form.duree} onChange={handleChange} required style={inputStyle} />
               <input name="photo_url" placeholder={t('photo_url_optionnel')} value={form.photo_url} onChange={handleChange} style={inputStyle} />
               <p style={{ color: c.texte, fontSize: '12px', marginBottom: '12px' }}>{t('photo_defaut_info')}</p>
+              <input name="pourcentage_acompte" type="number" min="0" max="100" placeholder={t('pourcentage_acompte_label')} value={form.pourcentage_acompte} onChange={handleChange} style={inputStyle} />
+              <p style={{ color: c.texte, fontSize: '12px', marginBottom: '12px' }}>{t('pourcentage_acompte_info')}</p>
               <button type="submit" style={{ width: '100%', padding: '12px', background: c.rouge, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontFamily: 'Georgia, serif' }}>{t('creer_service')}</button>
             </form>
           </div>
