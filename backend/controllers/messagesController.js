@@ -3,8 +3,12 @@ const { envoyerEmailNouveauMessage } = require('../config/email')
 
 const envoyerMessage = async (req, res) => {
   try {
-    const { booking_id, contenu } = req.body
+    const { booking_id, contenu, media_url, media_type } = req.body
     const expediteur_id = req.user.id
+
+    if (!contenu && !media_url) {
+      return res.status(400).json({ message: 'Le message doit contenir du texte ou un média' })
+    }
 
     const { data: booking } = await supabase
       .from('bookings')
@@ -27,7 +31,7 @@ const envoyerMessage = async (req, res) => {
 
     const { data, error } = await supabase
       .from('messages')
-      .insert([{ booking_id, expediteur_id, destinataire_id, contenu }])
+      .insert([{ booking_id, expediteur_id, destinataire_id, contenu: contenu || null, media_url: media_url || null, media_type: media_type || null }])
       .select()
 
     if (error) throw error
@@ -47,7 +51,7 @@ const envoyerMessage = async (req, res) => {
     if (destinataire?.email) {
       await envoyerEmailNouveauMessage(destinataire.email, {
         expediteurNom: `${expediteur.prenom} ${expediteur.nom}`,
-        contenu
+        contenu: contenu || (media_type === 'photo' ? '📷 Photo' : '🎥 Vidéo')
       }, destinataire.langue_preferee || 'fr')
     }
 
