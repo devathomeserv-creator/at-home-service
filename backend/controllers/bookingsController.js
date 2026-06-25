@@ -35,9 +35,14 @@ const creerReservation = async (req, res) => {
     const commission = Math.round(service.prix * TAUX_COMMISSION * 100) / 100
     const montant_net = Math.round((service.prix - commission) * 100) / 100
 
+    const aAcompte = service.pourcentage_acompte > 0 && service.pourcentage_acompte < 100
+    const montant_acompte = aAcompte
+      ? Math.round(service.prix * (service.pourcentage_acompte / 100) * 100) / 100
+      : null
+
     const { data, error } = await supabase
       .from('bookings')
-      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut, payment_intent_id, commission, montant_net, consentement_donnees: !!consentement_donnees, nom_beneficiaire: nom_beneficiaire || null, telephone_beneficiaire: telephone_beneficiaire || null }])
+      .insert([{ client_id, service_id, date_rdv, adresse_intervention, note, statut, payment_intent_id, commission, montant_net, consentement_donnees: !!consentement_donnees, nom_beneficiaire: nom_beneficiaire || null, telephone_beneficiaire: telephone_beneficiaire || null, montant_acompte, solde_paye: !aAcompte }])
       .select()
 
     if (error) throw error
