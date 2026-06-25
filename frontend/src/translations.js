@@ -74,13 +74,11 @@ export const traductions = {
     carte_titre: '🗺️ Trouvez un prestataire près de chez vous', chargement_carte: 'Chargement de la carte...',
     mentions_legales_titre: 'Mentions Légales', editeur_site: 'Éditeur du site', hebergement: 'Hébergement', propriete_intellectuelle: 'Propriété intellectuelle', responsabilite: 'Responsabilité',
     cgu_titre: "Conditions Générales d'Utilisation", politique_confidentialite: 'Politique de confidentialité', derniere_maj: 'Dernière mise à jour : 21 juin 2026',
-
     langues_parlees_label: 'Langues parlées', langues_parlees_info: 'Sélectionnez les langues que vous parlez. Cela aide les clients étrangers à vous trouver.',
-    fr_label: 'Français', en_label: 'Anglais', it_label: 'Italien', ru_label: 'Russe', langues_parlees_profil_public: 'Langues parlées'
-  fr_label: 'Français', en_label: 'Anglais', it_label: 'Italien', ru_label: 'Russe', langues_parlees_profil_public: 'Langues parlées',
+    fr_label: 'Français', en_label: 'Anglais', it_label: 'Italien', ru_label: 'Russe', langues_parlees_profil_public: 'Langues parlées',
     reserver_pour_proche: 'Réserver pour un proche', nom_beneficiaire_placeholder: 'Nom du bénéficiaire', telephone_beneficiaire_placeholder: 'Téléphone du bénéficiaire (optionnel)',
     beneficiaire_info: 'Cette réservation sera à votre nom, mais la prestation sera réalisée pour la personne indiquée.', reserve_par: 'Réservé par'
-  }
+  },
   en: {
     connexion: 'Login', inscription: 'Sign up', carte: 'Map', mon_profil: 'My profile', deconnexion: 'Logout', mon_espace: '← My space', accueil: '← Home', retour: 'Back', bonjour: 'Hello',
     hero_titre: 'Professionals at home,', hero_titre_2: 'whenever you need them', hero_sous_titre: 'No more searching, one click to find your home craftsman',
@@ -156,10 +154,8 @@ export const traductions = {
     carte_titre: '🗺️ Find a provider near you', chargement_carte: 'Loading map...',
     mentions_legales_titre: 'Legal Notice', editeur_site: 'Site publisher', hebergement: 'Hosting', propriete_intellectuelle: 'Intellectual property', responsabilite: 'Liability',
     cgu_titre: 'Terms of Service', politique_confidentialite: 'Privacy Policy', derniere_maj: 'Last updated: June 21, 2026',
-
     langues_parlees_label: 'Languages spoken', langues_parlees_info: 'Select the languages you speak. This helps foreign clients find you.',
-    fr_label: 'French', en_label: 'English', it_label: 'Italian', ru_label: 'Russian', langues_parlees_profil_public: 'Languages spoken'
-  fr_label: 'French', en_label: 'English', it_label: 'Italian', ru_label: 'Russian', langues_parlees_profil_public: 'Languages spoken',
+    fr_label: 'French', en_label: 'English', it_label: 'Italian', ru_label: 'Russian', langues_parlees_profil_public: 'Languages spoken',
     reserver_pour_proche: 'Book for someone else', nom_beneficiaire_placeholder: 'Beneficiary name', telephone_beneficiaire_placeholder: 'Beneficiary phone (optional)',
     beneficiaire_info: 'This booking will be under your name, but the service will be provided for the person indicated.', reserve_par: 'Booked by'
   },
@@ -238,13 +234,11 @@ export const traductions = {
     carte_titre: '🗺️ Trova un fornitore vicino a te', chargement_carte: 'Caricamento mappa...',
     mentions_legales_titre: 'Note Legali', editeur_site: 'Editore del sito', hebergement: 'Hosting', propriete_intellectuelle: 'Proprietà intellettuale', responsabilite: 'Responsabilità',
     cgu_titre: 'Termini di Servizio', politique_confidentialite: 'Informativa sulla Privacy', derniere_maj: 'Ultimo aggiornamento: 21 giugno 2026',
-
     langues_parlees_label: 'Lingue parlate', langues_parlees_info: 'Seleziona le lingue che parli. Questo aiuta i clienti stranieri a trovarti.',
-    fr_label: 'Francese', en_label: 'Inglese', it_label: 'Italiano', ru_label: 'Russo', langues_parlees_profil_public: 'Lingue parlate'
-  fr_label: 'Francese', en_label: 'Inglese', it_label: 'Italiano', ru_label: 'Russo', langues_parlees_profil_public: 'Lingue parlate',
+    fr_label: 'Francese', en_label: 'Inglese', it_label: 'Italiano', ru_label: 'Russo', langues_parlees_profil_public: 'Lingue parlate',
     reserver_pour_proche: 'Prenota per qualcun altro', nom_beneficiaire_placeholder: 'Nome del beneficiario', telephone_beneficiaire_placeholder: 'Telefono del beneficiario (opzionale)',
     beneficiaire_info: 'Questa prenotazione sarà a tuo nome, ma il servizio sarà fornito per la persona indicata.', reserve_par: 'Prenotato da'
-  },,
+  },
   ru: {
     connexion: 'Вход', inscription: 'Регистрация', carte: 'Карта', mon_profil: 'Мой профиль', deconnexion: 'Выход', mon_espace: '← Мой кабинет', accueil: '← Главная', retour: 'Назад', bonjour: 'Привет',
     hero_titre: 'Профессионалы на дом,', hero_titre_2: 'когда вам это нужно', hero_sous_titre: 'Больше не нужно искать, один клик — и ваш мастер на дом найден',
@@ -320,10 +314,8 @@ export const traductions = {
     carte_titre: '🗺️ Найдите специалиста рядом с вами', chargement_carte: 'Загрузка карты...',
     mentions_legales_titre: 'Юридическая информация', editeur_site: 'Издатель сайта', hebergement: 'Хостинг', propriete_intellectuelle: 'Интеллектуальная собственность', responsabilite: 'Ответственность',
     cgu_titre: 'Условия использования', politique_confidentialite: 'Политика конфиденциальности', derniere_maj: 'Последнее обновление: 21 июня 2026',
-
     langues_parlees_label: 'Языки, на которых вы говорите', langues_parlees_info: 'Выберите языки, на которых вы говорите. Это поможет иностранным клиентам найти вас.',
-    fr_label: 'Французский', en_label: 'Английский', it_label: 'Итальянский', ru_label: 'Русский', langues_parlees_profil_public: 'Языки'
-  fr_label: 'Французский', en_label: 'Английский', it_label: 'Итальянский', ru_label: 'Русский', langues_parlees_profil_public: 'Языки',
+    fr_label: 'Французский', en_label: 'Английский', it_label: 'Итальянский', ru_label: 'Русский', langues_parlees_profil_public: 'Языки',
     reserver_pour_proche: 'Забронировать для другого человека', nom_beneficiaire_placeholder: 'Имя получателя', telephone_beneficiaire_placeholder: 'Телефон получателя (необязательно)',
     beneficiaire_info: 'Это бронирование будет на ваше имя, но услуга будет оказана указанному человеку.', reserve_par: 'Забронировано'
   }
