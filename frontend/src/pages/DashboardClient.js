@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useLanguage } from '../context/LanguageContext'
-import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture, recupererPaiementIntent, ajouterListeAttente, getMaListeAttente, retirerListeAttente } from '../services/api'
+import { getPrestatairesListe, creerReservation, mesReservationsClient, laisserAvis, creerPaiement, annulerReservation, modifierReservation, getProfilPublicPrestataire, getCreneauxOccupes, getMesConversations, getMesFavoris, retirerFavori, telechargerFacture, recupererPaiementIntent, ajouterListeAttente, getMaListeAttente, retirerListeAttente, confirmerPaiementSolde } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -94,6 +94,8 @@ const DashboardClient = () => {
     const consentementParam = params.get('consentement')
     const nomBeneficiaireParam = params.get('nom_beneficiaire')
     const telBeneficiaireParam = params.get('telephone_beneficiaire')
+    const solde = params.get('solde')
+    const booking_id_solde = params.get('booking_id')
 
     if (paiement === 'succes' && service_id && date_rdv && adresseParam) {
       const finaliserReservation = async () => {
@@ -130,6 +132,26 @@ const DashboardClient = () => {
 
     if (paiement === 'annule') {
       setMessage('Paiement annulé. Vous pouvez réessayer.')
+      window.history.replaceState({}, '', '/client')
+    }
+
+    if (solde === 'succes' && booking_id_solde && session_id) {
+      const finaliserSolde = async () => {
+        try {
+          await confirmerPaiementSolde(booking_id_solde, session_id)
+          setMessage(t('solde_paye_succes'))
+          setVue('reservations')
+          chargerReservations()
+          window.history.replaceState({}, '', '/client')
+        } catch (err) {
+          console.error(err)
+        }
+      }
+      finaliserSolde()
+    }
+
+    if (solde === 'annule') {
+      setMessage('Paiement du solde annulé.')
       window.history.replaceState({}, '', '/client')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -390,6 +412,10 @@ const DashboardClient = () => {
       )
     : prestataires
 
+  const aAcompte = serviceSelectionne && serviceSelectionne.pourcentage_acompte > 0 && serviceSelectionne.pourcentage_acompte < 100
+  const montantAcompte = aAcompte ? Math.round(serviceSelectionne.prix * serviceSelectionne.pourcentage_acompte / 100 * 100) / 100 : 0
+  const montantSoldeAffiche = aAcompte ? Math.round((serviceSelectionne.prix - montantAcompte) * 100) / 100 : 0
+
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
       <style>{`
@@ -478,6 +504,14 @@ const DashboardClient = () => {
             <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: `1px solid ${c.bordure}`, maxHeight: '90vh', overflowY: 'auto' }}>
               <h3 style={{ color: c.texteFonce, marginBottom: '0.5rem' }}>{t('reserver_titre')} {serviceSelectionne.titre}</h3>
               <p style={{ color: c.rouge, fontWeight: 'bold', marginBottom: '1rem' }}>{serviceSelectionne.prix}€ · {serviceSelectionne.duree} min</p>
+
+              {aAcompte && (
+                <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: '1px solid #F6AD55' }}>
+                  <p style={{ color: '#92400e', fontSize: '13px', margin: '0 0 4px' }}>{t('acompte_a_payer')} : <strong>{montantAcompte}€</strong></p>
+                  <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>{t('solde_restant')} : <strong>{montantSoldeAffiche}€</strong></p>
+                </div>
+              )}
+
               <p style={{ color: c.texte, fontSize: '12px', marginBottom: '1rem', fontStyle: 'italic' }}>
                 {t('disponible_label')} {joursTravail.join(', ')} {t('de_a')} {heureDebut} - {heureFin}
               </p>
@@ -546,7 +580,9 @@ const DashboardClient = () => {
                 {dateSelectionnee && estCreneauOccupe(dateSelectionnee) ? (
                   <button onClick={handleListeAttente} style={{ flex: 1, background: '#F6AD55', color: '#1A365D', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', fontWeight: 'bold' }}>{t('rejoindre_liste_attente')}</button>
                 ) : (
-                  <button onClick={confirmerReservation} style={{ flex: 1, background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>{t('payer_reserver')}</button>
+                  <button onClick={confirmerReservation} style={{ flex: 1, background: c.rouge, color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px' }}>
+                    {aAcompte ? `${t('payer_reserver')} (${montantAcompte}€)` : t('payer_reserver')}
+                  </button>
                 )}
                 <button onClick={() => setShowReservationModal(false)} style={{ background: c.fondClair, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
               </div>
@@ -622,7 +658,7 @@ const DashboardClient = () => {
                         </div>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                           {p.services.map(s => (
-                            <span key={s.titre} style={{ background: c.bleuFond, color: c.bleu, padding: '2px 8px', borderRadius: '20px', fontSize: '11px' }}>{s.titre} — {s.prix}€</span>
+                            <span key={s.titre} style={{ background: c.bleuFond, color: c.bleu, padding: '2px 8px', borderRadius: '20px', fontSize: '11px' }}>{s.titre} — {s.prix}€{s.pourcentage_acompte > 0 && ` (acompte ${s.pourcentage_acompte}%)`}</span>
                           ))}
                         </div>
                       </div>
@@ -653,6 +689,13 @@ const DashboardClient = () => {
                   <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
                   {res.nom_beneficiaire && (
                     <p style={{ color: c.texte, fontSize: '13px', marginTop: '4px' }}>👤 {res.nom_beneficiaire}</p>
+                  )}
+                  {res.montant_acompte && (
+                    <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', border: '1px solid #F6AD55' }}>
+                      <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>
+                        {t('acompte_a_payer')} : <strong>{res.montant_acompte}€</strong> {res.solde_paye ? `— ${t('solde_deja_paye')}` : `— ${t('solde_a_payer_label')} : ${Math.round((res.services?.prix - res.montant_acompte) * 100) / 100}€`}
+                      </p>
+                    </div>
                   )}
                   {res.statut === 'annule' && res.rembourse && (
                     <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>{t('rembourse_auto')}</p>
