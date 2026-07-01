@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { getMessages, envoyerMessage } from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
 import { uploadMessageMedia } from '../services/supabaseClient'
+import VideoModal from './VideoModal'
 
 const ChatModal = ({ booking, onClose }) => {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [messages, setMessages] = useState([])
   const [nouveauMessage, setNouveauMessage] = useState('')
   const [chargement, setChargement] = useState(true)
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [erreur, setErreur] = useState('')
+  const [showVideo, setShowVideo] = useState(false)
   const messagesEndRef = useRef(null)
   const fichierInputRef = useRef(null)
 
@@ -83,12 +87,25 @@ const ChatModal = ({ booking, onClose }) => {
     }
   }
 
+  if (showVideo) {
+    return <VideoModal booking={booking} onClose={() => setShowVideo(false)} />
+  }
+
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
       <div style={{ background: '#F5ECD8', borderRadius: '16px', width: '100%', maxWidth: '480px', border: '1px solid #A07840', display: 'flex', flexDirection: 'column', maxHeight: '80vh' }}>
         <div style={{ background: '#2B6CB0', padding: '1rem', borderRadius: '16px 16px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ color: 'white', margin: 0, fontSize: '16px', fontFamily: 'Georgia, serif' }}>💬 {booking.services?.titre}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowVideo(true)}
+              title={t('demarrer_appel')}
+              style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer', padding: '4px 10px', borderRadius: '8px' }}
+            >
+              📹
+            </button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'white', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+          </div>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', minHeight: '300px', maxHeight: '400px' }}>

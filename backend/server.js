@@ -1,7 +1,6 @@
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
-
 const authRoutes = require('./routes/authRoutes')
 const servicesRoutes = require('./routes/servicesRoutes')
 const bookingsRoutes = require('./routes/bookingsRoutes')
@@ -25,6 +24,7 @@ const listeAttenteRoutes = require('./routes/listeAttenteRoutes')
 const topPrestataireRoutes = require('./routes/topPrestataireRoutes')
 const parametresRoutes = require('./routes/parametresRoutes')
 const exportComptableRoutes = require('./routes/exportComptableRoutes')
+const videoRoutes = require('./routes/videoRoutes')
 
 const app = express()
 app.use(cors())
@@ -53,13 +53,13 @@ app.use('/api/liste-attente', listeAttenteRoutes)
 app.use('/api/top-prestataires', topPrestataireRoutes)
 app.use('/api/parametres', parametresRoutes)
 app.use('/api/export-comptable', exportComptableRoutes)
+app.use('/api/video', videoRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Serveur marketplace en ligne !' })
 })
 
 const PORT = process.env.PORT || 5000
-
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`)
 })

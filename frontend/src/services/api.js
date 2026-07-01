@@ -70,6 +70,7 @@ export const retirerListeAttente = (id) => API.delete(`/liste-attente/${id}`)
 export const getTopPrestataires = () => API.get('/top-prestataires')
 export const getModeMaintenance = () => API.get('/parametres/maintenance')
 export const modifierModeMaintenance = (mode_maintenance) => API.put('/parametres/maintenance', { mode_maintenance })
+export const creerSalleVideo = (booking_id) => API.post(`/video/room/${booking_id}`)
 export const telechargerFacture = async (booking_id) => {
   const token = localStorage.getItem('token')
   const response = await fetch(`https://loving-nature-production-145d.up.railway.app/api/facture/${booking_id}`, {

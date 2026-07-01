@@ -13,7 +13,7 @@ export const traductions = {
     footer_slogan: 'Plus besoin de chercher,\nun clic et trouvez votre\nartisan à domicile', footer_services: 'Services', footer_liens: 'Liens utiles', footer_carte: 'Carte des prestataires',
     footer_mentions: 'Mentions légales et CGU', footer_confidentialite: 'Politique de confidentialité', footer_creer_compte: 'Créer un compte', footer_devenir_prestataire: 'Devenir prestataire',
     footer_contact: 'Contact', footer_droits: '© 2026 At Home Service — Tous droits réservés',
-    coiffure: 'Coiffure', barber: 'Barber', esthetique: 'Esthétique', massage: 'Massage', plomberie: 'Plomberie', electricite: 'Électricité', maconnerie: 'Maçonnerie', renovation: 'Rénovation', coach_sportif: 'Coach sportif', photographe: 'Photographe', tous: 'Tous',
+    coiffure: 'Coiffure', barber: 'Barber', esthetique: 'Esthétique', massage: 'Massage', plomberie: 'Plomberie', electricite: 'Électricité', maconnerie: 'Maçonnerie', renovation: 'Rénovation', coach: 'Coach', photographe: 'Photographe', tous: 'Tous',
     auth_slogan: 'Plus besoin de chercher, un clic et trouvez votre artisan à domicile', nom: 'Nom', prenom: 'Prénom', telephone: 'Téléphone', je_suis_client: 'Je suis un client', je_suis_prestataire: 'Je suis un prestataire',
     code_parrainage_optionnel: 'Code de parrainage (optionnel)', email: 'Email', mot_de_passe: 'Mot de passe', chargement: 'Chargement...', se_connecter: 'Se connecter', sinscrire: "S'inscrire",
     telecharger_app: "📱 Télécharger l'application", mentions_legales_cgu: 'Mentions légales et CGU', parraine_titre: '🎉 Vous avez été parrainé ! Code :',
@@ -81,7 +81,8 @@ export const traductions = {
     pourcentage_acompte_label: "Pourcentage d'acompte (optionnel)", pourcentage_acompte_info: 'Si renseigné, le client ne paiera que ce pourcentage à la réservation. Le solde sera à régler lors de la prestation ou via un lien que vous pourrez lui envoyer.',
     acompte_a_payer: "Acompte à payer aujourd'hui", solde_restant: 'Solde restant à régler', solde_a_payer_label: 'Solde à payer',
     envoyer_lien_solde: 'Envoyer un lien de paiement pour le solde', solde_deja_paye: '✅ Solde déjà payé', lien_solde_envoye: 'Lien de paiement envoyé au client !',
-    solde_paiement_titre: 'Paiement du solde restant', payer_le_solde: 'Payer le solde', solde_paye_succes: 'Solde payé avec succès ! Merci.'
+    solde_paiement_titre: 'Paiement du solde restant', payer_le_solde: 'Payer le solde', solde_paye_succes: 'Solde payé avec succès ! Merci.',
+    appel_video: '📹 Appel vidéo', demarrer_appel: 'Démarrer un appel vidéo', rejoindre_appel: 'Rejoindre l\'appel vidéo', appel_en_cours: 'Appel en cours...', terminer_appel: 'Terminer l\'appel', appel_termine: 'Appel terminé'
   },
   en: {
     connexion: 'Login', inscription: 'Sign up', carte: 'Map', mon_profil: 'My profile', deconnexion: 'Logout', mon_espace: '← My space', accueil: '← Home', retour: 'Back', bonjour: 'Hello',
@@ -97,7 +98,7 @@ export const traductions = {
     footer_slogan: 'No more searching,\none click to find your\nhome craftsman', footer_services: 'Services', footer_liens: 'Useful links', footer_carte: 'Provider map',
     footer_mentions: 'Legal notice and Terms', footer_confidentialite: 'Privacy policy', footer_creer_compte: 'Create an account', footer_devenir_prestataire: 'Become a provider',
     footer_contact: 'Contact', footer_droits: '© 2026 At Home Service — All rights reserved',
-    coiffure: 'Hairdressing', barber: 'Barber', esthetique: 'Beauty', massage: 'Massage', plomberie: 'Plumbing', electricite: 'Electricity', maconnerie: 'Masonry', renovation: 'Renovation', coach_sportif: 'Sports coach', photographe: 'Photographer', tous: 'All',
+    coiffure: 'Hairdressing', barber: 'Barber', esthetique: 'Beauty', massage: 'Massage', plomberie: 'Plumbing', electricite: 'Electricity', maconnerie: 'Masonry', renovation: 'Renovation', coach: 'Coach', photographe: 'Photographer', tous: 'All',
     auth_slogan: 'No more searching, one click to find your home craftsman', nom: 'Last name', prenom: 'First name', telephone: 'Phone', je_suis_client: 'I am a client', je_suis_prestataire: 'I am a provider',
     code_parrainage_optionnel: 'Referral code (optional)', email: 'Email', mot_de_passe: 'Password', chargement: 'Loading...', se_connecter: 'Log in', sinscrire: 'Sign up',
     telecharger_app: '📱 Download the app', mentions_legales_cgu: 'Legal notice and Terms', parraine_titre: "🎉 You've been referred! Code:",
@@ -165,7 +166,8 @@ export const traductions = {
     pourcentage_acompte_label: 'Deposit percentage (optional)', pourcentage_acompte_info: 'If set, the client will only pay this percentage at booking. The balance will be due at the service or via a link you can send.',
     acompte_a_payer: 'Deposit to pay today', solde_restant: 'Remaining balance', solde_a_payer_label: 'Balance due',
     envoyer_lien_solde: 'Send a payment link for the balance', solde_deja_paye: '✅ Balance already paid', lien_solde_envoye: 'Payment link sent to the client!',
-    solde_paiement_titre: 'Payment of remaining balance', payer_le_solde: 'Pay the balance', solde_paye_succes: 'Balance paid successfully! Thank you.'
+    solde_paiement_titre: 'Payment of remaining balance', payer_le_solde: 'Pay the balance', solde_paye_succes: 'Balance paid successfully! Thank you.',
+    appel_video: '📹 Video call', demarrer_appel: 'Start a video call', rejoindre_appel: 'Join video call', appel_en_cours: 'Call in progress...', terminer_appel: 'End call', appel_termine: 'Call ended'
   },
   it: {
     connexion: 'Accesso', inscription: 'Iscriviti', carte: 'Mappa', mon_profil: 'Il mio profilo', deconnexion: 'Disconnessione', mon_espace: '← Il mio spazio', accueil: '← Home', retour: 'Indietro', bonjour: 'Ciao',
@@ -181,7 +183,7 @@ export const traductions = {
     footer_slogan: 'Basta cercare,\nun clic per trovare il tuo\nartigiano a domicilio', footer_services: 'Servizi', footer_liens: 'Link utili', footer_carte: 'Mappa dei fornitori',
     footer_mentions: 'Note legali e Termini', footer_confidentialite: 'Informativa sulla privacy', footer_creer_compte: 'Crea un account', footer_devenir_prestataire: 'Diventa fornitore',
     footer_contact: 'Contatto', footer_droits: '© 2026 At Home Service — Tutti i diritti riservati',
-    coiffure: 'Parrucchiere', barber: 'Barbiere', esthetique: 'Estetica', massage: 'Massaggio', plomberie: 'Idraulica', electricite: 'Elettricità', maconnerie: 'Muratura', renovation: 'Ristrutturazione', coach_sportif: 'Personal trainer', photographe: 'Fotografo', tous: 'Tutti',
+    coiffure: 'Parrucchiere', barber: 'Barbiere', esthetique: 'Estetica', massage: 'Massaggio', plomberie: 'Idraulica', electricite: 'Elettricità', maconnerie: 'Muratura', renovation: 'Ristrutturazione', coach: 'Coach', photographe: 'Fotografo', tous: 'Tutti',
     auth_slogan: 'Basta cercare, un clic per trovare il tuo artigiano a domicilio', nom: 'Cognome', prenom: 'Nome', telephone: 'Telefono', je_suis_client: 'Sono un cliente', je_suis_prestataire: 'Sono un fornitore',
     code_parrainage_optionnel: 'Codice di invito (opzionale)', email: 'Email', mot_de_passe: 'Password', chargement: 'Caricamento...', se_connecter: 'Accedi', sinscrire: 'Iscriviti',
     telecharger_app: "📱 Scarica l'app", mentions_legales_cgu: 'Note legali e Termini', parraine_titre: '🎉 Sei stato invitato! Codice:',
@@ -210,7 +212,7 @@ export const traductions = {
     envoi_en_cours: 'Invio in corso...', ajouter: 'Aggiungi', aucune_realisation: 'Nessuna realizzazione aggiunta al momento.', supprimer: '🗑️ Elimina',
     aucune_conversation_presta: 'Nessuna conversazione al momento. Riceverai qui i messaggi dei tuoi clienti!',
     avis_total: 'recensioni totali', aucun_avis: 'Nessuna recensione al momento.', votre_reponse: 'La tua risposta:', repondre_placeholder: 'Rispondi a questa recensione...', publier_reponse: 'Pubblica risposta',
-    modifier_reponse: '✏️ Modifica la mia risposta', repondre: '💬 Rispondi', ajouter_nouveau_service: 'Aggiungi un nuovo servizio', creer_service: 'Crea servizio',
+    modifier_reponse: '✏️ Modifica la mia risposta', repondre: '💬 Rispondi', ajouter_nuovo_service: 'Aggiungi un nuovo servizio', creer_service: 'Crea servizio',
     panneau_admin: 'panello amministrazione', onglet_statistiques: 'Statistiche', onglet_revenus: '💰 Entrate', onglet_utilisateurs: 'Utenti', onglet_signalements: '🚩 Segnalazioni', onglet_parametres: '⚙️ Impostazioni',
     total_utilisateurs: 'Totale utenti', clients_label: 'Clienti', prestataires_label: 'Fornitori', commission_mois: 'Commissione questo mese', commission_totale: 'Commissione totale', volume_total: 'Volume totale gestito',
     taux_commission: 'Tasso di commissione', evolution_commission: 'Andamento della commissione (ultimi 6 mesi)', pas_assez_graphique: 'Non ci sono ancora abbastanza dati per mostrare un grafico.', supprimer_btn: 'Elimina',
@@ -249,7 +251,8 @@ export const traductions = {
     pourcentage_acompte_label: "Percentuale di acconto (opzionale)", pourcentage_acompte_info: 'Se impostato, il cliente pagherà solo questa percentuale alla prenotazione. Il saldo sarà da pagare al servizio o tramite un link che potrai inviare.',
     acompte_a_payer: 'Acconto da pagare oggi', solde_restant: 'Saldo rimanente', solde_a_payer_label: 'Saldo da pagare',
     envoyer_lien_solde: 'Invia un link di pagamento per il saldo', solde_deja_paye: '✅ Saldo già pagato', lien_solde_envoye: 'Link di pagamento inviato al cliente!',
-    solde_paiement_titre: 'Pagamento del saldo rimanente', payer_le_solde: 'Paga il saldo', solde_paye_succes: 'Saldo pagato con successo! Grazie.'
+    solde_paiement_titre: 'Pagamento del saldo rimanente', payer_le_solde: 'Paga il saldo', solde_paye_succes: 'Saldo pagato con successo! Grazie.',
+    appel_video: '📹 Videochiamata', demarrer_appel: 'Avvia una videochiamata', rejoindre_appel: 'Unisciti alla videochiamata', appel_en_cours: 'Chiamata in corso...', terminer_appel: 'Termina la chiamata', appel_termine: 'Chiamata terminata'
   },
   ru: {
     connexion: 'Вход', inscription: 'Регистрация', carte: 'Карта', mon_profil: 'Мой профиль', deconnexion: 'Выход', mon_espace: '← Мой кабинет', accueil: '← Главная', retour: 'Назад', bonjour: 'Привет',
@@ -265,7 +268,7 @@ export const traductions = {
     footer_slogan: 'Больше не нужно искать,\nодин клик — и ваш мастер\nна дом найден', footer_services: 'Услуги', footer_liens: 'Полезные ссылки', footer_carte: 'Карта специалистов',
     footer_mentions: 'Юридическая информация', footer_confidentialite: 'Политика конфиденциальности', footer_creer_compte: 'Создать аккаунт', footer_devenir_prestataire: 'Стать специалистом',
     footer_contact: 'Контакты', footer_droits: '© 2026 At Home Service — Все права защищены',
-    coiffure: 'Парикмахер', barber: 'Барбер', esthetique: 'Косметология', massage: 'Массаж', plomberie: 'Сантехника', electricite: 'Электрика', maconnerie: 'Кладка', renovation: 'Ремонт', coach_sportif: 'Спортивный тренер', photographe: 'Фотограф', tous: 'Все',
+    coiffure: 'Парикмахер', barber: 'Барбер', esthetique: 'Косметология', massage: 'Массаж', plomberie: 'Сантехника', electricite: 'Электрика', maconnerie: 'Кладка', renovation: 'Ремонт', coach: 'Тренер', photographe: 'Фотограф', tous: 'Все',
     auth_slogan: 'Больше не нужно искать, один клик — и ваш мастер на дом найден', nom: 'Фамилия', prenom: 'Имя', telephone: 'Телефон', je_suis_client: 'Я клиент', je_suis_prestataire: 'Я специалист',
     code_parrainage_optionnel: 'Реферальный код (необязательно)', email: 'Email', mot_de_passe: 'Пароль', chargement: 'Загрузка...', se_connecter: 'Войти', sinscrire: 'Зарегистрироваться',
     telecharger_app: '📱 Скачать приложение', mentions_legales_cgu: 'Юридическая информация', parraine_titre: '🎉 Вас пригласили! Код:',
@@ -333,6 +336,7 @@ export const traductions = {
     pourcentage_acompte_label: 'Процент депозита (необязательно)', pourcentage_acompte_info: 'Если указано, клиент оплатит только этот процент при бронировании. Остаток нужно будет оплатить на месте или по ссылке, которую вы отправите.',
     acompte_a_payer: 'Депозит к оплате сегодня', solde_restant: 'Остаток к оплате', solde_a_payer_label: 'Остаток к оплате',
     envoyer_lien_solde: 'Отправить ссылку для оплаты остатка', solde_deja_paye: '✅ Остаток уже оплачен', lien_solde_envoye: 'Ссылка на оплату отправлена клиенту!',
-    solde_paiement_titre: 'Оплата оставшейся суммы', payer_le_solde: 'Оплатить остаток', solde_paye_succes: 'Остаток успешно оплачен! Спасибо.'
+    solde_paiement_titre: 'Оплата оставшейся суммы', payer_le_solde: 'Оплатить остаток', solde_paye_succes: 'Остаток успешно оплачен! Спасибо.',
+    appel_video: '📹 Видеозвонок', demarrer_appel: 'Начать видеозвонок', rejoindre_appel: 'Присоединиться к видеозвонку', appel_en_cours: 'Звонок идёт...', terminer_appel: 'Завершить звонок', appel_termine: 'Звонок завершён'
   }
 }
