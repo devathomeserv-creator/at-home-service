@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import DailyIframe from '@daily-co/daily-js'
 import { creerSalleVideo } from '../services/api'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -7,15 +6,15 @@ const VideoModal = ({ booking, onClose }) => {
   const { t } = useLanguage()
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState('')
-  const callRef = useRef(null)
   const containerRef = useRef(null)
+  const callFrameRef = useRef(null)
 
   useEffect(() => {
     demarrerAppel()
     return () => {
-      if (callRef.current) {
-        callRef.current.destroy()
-        callRef.current = null
+      if (callFrameRef.current) {
+        callFrameRef.current.destroy()
+        callFrameRef.current = null
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -26,7 +25,14 @@ const VideoModal = ({ booking, onClose }) => {
       const res = await creerSalleVideo(booking.id)
       const { url, token } = res.data
 
-      const call = DailyIframe.createFrame(containerRef.current, {
+      const DailyIframe = window.DailyIframe
+      if (!DailyIframe) {
+        setErreur('Impossible de charger le module vidéo')
+        setChargement(false)
+        return
+      }
+
+      const callFrame = DailyIframe.createFrame(containerRef.current, {
         showLeaveButton: true,
         showFullscreenButton: true,
         iframeStyle: {
@@ -37,30 +43,30 @@ const VideoModal = ({ booking, onClose }) => {
         }
       })
 
-      callRef.current = call
+      callFrameRef.current = callFrame
 
-      call.on('left-meeting', () => {
+      callFrame.on('left-meeting', () => {
         onClose()
       })
 
-      call.on('error', (err) => {
-        setErreur('Erreur lors de la connexion à l\'appel vidéo')
-        console.error(err)
+      callFrame.on('error', (err) => {
+        console.error('Daily error:', err)
+        setErreur('Erreur lors de la connexion')
       })
 
-      await call.join({ url, token })
+      await callFrame.join({ url, token })
       setChargement(false)
     } catch (err) {
-      setErreur('Impossible de démarrer l\'appel vidéo')
+      console.error('Video error:', err)
+      setErreur('Impossible de démarrer l\'appel vidéo : ' + err.message)
       setChargement(false)
-      console.error(err)
     }
   }
 
   const terminerAppel = () => {
-    if (callRef.current) {
-      callRef.current.destroy()
-      callRef.current = null
+    if (callFrameRef.current) {
+      callFrameRef.current.destroy()
+      callFrameRef.current = null
     }
     onClose()
   }
@@ -68,7 +74,6 @@ const VideoModal = ({ booking, onClose }) => {
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '1rem' }}>
       <div style={{ width: '100%', maxWidth: '900px', height: '80vh', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ color: 'white', margin: 0, fontFamily: 'Georgia, serif', fontSize: '16px' }}>
             📹 {t('appel_video')} — {booking.services?.titre}
@@ -87,8 +92,11 @@ const VideoModal = ({ booking, onClose }) => {
             </div>
           )}
           {erreur && (
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
               <p style={{ color: '#FEB2B2', fontFamily: 'Georgia, serif', textAlign: 'center', padding: '2rem' }}>{erreur}</p>
+              <button onClick={demarrerAppel} style={{ background: '#2B6CB0', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>
+                Réessayer
+              </button>
             </div>
           )}
         </div>
