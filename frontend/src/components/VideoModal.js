@@ -8,12 +8,20 @@ const VideoModal = ({ booking, onClose }) => {
   const [erreur, setErreur] = useState('')
   const containerRef = useRef(null)
   const callFrameRef = useRef(null)
+  const dejaDemarre = useRef(false)
 
   useEffect(() => {
-    demarrerAppel()
+    if (!dejaDemarre.current) {
+      dejaDemarre.current = true
+      demarrerAppel()
+    }
     return () => {
       if (callFrameRef.current) {
-        callFrameRef.current.destroy()
+        try {
+          callFrameRef.current.destroy()
+        } catch (e) {
+          console.log('destroy error:', e)
+        }
         callFrameRef.current = null
       }
     }
@@ -25,11 +33,22 @@ const VideoModal = ({ booking, onClose }) => {
       const res = await creerSalleVideo(booking.id)
       const { url, token } = res.data
 
-      const DailyIframe = window.DailyIframe
-      if (!DailyIframe) {
-        setErreur('Impossible de charger le module vidéo')
+      if (!url) {
+        setErreur('URL de salle introuvable')
         setChargement(false)
         return
+      }
+
+      const DailyIframe = window.DailyIframe
+      if (!DailyIframe) {
+        setErreur('Module vidéo non chargé')
+        setChargement(false)
+        return
+      }
+
+      if (callFrameRef.current) {
+        try { callFrameRef.current.destroy() } catch (e) {}
+        callFrameRef.current = null
       }
 
       const callFrame = DailyIframe.createFrame(containerRef.current, {
@@ -46,27 +65,33 @@ const VideoModal = ({ booking, onClose }) => {
       callFrameRef.current = callFrame
 
       callFrame.on('left-meeting', () => {
+        console.log('left-meeting déclenché')
         onClose()
       })
 
       callFrame.on('error', (err) => {
         console.error('Daily error:', err)
-        setErreur('Erreur lors de la connexion')
+        setErreur('Erreur : ' + (err.errorMsg || JSON.stringify(err)))
+        setChargement(false)
+      })
+
+      callFrame.on('joined-meeting', () => {
+        console.log('joined-meeting !')
+        setChargement(false)
       })
 
       await callFrame.join({ url, token })
-      setChargement(false)
+
     } catch (err) {
       console.error('Video error:', err)
-      setErreur('Impossible de démarrer l\'appel vidéo : ' + err.message)
+      setErreur('Impossible de démarrer : ' + err.message)
       setChargement(false)
     }
   }
 
   const terminerAppel = () => {
     if (callFrameRef.current) {
-      callFrameRef.current.destroy()
-      callFrameRef.current = null
+      try { callFrameRef.current.leave() } catch (e) {}
     }
     onClose()
   }
