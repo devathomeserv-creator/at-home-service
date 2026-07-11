@@ -6,6 +6,7 @@ import { creerService, mesServices, mesReservationsPrestataire, modifierStatut, 
 import { uploadRealisation } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import ChatModal from '../components/ChatModal'
+import CalendrierReservations from '../components/CalendrierReservations'
 
 const drapeaux = { fr: '🇫🇷', en: '🇬🇧', it: '🇮🇹', ru: '🇷🇺' }
 
@@ -23,6 +24,8 @@ const DashboardPrestataire = () => {
   const [realisations, setRealisations] = useState([])
   const [clients, setClients] = useState([])
   const [vue, setVue] = useState('reservations')
+  const [vueReservations, setVueReservations] = useState('liste')
+  const [reservationDetail, setReservationDetail] = useState(null)
   const [message, setMessage] = useState('')
   const [menuOuvert, setMenuOuvert] = useState(false)
   const [selecteurLangueOuvert, setSelecteurLangueOuvert] = useState(false)
@@ -36,14 +39,10 @@ const DashboardPrestataire = () => {
   const [fichierSelectionne, setFichierSelectionne] = useState(null)
   const [uploadEnCours, setUploadEnCours] = useState(false)
   const [envoiSoldeEnCours, setEnvoiSoldeEnCours] = useState(null)
-  const [form, setForm] = useState({
-    categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: ''
-  })
-  const [formModif, setFormModif] = useState({
-    categorie: '', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: ''
-  })
+  const [form, setForm] = useState({ categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: '' })
+  const [formModif, setFormModif] = useState({ categorie: '', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: '' })
 
-  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
+  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach', 'photographe']
   const categorieKey = (nom) => nom.replace(' ', '_')
 
   useEffect(() => {
@@ -57,72 +56,28 @@ const DashboardPrestataire = () => {
   }, [])
 
   const chargerServices = async () => {
-    try {
-      const res = await mesServices()
-      setServices(res.data.services)
-    } catch (err) {
-      console.error(err)
-    }
+    try { const res = await mesServices(); setServices(res.data.services) } catch (err) { console.error(err) }
   }
-
   const chargerReservations = async () => {
-    try {
-      const res = await mesReservationsPrestataire()
-      setReservations(res.data.reservations)
-    } catch (err) {
-      console.error(err)
-    }
+    try { const res = await mesReservationsPrestataire(); setReservations(res.data.reservations) } catch (err) { console.error(err) }
   }
-
   const chargerAvis = async () => {
-    try {
-      const res = await getMesAvis()
-      setAvis(res.data.avis)
-      setMoyenneAvis(res.data.moyenne)
-    } catch (err) {
-      console.error(err)
-    }
+    try { const res = await getMesAvis(); setAvis(res.data.avis); setMoyenneAvis(res.data.moyenne) } catch (err) { console.error(err) }
   }
-
   const chargerConversations = async () => {
-    try {
-      const res = await getMesConversations()
-      setConversations(res.data.conversations)
-    } catch (err) {
-      console.error(err)
-    }
+    try { const res = await getMesConversations(); setConversations(res.data.conversations) } catch (err) { console.error(err) }
   }
-
   const chargerStats = async () => {
-    try {
-      const res = await getStatsPrestataire()
-      setStats(res.data)
-    } catch (err) {
-      console.error(err)
-    }
+    try { const res = await getStatsPrestataire(); setStats(res.data) } catch (err) { console.error(err) }
   }
-
   const chargerRealisations = async () => {
-    try {
-      const res = await getMesRealisations()
-      setRealisations(res.data.realisations)
-    } catch (err) {
-      console.error(err)
-    }
+    try { const res = await getMesRealisations(); setRealisations(res.data.realisations) } catch (err) { console.error(err) }
   }
-
   const chargerClients = async () => {
-    try {
-      const res = await getMesClients()
-      setClients(res.data.clients)
-    } catch (err) {
-      console.error(err)
-    }
+    try { const res = await getMesClients(); setClients(res.data.clients) } catch (err) { console.error(err) }
   }
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleCreerService = async (e) => {
     e.preventDefault()
@@ -132,28 +87,16 @@ const DashboardPrestataire = () => {
       setForm({ categorie: 'coiffure', titre: '', description: '', prix: '', duree: '', photo_url: '', pourcentage_acompte: '' })
       chargerServices()
       setVue('services')
-    } catch (err) {
-      setMessage('Erreur lors de la création')
-    }
+    } catch (err) { setMessage('Erreur lors de la création') }
   }
 
   const ouvrirModifierService = (service) => {
     setServiceAModifier(service)
-    setFormModif({
-      categorie: service.categorie,
-      titre: service.titre,
-      description: service.description || '',
-      prix: service.prix,
-      duree: service.duree,
-      photo_url: service.photo_url || '',
-      pourcentage_acompte: service.pourcentage_acompte || ''
-    })
+    setFormModif({ categorie: service.categorie, titre: service.titre, description: service.description || '', prix: service.prix, duree: service.duree, photo_url: service.photo_url || '', pourcentage_acompte: service.pourcentage_acompte || '' })
     setShowModifierService(true)
   }
 
-  const handleModifChange = (e) => {
-    setFormModif({ ...formModif, [e.target.name]: e.target.value })
-  }
+  const handleModifChange = (e) => setFormModif({ ...formModif, [e.target.name]: e.target.value })
 
   const handleModifierService = async (e) => {
     e.preventDefault()
@@ -162,31 +105,16 @@ const DashboardPrestataire = () => {
       setMessage('Service modifié avec succès !')
       setShowModifierService(false)
       chargerServices()
-    } catch (err) {
-      setMessage('Erreur lors de la modification')
-    }
+    } catch (err) { setMessage('Erreur lors de la modification') }
   }
 
   const handleSupprimerService = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) return
-    try {
-      await supprimerService(id)
-      setMessage('Service supprimé avec succès')
-      chargerServices()
-    } catch (err) {
-      setMessage('Erreur lors de la suppression')
-    }
+    try { await supprimerService(id); setMessage('Service supprimé avec succès'); chargerServices() } catch (err) { setMessage('Erreur lors de la suppression') }
   }
 
   const changerStatut = async (id, statut) => {
-    try {
-      await modifierStatut(id, statut)
-      setMessage('Statut mis à jour !')
-      chargerReservations()
-      chargerStats()
-    } catch (err) {
-      setMessage('Erreur lors de la mise à jour')
-    }
+    try { await modifierStatut(id, statut); setMessage('Statut mis à jour !'); chargerReservations(); chargerStats() } catch (err) { setMessage('Erreur lors de la mise à jour') }
   }
 
   const handleEnvoyerLienSolde = async (booking_id) => {
@@ -194,56 +122,26 @@ const DashboardPrestataire = () => {
     try {
       const res = await creerPaiementSolde(booking_id)
       await navigator.clipboard.writeText(res.data.url)
-      setMessage(`${t('lien_solde_envoye')} (${res.data.montant}€) — Lien copié, vous pouvez le partager au client.`)
-    } catch (err) {
-      setMessage(err.response?.data?.message || 'Erreur lors de la génération du lien')
-    } finally {
-      setEnvoiSoldeEnCours(null)
-    }
+      setMessage(`${t('lien_solde_envoye')} (${res.data.montant}€) — Lien copié !`)
+    } catch (err) { setMessage(err.response?.data?.message || 'Erreur lors de la génération du lien') }
+    finally { setEnvoiSoldeEnCours(null) }
   }
 
-  const ouvrirChat = (reservation) => {
-    setBookingChat(reservation)
-    setShowChat(true)
-  }
-
-  const fermerChat = () => {
-    setShowChat(false)
-    chargerConversations()
-  }
-
-  const ouvrirReponseAvis = (avisItem) => {
-    setAvisEnReponse(avisItem.id)
-    setTexteReponse(avisItem.reponse_prestataire || '')
-  }
+  const ouvrirChat = (reservation) => { setBookingChat(reservation); setShowChat(true) }
+  const fermerChat = () => { setShowChat(false); chargerConversations() }
+  const ouvrirReponseAvis = (avisItem) => { setAvisEnReponse(avisItem.id); setTexteReponse(avisItem.reponse_prestataire || '') }
 
   const handleRepondreAvis = async (id) => {
     if (!texteReponse.trim()) return
-    try {
-      await repondreAvis(id, texteReponse)
-      setMessage('Réponse publiée avec succès !')
-      setAvisEnReponse(null)
-      setTexteReponse('')
-      chargerAvis()
-    } catch (err) {
-      setMessage('Erreur lors de la publication')
-    }
+    try { await repondreAvis(id, texteReponse); setMessage('Réponse publiée !'); setAvisEnReponse(null); setTexteReponse(''); chargerAvis() } catch (err) { setMessage('Erreur lors de la publication') }
   }
 
-  const handleFormRealisationChange = (e) => {
-    setFormRealisation({ ...formRealisation, [e.target.name]: e.target.value })
-  }
-
-  const handleFichierChange = (e) => {
-    setFichierSelectionne(e.target.files[0])
-  }
+  const handleFormRealisationChange = (e) => setFormRealisation({ ...formRealisation, [e.target.name]: e.target.value })
+  const handleFichierChange = (e) => setFichierSelectionne(e.target.files[0])
 
   const handleAjouterRealisation = async (e) => {
     e.preventDefault()
-    if (!fichierSelectionne) {
-      setMessage('Veuillez sélectionner un fichier')
-      return
-    }
+    if (!fichierSelectionne) { setMessage('Veuillez sélectionner un fichier'); return }
     setUploadEnCours(true)
     try {
       const media_url = await uploadRealisation(fichierSelectionne, user.id)
@@ -253,32 +151,63 @@ const DashboardPrestataire = () => {
       setFichierSelectionne(null)
       document.getElementById('fichier-input').value = ''
       chargerRealisations()
-    } catch (err) {
-      setMessage('Erreur lors de l\'ajout : ' + err.message)
-    } finally {
-      setUploadEnCours(false)
-    }
+    } catch (err) { setMessage('Erreur lors de l\'ajout : ' + err.message) }
+    finally { setUploadEnCours(false) }
   }
 
   const handleSupprimerRealisation = async (id) => {
     if (!window.confirm('Supprimer cette réalisation ?')) return
-    try {
-      await supprimerRealisation(id)
-      setMessage('Réalisation supprimée')
-      chargerRealisations()
-    } catch (err) {
-      setMessage('Erreur lors de la suppression')
-    }
+    try { await supprimerRealisation(id); setMessage('Réalisation supprimée'); chargerRealisations() } catch (err) { setMessage('Erreur lors de la suppression') }
   }
 
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
-
+  const handleLogout = () => { logout(); navigate('/') }
   const totalNonLus = conversations.reduce((acc, conv) => acc + conv.nonLus, 0)
 
   const inputStyle = { width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', boxSizing: 'border-box', fontFamily: 'Georgia, serif' }
+
+  const renderCarteReservation = (res) => (
+    <div key={res.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+        <h3 style={{ margin: 0, color: c.texteFonce }}>{res.services?.titre}</h3>
+        <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: res.statut === 'confirme' ? '#d1fae5' : res.statut === 'annule' ? '#fee2e2' : '#fef3c7', color: res.statut === 'confirme' ? '#065f46' : res.statut === 'annule' ? '#991b1b' : '#92400e' }}>{res.statut}</span>
+      </div>
+      <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('client_label')} {res.users?.prenom} {res.users?.nom}</p>
+      <p style={{ color: c.texte }}>{t('date_label')} {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
+      <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
+      {res.nom_beneficiaire && <p style={{ color: c.texte, fontSize: '13px' }}>👤 {res.nom_beneficiaire} {res.telephone_beneficiaire && `— ${res.telephone_beneficiaire}`}</p>}
+      {res.montant_net > 0 && <p style={{ color: '#065f46', fontSize: '13px' }}>{t('net_percevoir')} <strong>{res.montant_net}€</strong></p>}
+      {res.montant_acompte && (
+        <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '10px 12px', marginTop: '8px', border: '1px solid #F6AD55' }}>
+          <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>
+            {t('acompte_a_payer')} : <strong>{res.montant_acompte}€</strong> — {t('solde_a_payer_label')} : <strong>{Math.round((res.services?.prix - res.montant_acompte) * 100) / 100}€</strong>
+          </p>
+          {res.solde_paye ? (
+            <p style={{ color: '#065f46', fontSize: '13px', margin: '6px 0 0', fontWeight: 'bold' }}>{t('solde_deja_paye')}</p>
+          ) : (
+            res.statut !== 'annule' && (
+              <button onClick={() => handleEnvoyerLienSolde(res.id)} disabled={envoiSoldeEnCours === res.id} style={{ marginTop: '8px', background: '#92400e', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '12px' }}>
+                {envoiSoldeEnCours === res.id ? '...' : `💳 ${t('envoyer_lien_solde')}`}
+              </button>
+            )
+          )}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
+        {res.statut === 'en_attente' && (
+          <>
+            <button onClick={() => changerStatut(res.id, 'confirme')} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('confirmer')}</button>
+            <button onClick={() => changerStatut(res.id, 'annule')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
+          </>
+        )}
+        {res.statut === 'confirme' && (
+          <button onClick={() => changerStatut(res.id, 'termine')} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('marquer_termine')}</button>
+        )}
+        {res.statut !== 'annule' && (
+          <button onClick={() => ouvrirChat(res)} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('message_btn')}</button>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
@@ -305,9 +234,7 @@ const DashboardPrestataire = () => {
           </div>
         </div>
         <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
-          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
-            {drapeaux[langue]}
-          </button>
+          <button onClick={() => setSelecteurLangueOuvert(!selecteurLangueOuvert)} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>{drapeaux[langue]}</button>
           {selecteurLangueOuvert && (
             <div style={{ position: 'absolute', top: '100%', right: '7rem', marginTop: '8px', background: c.fondClair, borderRadius: '8px', border: `1px solid ${c.bordure}`, overflow: 'hidden', zIndex: 200 }}>
               {Object.keys(drapeaux).map(l => (
@@ -317,9 +244,7 @@ const DashboardPrestataire = () => {
               ))}
             </div>
           )}
-          <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>
-            {themeMode === 'clair' ? '🌙' : '☀️'}
-          </button>
+          <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '16px' }}>{themeMode === 'clair' ? '🌙' : '☀️'}</button>
           <span style={{ color: '#BEE3F8', fontSize: '14px' }}>{t('bonjour')} {user?.prenom} !</span>
           <button onClick={() => navigate('/profil')} style={{ background: 'white', color: c.bleu, border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('mon_profil')}</button>
           <button onClick={handleLogout} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('deconnexion')}</button>
@@ -358,6 +283,19 @@ const DashboardPrestataire = () => {
 
         {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={fermerChat} />}
 
+        {/* Modal detail reservation depuis calendrier */}
+        {reservationDetail && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: `1px solid ${c.bordure}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ color: c.texteFonce, margin: 0 }}>{reservationDetail.services?.titre}</h3>
+                <button onClick={() => setReservationDetail(null)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: c.texteFonce }}>✕</button>
+              </div>
+              {renderCarteReservation(reservationDetail)}
+            </div>
+          </div>
+        )}
+
         {showModifierService && serviceAModifier && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
             <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: `1px solid ${c.bordure}`, maxHeight: '90vh', overflowY: 'auto' }}>
@@ -389,32 +327,20 @@ const DashboardPrestataire = () => {
               ℹ️ {t('info_commission')} <strong>{stats.tauxCommission}%</strong> {t('info_commission_2')}
             </div>
             <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
-                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>{t('net_mois')}</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: c.rouge, margin: 0 }}>{stats.revenusMois}€</p>
-              </div>
-              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
-                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>{t('net_total')}</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: c.bleu, margin: 0 }}>{stats.revenusTotal}€</p>
-              </div>
-              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
-                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>{t('reservations_mois')}</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: c.texteFonce, margin: 0 }}>{stats.reservationsMois}</p>
-              </div>
-              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
-                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>{t('taux_confirmation')}</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#059669', margin: 0 }}>{stats.tauxConfirmation}%</p>
-              </div>
-              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
-                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>{t('note_moyenne')}</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#F6AD55', margin: 0 }}>{stats.moyenneAvis}★</p>
-              </div>
-              <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
-                <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>{t('total_reservations')}</p>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: c.texteFonce, margin: 0 }}>{stats.totalReservations}</p>
-              </div>
+              {[
+                { label: t('net_mois'), val: `${stats.revenusMois}€`, color: c.rouge },
+                { label: t('net_total'), val: `${stats.revenusTotal}€`, color: c.bleu },
+                { label: t('reservations_mois'), val: stats.reservationsMois, color: c.texteFonce },
+                { label: t('taux_confirmation'), val: `${stats.tauxConfirmation}%`, color: '#059669' },
+                { label: t('note_moyenne'), val: `${stats.moyenneAvis}★`, color: '#F6AD55' },
+                { label: t('total_reservations'), val: stats.totalReservations, color: c.texteFonce }
+              ].map((s, i) => (
+                <div key={i} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}`, textAlign: 'center' }}>
+                  <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 0.5rem' }}>{s.label}</p>
+                  <p style={{ fontSize: '32px', fontWeight: 'bold', color: s.color, margin: 0 }}>{s.val}</p>
+                </div>
+              ))}
             </div>
-
             <div style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', border: `1px solid ${c.bordure}` }}>
               <h3 style={{ color: c.texteFonce, marginBottom: '1rem', fontFamily: 'Georgia, serif' }}>{t('services_demandes')}</h3>
               {stats.servicePopulaire.length === 0 && <p style={{ color: c.texte, fontSize: '14px' }}>{t('pas_assez_donnees')}</p>}
@@ -430,54 +356,27 @@ const DashboardPrestataire = () => {
 
         {vue === 'reservations' && (
           <div>
-            {reservations.length === 0 && <p style={{ color: c.texte }}>{t('aucune_reservation')}</p>}
-            {reservations.map(res => (
-              <div key={res.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <h3 style={{ margin: 0, color: c.texteFonce }}>{res.services?.titre}</h3>
-                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: res.statut === 'confirme' ? '#d1fae5' : res.statut === 'annule' ? '#fee2e2' : '#fef3c7', color: res.statut === 'confirme' ? '#065f46' : res.statut === 'annule' ? '#991b1b' : '#92400e' }}>{res.statut}</span>
-                </div>
-                <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('client_label')} {res.users?.prenom} {res.users?.nom}</p>
-                <p style={{ color: c.texte }}>{t('date_label')} {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
-                <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
-                {res.nom_beneficiaire && (
-                  <p style={{ color: c.texte, fontSize: '13px', marginTop: '4px' }}>👤 {res.nom_beneficiaire} {res.telephone_beneficiaire && `— ${res.telephone_beneficiaire}`}</p>
-                )}
-                {res.montant_net > 0 && (
-                  <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>{t('net_percevoir')} <strong>{res.montant_net}€</strong> ({t('sur_label')} {res.services?.prix}€)</p>
-                )}
-                {res.montant_acompte && (
-                  <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '10px 12px', marginTop: '8px', border: '1px solid #F6AD55' }}>
-                    <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>
-                      {t('acompte_a_payer')} : <strong>{res.montant_acompte}€</strong> — {t('solde_a_payer_label')} : <strong>{Math.round((res.services?.prix - res.montant_acompte) * 100) / 100}€</strong>
-                    </p>
-                    {res.solde_paye ? (
-                      <p style={{ color: '#065f46', fontSize: '13px', margin: '6px 0 0', fontWeight: 'bold' }}>{t('solde_deja_paye')}</p>
-                    ) : (
-                      res.statut !== 'annule' && (
-                        <button onClick={() => handleEnvoyerLienSolde(res.id)} disabled={envoiSoldeEnCours === res.id} style={{ marginTop: '8px', background: '#92400e', color: 'white', border: 'none', padding: '6px 14px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '12px' }}>
-                          {envoiSoldeEnCours === res.id ? '...' : `💳 ${t('envoyer_lien_solde')}`}
-                        </button>
-                      )
-                    )}
-                  </div>
-                )}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                  {res.statut === 'en_attente' && (
-                    <>
-                      <button onClick={() => changerStatut(res.id, 'confirme')} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('confirmer')}</button>
-                      <button onClick={() => changerStatut(res.id, 'annule')} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('annuler')}</button>
-                    </>
-                  )}
-                  {res.statut === 'confirme' && (
-                    <button onClick={() => changerStatut(res.id, 'termine')} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('marquer_termine')}</button>
-                  )}
-                  {res.statut !== 'annule' && (
-                    <button onClick={() => ouvrirChat(res)} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('message_btn')}</button>
-                  )}
-                </div>
+            {/* Toggle liste / agenda */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
+              <button onClick={() => setVueReservations('liste')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vueReservations === 'liste' ? c.bleu : c.fondClair, color: vueReservations === 'liste' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>
+                📋 Liste
+              </button>
+              <button onClick={() => setVueReservations('agenda')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vueReservations === 'agenda' ? c.bleu : c.fondClair, color: vueReservations === 'agenda' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>
+                📅 Agenda
+              </button>
+            </div>
+
+            {vueReservations === 'liste' ? (
+              <div>
+                {reservations.length === 0 && <p style={{ color: c.texte }}>{t('aucune_reservation')}</p>}
+                {reservations.map(res => renderCarteReservation(res))}
               </div>
-            ))}
+            ) : (
+              <CalendrierReservations
+                reservations={reservations}
+                onSelectReservation={(res) => setReservationDetail(res)}
+              />
+            )}
           </div>
         )}
 
@@ -496,9 +395,7 @@ const DashboardPrestataire = () => {
                   <p style={{ color: c.texte, fontSize: '12px', margin: '0 0 4px' }}>{cl.totalReservations} {t('reservation_count')}</p>
                   <p style={{ color: c.texte, fontSize: '12px', margin: '0 0 8px' }}>{t('derniere_prestation')} {new Date(cl.derniereReservation).toLocaleDateString('fr-FR')}</p>
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {cl.services.map(s => (
-                      <span key={s} style={{ background: c.bleuFond, color: c.bleu, padding: '2px 8px', borderRadius: '20px', fontSize: '11px' }}>{s}</span>
-                    ))}
+                    {cl.services.map(s => <span key={s} style={{ background: c.bleuFond, color: c.bleu, padding: '2px 8px', borderRadius: '20px', fontSize: '11px' }}>{s}</span>)}
                   </div>
                 </div>
               ))}
@@ -515,9 +412,7 @@ const DashboardPrestataire = () => {
                 <h3 style={{ margin: '0.8rem 0 0.5rem', color: c.texteFonce }}>{service.titre}</h3>
                 <p style={{ color: c.texte, fontSize: '14px' }}>{service.description}</p>
                 <p style={{ fontWeight: 'bold', color: c.rouge, marginTop: '0.5rem' }}>{service.prix}€ — {service.duree} min</p>
-                {service.pourcentage_acompte > 0 && (
-                  <p style={{ color: '#92400e', fontSize: '12px', marginTop: '4px' }}>💳 Acompte {service.pourcentage_acompte}% ({Math.round(service.prix * service.pourcentage_acompte / 100 * 100) / 100}€)</p>
-                )}
+                {service.pourcentage_acompte > 0 && <p style={{ color: '#92400e', fontSize: '12px', marginTop: '4px' }}>💳 Acompte {service.pourcentage_acompte}% ({Math.round(service.prix * service.pourcentage_acompte / 100 * 100) / 100}€)</p>}
                 <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
                   <button onClick={() => ouvrirModifierService(service)} style={{ flex: 1, background: c.bleu, color: 'white', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>{t('modifier_btn')}</button>
                   <button onClick={() => handleSupprimerService(service.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>🗑️</button>
@@ -545,17 +440,12 @@ const DashboardPrestataire = () => {
                 </button>
               </form>
             </div>
-
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1rem' }}>
               {realisations.length === 0 && <p style={{ color: c.texte }}>{t('aucune_realisation')}</p>}
               {realisations.map(r => (
                 <div key={r.id} style={{ background: c.fondClair, borderRadius: '12px', border: `1px solid ${c.bordure}`, overflow: 'hidden' }}>
-                  <div style={{ height: '160px', background: c.texteFonce, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                    {r.type_media === 'photo' ? (
-                      <img src={r.media_url} alt={r.titre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <video src={r.media_url} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    )}
+                  <div style={{ height: '160px', background: c.texteFonce, overflow: 'hidden' }}>
+                    {r.type_media === 'photo' ? <img src={r.media_url} alt={r.titre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <video src={r.media_url} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                   </div>
                   <div style={{ padding: '1rem' }}>
                     {r.titre && <h4 style={{ margin: '0 0 4px', color: c.texteFonce, fontFamily: 'Georgia, serif' }}>{r.titre}</h4>}
@@ -577,9 +467,7 @@ const DashboardPrestataire = () => {
                   <h3 style={{ margin: '0 0 4px', color: c.texteFonce }}>{conv.users?.prenom} {conv.users?.nom}</h3>
                   <p style={{ color: c.texte, fontSize: '13px', margin: 0 }}>{conv.services?.titre} — {new Date(conv.date_rdv).toLocaleDateString('fr-FR')}</p>
                 </div>
-                {conv.nonLus > 0 && (
-                  <span style={{ background: c.rouge, color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{conv.nonLus}</span>
-                )}
+                {conv.nonLus > 0 && <span style={{ background: c.rouge, color: 'white', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>{conv.nonLus}</span>}
               </div>
             ))}
           </div>
@@ -591,9 +479,7 @@ const DashboardPrestataire = () => {
               <div style={{ fontSize: '48px', fontWeight: 'bold', color: c.bleu }}>{moyenneAvis}</div>
               <div>
                 <div style={{ display: 'flex', gap: '2px' }}>
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <span key={i} style={{ fontSize: '18px', color: i <= Math.round(moyenneAvis) ? '#F6AD55' : '#CBD5E0' }}>★</span>
-                  ))}
+                  {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ fontSize: '18px', color: i <= Math.round(moyenneAvis) ? '#F6AD55' : '#CBD5E0' }}>★</span>)}
                 </div>
                 <p style={{ color: c.texte, fontSize: '14px', marginTop: '4px' }}>{avis.length} {t('avis_total')}</p>
               </div>
@@ -607,30 +493,20 @@ const DashboardPrestataire = () => {
                     <span style={{ color: c.texte, fontSize: '13px', marginLeft: '8px' }}>— {a.services?.titre}</span>
                   </div>
                   <div style={{ display: 'flex', gap: '2px' }}>
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <span key={i} style={{ fontSize: '18px', color: i <= a.note ? '#F6AD55' : '#CBD5E0' }}>★</span>
-                    ))}
+                    {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ fontSize: '18px', color: i <= a.note ? '#F6AD55' : '#CBD5E0' }}>★</span>)}
                   </div>
                 </div>
                 {a.commentaire && <p style={{ color: c.texte, fontSize: '14px', fontStyle: 'italic' }}>"{a.commentaire}"</p>}
                 <p style={{ color: c.bordure, fontSize: '12px', marginTop: '8px' }}>{new Date(a.created_at).toLocaleDateString('fr-FR')}</p>
-
                 {a.reponse_prestataire && avisEnReponse !== a.id && (
                   <div style={{ background: c.blanc, borderRadius: '8px', padding: '12px', marginTop: '12px', borderLeft: `3px solid ${c.bleu}` }}>
                     <p style={{ color: c.bleu, fontSize: '12px', fontWeight: 'bold', margin: '0 0 4px' }}>{t('votre_reponse')}</p>
                     <p style={{ color: c.texte, fontSize: '13px', margin: 0 }}>{a.reponse_prestataire}</p>
                   </div>
                 )}
-
                 {avisEnReponse === a.id ? (
                   <div style={{ marginTop: '12px' }}>
-                    <textarea
-                      value={texteReponse}
-                      onChange={(e) => setTexteReponse(e.target.value)}
-                      placeholder={t('repondre_placeholder')}
-                      rows={3}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', fontFamily: 'Georgia, serif', boxSizing: 'border-box', marginBottom: '8px' }}
-                    />
+                    <textarea value={texteReponse} onChange={(e) => setTexteReponse(e.target.value)} placeholder={t('repondre_placeholder')} rows={3} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', fontFamily: 'Georgia, serif', boxSizing: 'border-box', marginBottom: '8px' }} />
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => handleRepondreAvis(a.id)} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>{t('publier_reponse')}</button>
                       <button onClick={() => setAvisEnReponse(null)} style={{ background: c.blanc, color: c.texteFonce, border: `1px solid ${c.bordure}`, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>{t('annuler')}</button>

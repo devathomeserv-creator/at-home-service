@@ -9,6 +9,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
 import fr from 'date-fns/locale/fr'
 import ChatModal from '../components/ChatModal'
+import CalendrierReservations from '../components/CalendrierReservations'
 registerLocale('fr', fr)
 
 const imagesParCategorie = {
@@ -20,7 +21,7 @@ const imagesParCategorie = {
   electricite: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=300&h=200&fit=crop',
   maconnerie: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&h=200&fit=crop',
   renovation: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=200&fit=crop',
-  'coach sportif': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
+  coach: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop',
   photographe: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=300&h=200&fit=crop'
 }
 
@@ -46,6 +47,7 @@ const DashboardClient = () => {
   const [favoris, setFavoris] = useState([])
   const [listeAttente, setListeAttente] = useState([])
   const [vue, setVue] = useState('services')
+  const [vueReservations, setVueReservations] = useState('liste')
   const [categorie, setCategorie] = useState('')
   const [recherche, setRecherche] = useState('')
   const [message, setMessage] = useState('')
@@ -72,8 +74,9 @@ const DashboardClient = () => {
   const [reservationPourProche, setReservationPourProche] = useState(false)
   const [nomBeneficiaire, setNomBeneficiaire] = useState('')
   const [telephoneBeneficiaire, setTelephoneBeneficiaire] = useState('')
+  const [reservationDetail, setReservationDetail] = useState(null)
 
-  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach sportif', 'photographe']
+  const categories = ['coiffure', 'barber', 'esthetique', 'massage', 'plomberie', 'electricite', 'maconnerie', 'renovation', 'coach', 'photographe']
   const categorieKey = (nom) => nom.replace(' ', '_')
 
   useEffect(() => {
@@ -108,7 +111,6 @@ const DashboardClient = () => {
         } catch (err) {
           console.error(err)
         }
-
         try {
           await creerReservation({
             service_id,
@@ -221,13 +223,11 @@ const DashboardClient = () => {
     setNomBeneficiaire('')
     setTelephoneBeneficiaire('')
     setShowReservationModal(true)
-
     try {
       const resProfil = await getProfilPublicPrestataire(prestataire.id)
       setJoursTravail(resProfil.data.prestataire.jours_travail || [])
       setHeureDebut(resProfil.data.prestataire.heure_debut || '09:00')
       setHeureFin(resProfil.data.prestataire.heure_fin || '18:00')
-
       const resCreneaux = await getCreneauxOccupes(prestataire.id)
       setCreneauxOccupes(resCreneaux.data.creneauxOccupes || [])
     } catch (err) {
@@ -251,27 +251,14 @@ const DashboardClient = () => {
     const heures = time.getHours()
     const minutes = time.getMinutes()
     const heureActuelle = `${String(heures).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
-
     if (heureActuelle < heureDebut || heureActuelle >= heureFin) return false
-
     return true
   }
 
   const confirmerReservation = async () => {
-    if (!dateSelectionnee) {
-      setMessage('Veuillez choisir une date et heure')
-      return
-    }
-    if (!adresse) {
-      setMessage('Veuillez entrer votre adresse')
-      return
-    }
-
-    if (estCreneauOccupe(dateSelectionnee)) {
-      setMessage('Ce créneau est déjà pris. Vous pouvez vous inscrire en liste d\'attente.')
-      return
-    }
-
+    if (!dateSelectionnee) { setMessage('Veuillez choisir une date et heure'); return }
+    if (!adresse) { setMessage('Veuillez entrer votre adresse'); return }
+    if (estCreneauOccupe(dateSelectionnee)) { setMessage("Ce créneau est déjà pris."); return }
     try {
       const res = await creerPaiement({
         service_id: serviceSelectionne.id,
@@ -288,26 +275,20 @@ const DashboardClient = () => {
   }
 
   const handleListeAttente = async () => {
-    if (!dateSelectionnee) {
-      setMessage('Veuillez choisir une date et heure pour la liste d\'attente')
-      return
-    }
+    if (!dateSelectionnee) { setMessage("Veuillez choisir une date"); return }
     try {
-      await ajouterListeAttente({
-        service_id: serviceSelectionne.id,
-        date_souhaitee: dateSelectionnee.toISOString()
-      })
-      setMessage('Vous êtes inscrit en liste d\'attente pour ce créneau ! Vous serez notifié par email s\'il se libère.')
+      await ajouterListeAttente({ service_id: serviceSelectionne.id, date_souhaitee: dateSelectionnee.toISOString() })
+      setMessage("Vous êtes inscrit en liste d'attente !")
       setShowReservationModal(false)
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Erreur lors de l\'inscription')
+      setMessage(err.response?.data?.message || "Erreur lors de l'inscription")
     }
   }
 
   const handleRetirerListeAttente = async (id) => {
     try {
       await retirerListeAttente(id)
-      setMessage('Retiré de la liste d\'attente')
+      setMessage("Retiré de la liste d'attente")
       chargerListeAttente()
     } catch (err) {
       setMessage('Erreur lors du retrait')
@@ -321,7 +302,7 @@ const DashboardClient = () => {
       setMessage(res.data.message)
       chargerReservations()
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Erreur lors de l\'annulation')
+      setMessage(err.response?.data?.message || "Erreur lors de l'annulation")
     }
   }
 
@@ -333,15 +314,9 @@ const DashboardClient = () => {
   }
 
   const handleModifier = async () => {
-    if (!dateModifiee) {
-      setMessage('Veuillez choisir une date')
-      return
-    }
+    if (!dateModifiee) { setMessage('Veuillez choisir une date'); return }
     try {
-      await modifierReservation(reservationSelectionnee.id, {
-        date_rdv: dateModifiee.toISOString(),
-        adresse_intervention: adresseModifiee
-      })
+      await modifierReservation(reservationSelectionnee.id, { date_rdv: dateModifiee.toISOString(), adresse_intervention: adresseModifiee })
       setMessage('Réservation modifiée avec succès !')
       setShowModifierModal(false)
       chargerReservations()
@@ -387,14 +362,8 @@ const DashboardClient = () => {
     }
   }
 
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
-
-  const filtrerCategorie = (cat) => {
-    setCategorie(cat)
-  }
+  const handleLogout = () => { logout(); navigate('/') }
+  const filtrerCategorie = (cat) => { setCategorie(cat) }
 
   const statutColor = (statut) => {
     if (statut === 'confirme') return { bg: '#d1fae5', color: '#065f46' }
@@ -404,17 +373,50 @@ const DashboardClient = () => {
   }
 
   const totalNonLus = conversations.reduce((acc, c2) => acc + c2.nonLus, 0)
-
   const prestatairesFiltres = recherche
-    ? prestataires.filter(p =>
-        `${p.prenom} ${p.nom}`.toLowerCase().includes(recherche.toLowerCase()) ||
-        p.services.some(s => s.titre.toLowerCase().includes(recherche.toLowerCase()))
-      )
+    ? prestataires.filter(p => `${p.prenom} ${p.nom}`.toLowerCase().includes(recherche.toLowerCase()) || p.services.some(s => s.titre.toLowerCase().includes(recherche.toLowerCase())))
     : prestataires
 
   const aAcompte = serviceSelectionne && serviceSelectionne.pourcentage_acompte > 0 && serviceSelectionne.pourcentage_acompte < 100
   const montantAcompte = aAcompte ? Math.round(serviceSelectionne.prix * serviceSelectionne.pourcentage_acompte / 100 * 100) / 100 : 0
   const montantSoldeAffiche = aAcompte ? Math.round((serviceSelectionne.prix - montantAcompte) * 100) / 100 : 0
+
+  const renderCarteReservation = (res) => {
+    const sc = statutColor(res.statut)
+    return (
+      <div key={res.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <h3 style={{ margin: 0, color: c.texteFonce }}>{res.services?.titre}</h3>
+          <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: sc.bg, color: sc.color }}>{res.statut}</span>
+        </div>
+        <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('date_label')} {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
+        <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
+        {res.nom_beneficiaire && <p style={{ color: c.texte, fontSize: '13px', marginTop: '4px' }}>👤 {res.nom_beneficiaire}</p>}
+        {res.montant_acompte && (
+          <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', border: '1px solid #F6AD55' }}>
+            <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>
+              {t('acompte_a_payer')} : <strong>{res.montant_acompte}€</strong> {res.solde_paye ? `— ${t('solde_deja_paye')}` : `— ${t('solde_a_payer_label')} : ${Math.round((res.services?.prix - res.montant_acompte) * 100) / 100}€`}
+            </p>
+          </div>
+        )}
+        {res.statut === 'annule' && res.rembourse && <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>{t('rembourse_auto')}</p>}
+        {(res.statut === 'en_attente' || res.statut === 'confirme') && (
+          <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
+            <button onClick={() => ouvrirModifier(res)} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>{t('modifier')}</button>
+            <button onClick={() => handleAnnuler(res.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ {t('annuler')}</button>
+          </div>
+        )}
+        {res.statut === 'termine' && (
+          <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
+            <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>{t('laisser_avis_btn')}</button>
+            <button onClick={() => handleTelechargerFacture(res.id)} disabled={telechargementEnCours === res.id} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>
+              {telechargementEnCours === res.id ? t('telechargement_facture') : t('telecharger_facture')}
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: c.fond, display: 'flex', flexDirection: 'column' }}>
@@ -499,37 +501,35 @@ const DashboardClient = () => {
 
         {showChat && bookingChat && <ChatModal booking={bookingChat} onClose={fermerChat} />}
 
+        {/* Modal detail reservation depuis calendrier */}
+        {reservationDetail && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+            <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: `1px solid ${c.bordure}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h3 style={{ color: c.texteFonce, margin: 0 }}>{reservationDetail.services?.titre}</h3>
+                <button onClick={() => setReservationDetail(null)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: c.texteFonce }}>✕</button>
+              </div>
+              {renderCarteReservation(reservationDetail)}
+            </div>
+          </div>
+        )}
+
         {showReservationModal && serviceSelectionne && (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
             <div style={{ background: c.fondClair, borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '480px', border: `1px solid ${c.bordure}`, maxHeight: '90vh', overflowY: 'auto' }}>
               <h3 style={{ color: c.texteFonce, marginBottom: '0.5rem' }}>{t('reserver_titre')} {serviceSelectionne.titre}</h3>
               <p style={{ color: c.rouge, fontWeight: 'bold', marginBottom: '1rem' }}>{serviceSelectionne.prix}€ · {serviceSelectionne.duree} min</p>
-
               {aAcompte && (
                 <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: '1px solid #F6AD55' }}>
                   <p style={{ color: '#92400e', fontSize: '13px', margin: '0 0 4px' }}>{t('acompte_a_payer')} : <strong>{montantAcompte}€</strong></p>
                   <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>{t('solde_restant')} : <strong>{montantSoldeAffiche}€</strong></p>
                 </div>
               )}
-
               <p style={{ color: c.texte, fontSize: '12px', marginBottom: '1rem', fontStyle: 'italic' }}>
                 {t('disponible_label')} {joursTravail.join(', ')} {t('de_a')} {heureDebut} - {heureFin}
               </p>
               <p style={{ color: c.texte, marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>{t('choisir_date_heure')}</p>
-              <DatePicker
-                selected={dateSelectionnee}
-                onChange={(date) => setDateSelectionnee(date)}
-                showTimeSelect
-                timeFormat="HH:mm"
-                timeIntervals={30}
-                dateFormat="dd/MM/yyyy à HH:mm"
-                minDate={new Date()}
-                locale="fr"
-                placeholderText="Cliquez pour choisir..."
-                inline
-                filterDate={filtrerJourValide}
-                filterTime={filtrerHeureValide}
-              />
+              <DatePicker selected={dateSelectionnee} onChange={(date) => setDateSelectionnee(date)} showTimeSelect timeFormat="HH:mm" timeIntervals={30} dateFormat="dd/MM/yyyy à HH:mm" minDate={new Date()} locale="fr" placeholderText="Cliquez pour choisir..." inline filterDate={filtrerJourValide} filterTime={filtrerHeureValide} />
               {dateSelectionnee && estCreneauOccupe(dateSelectionnee) && (
                 <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: '1px solid #F6AD55' }}>
                   <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>{t('creneau_pris_attente')}</p>
@@ -537,18 +537,10 @@ const DashboardClient = () => {
               )}
               <p style={{ color: c.texte, margin: '1rem 0 8px', fontSize: '14px', fontWeight: 'bold' }}>{t('votre_adresse')}</p>
               <input placeholder={t('placeholder_adresse')} value={adresse} onChange={(e) => setAdresse(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: `1.5px solid ${c.bleuClair}`, background: c.inputFond, color: c.inputTexte, fontSize: '14px', marginBottom: '1rem', boxSizing: 'border-box' }} />
-
               <div style={{ background: c.blanc, borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: `1px solid ${c.bleuClair}` }}>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', marginBottom: reservationPourProche ? '10px' : 0 }}>
-                  <input
-                    type="checkbox"
-                    checked={reservationPourProche}
-                    onChange={(e) => setReservationPourProche(e.target.checked)}
-                    style={{ marginTop: '3px', flexShrink: 0 }}
-                  />
-                  <span style={{ color: c.texteFonce, fontSize: '13px', fontWeight: 'bold' }}>
-                    {t('reserver_pour_proche')}
-                  </span>
+                  <input type="checkbox" checked={reservationPourProche} onChange={(e) => setReservationPourProche(e.target.checked)} style={{ marginTop: '3px', flexShrink: 0 }} />
+                  <span style={{ color: c.texteFonce, fontSize: '13px', fontWeight: 'bold' }}>{t('reserver_pour_proche')}</span>
                 </label>
                 {reservationPourProche && (
                   <>
@@ -558,24 +550,15 @@ const DashboardClient = () => {
                   </>
                 )}
               </div>
-
               <div style={{ background: c.blanc, borderRadius: '8px', padding: '12px', marginBottom: '1rem', border: `1px solid ${c.bleuClair}` }}>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={consentementDonnees}
-                    onChange={(e) => setConsentementDonnees(e.target.checked)}
-                    style={{ marginTop: '3px', flexShrink: 0 }}
-                  />
+                  <input type="checkbox" checked={consentementDonnees} onChange={(e) => setConsentementDonnees(e.target.checked)} style={{ marginTop: '3px', flexShrink: 0 }} />
                   <span style={{ color: c.texte, fontSize: '12px', lineHeight: 1.5 }}>
                     {t('consentement_texte')} <span onClick={() => navigate('/confidentialite')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{t('en_savoir_plus')}</span>.
                   </span>
                 </label>
               </div>
-
-              <p style={{ color: c.texte, fontSize: '11px', marginBottom: '1rem', fontStyle: 'italic' }}>
-                {t('annulation_gratuite_info')}
-              </p>
+              <p style={{ color: c.texte, fontSize: '11px', marginBottom: '1rem', fontStyle: 'italic' }}>{t('annulation_gratuite_info')}</p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {dateSelectionnee && estCreneauOccupe(dateSelectionnee) ? (
                   <button onClick={handleListeAttente} style={{ flex: 1, background: '#F6AD55', color: '#1A365D', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '15px', fontWeight: 'bold' }}>{t('rejoindre_liste_attente')}</button>
@@ -676,49 +659,27 @@ const DashboardClient = () => {
 
         {vue === 'reservations' && (
           <div>
-            {reservations.length === 0 && <p style={{ color: c.texte }}>{t('aucune_reservation')}</p>}
-            {reservations.map(res => {
-              const sc = statutColor(res.statut)
-              return (
-                <div key={res.id} style={{ background: c.fondClair, borderRadius: '12px', padding: '1.5rem', marginBottom: '1rem', border: `1px solid ${c.bordure}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                    <h3 style={{ margin: 0, color: c.texteFonce }}>{res.services?.titre}</h3>
-                    <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '13px', background: sc.bg, color: sc.color }}>{res.statut}</span>
-                  </div>
-                  <p style={{ color: c.texte, marginTop: '0.5rem' }}>{t('date_label')} {new Date(res.date_rdv).toLocaleString('fr-FR')}</p>
-                  <p style={{ color: c.texte }}>{t('adresse_intervention_label')} {res.adresse_intervention}</p>
-                  {res.nom_beneficiaire && (
-                    <p style={{ color: c.texte, fontSize: '13px', marginTop: '4px' }}>👤 {res.nom_beneficiaire}</p>
-                  )}
-                  {res.montant_acompte && (
-                    <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '8px 12px', marginTop: '8px', border: '1px solid #F6AD55' }}>
-                      <p style={{ color: '#92400e', fontSize: '13px', margin: 0 }}>
-                        {t('acompte_a_payer')} : <strong>{res.montant_acompte}€</strong> {res.solde_paye ? `— ${t('solde_deja_paye')}` : `— ${t('solde_a_payer_label')} : ${Math.round((res.services?.prix - res.montant_acompte) * 100) / 100}€`}
-                      </p>
-                    </div>
-                  )}
-                  {res.statut === 'annule' && res.rembourse && (
-                    <p style={{ color: '#065f46', fontSize: '13px', marginTop: '4px' }}>{t('rembourse_auto')}</p>
-                  )}
+            {/* Toggle liste / agenda */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
+              <button onClick={() => setVueReservations('liste')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vueReservations === 'liste' ? c.bleu : c.fondClair, color: vueReservations === 'liste' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>
+                📋 Liste
+              </button>
+              <button onClick={() => setVueReservations('agenda')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: vueReservations === 'agenda' ? c.bleu : c.fondClair, color: vueReservations === 'agenda' ? 'white' : c.texteFonce, fontFamily: 'Georgia, serif' }}>
+                📅 Agenda
+              </button>
+            </div>
 
-                  {(res.statut === 'en_attente' || res.statut === 'confirme') && (
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                      <button onClick={() => ouvrirModifier(res)} style={{ background: c.bleu, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>{t('modifier')}</button>
-                      <button onClick={() => handleAnnuler(res.id)} style={{ background: c.rouge, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>✗ {t('annuler')}</button>
-                    </div>
-                  )}
-
-                  {res.statut === 'termine' && (
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', flexWrap: 'wrap' }}>
-                      <button onClick={() => ouvrirAvis(res)} style={{ background: '#F6AD55', color: '#1A365D', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontWeight: 'bold' }}>{t('laisser_avis_btn')}</button>
-                      <button onClick={() => handleTelechargerFacture(res.id)} disabled={telechargementEnCours === res.id} style={{ background: c.texteFonce, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif', fontSize: '13px' }}>
-                        {telechargementEnCours === res.id ? t('telechargement_facture') : t('telecharger_facture')}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+            {vueReservations === 'liste' ? (
+              <div>
+                {reservations.length === 0 && <p style={{ color: c.texte }}>{t('aucune_reservation')}</p>}
+                {reservations.map(res => renderCarteReservation(res))}
+              </div>
+            ) : (
+              <CalendrierReservations
+                reservations={reservations}
+                onSelectReservation={(res) => setReservationDetail(res)}
+              />
+            )}
           </div>
         )}
 
@@ -757,11 +718,7 @@ const DashboardClient = () => {
                     <button onClick={() => handleRetirerFavori(fav.prestataire_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>❤️</button>
                   </div>
                   {fav.users?.ville && <p style={{ color: c.texte, fontSize: '13px', margin: '0 0 8px' }}>📍 {fav.users.ville} {fav.users.code_postal}</p>}
-                  {fav.services?.length > 0 && (
-                    <p style={{ color: c.texte, fontSize: '12px', marginBottom: '1rem' }}>
-                      {fav.services.map(s => s.categorie).filter((v, i, a) => a.indexOf(v) === i).join(', ')}
-                    </p>
-                  )}
+                  {fav.services?.length > 0 && <p style={{ color: c.texte, fontSize: '12px', marginBottom: '1rem' }}>{fav.services.map(s => s.categorie).filter((v, i, a) => a.indexOf(v) === i).join(', ')}</p>}
                   <button onClick={() => navigate(`/prestataire/${fav.prestataire_id}`)} style={{ width: '100%', background: c.bleu, color: 'white', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>{t('voir_profil')}</button>
                 </div>
               ))}
